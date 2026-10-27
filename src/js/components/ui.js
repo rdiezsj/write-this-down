@@ -1,3 +1,5 @@
+import * as i18n from './i18n';
+import { t } from './i18n';
 import markdown from './markdown';
 import util from './utils';
 import editor from './editor';
@@ -114,6 +116,7 @@ export default (function () {
 
 
     function init() {
+        i18n.init();
         // what the other parts of the interface share (see app.js)
         Object.assign(app, {
             shared, picker: picker.state,
@@ -194,6 +197,7 @@ export default (function () {
     }
 
     function loadState() {
+        i18n.setLanguage(localStorage['language'] || i18n.preferredLanguage());
         const colorSchemeFromStorage = localStorage['scheme'];
         const fontSchemeFromStorage = localStorage['font-scheme'];
         const soundFromStorage = localStorage['sound'] || (localStorage[keys.LEGACY_MUTED] === 'false' ? 'typewriter' : localStorage[keys.LEGACY_MUTED] === 'true' ? 'off' : '');
@@ -270,8 +274,10 @@ export default (function () {
     }
 
     function saveState() {
-        // nothing of the reader's is changed while a shared document is shown
-        if (util.supportsHtmlStorage() && !shared.active) {
+        // The interface language is local; a shared document never overwrites the reader's look.
+        if (!util.supportsHtmlStorage()) return;
+        localStorage['language'] = i18n.currentLanguage();
+        if (!shared.active) {
             localStorage['sound'] = keySounds.current();
             localStorage.removeItem(keys.LEGACY_MUTED);
             localStorage['scheme'] = colorScheme;
@@ -302,6 +308,7 @@ export default (function () {
 
         // Command: all commands (the word in the status line)
         document.querySelector('.palette').onclick = onPaletteClick;
+        document.querySelector('.language').onclick = () => changeLanguage(i18n.currentLanguage() === 'es' ? 'en' : 'es');
 
         // Command: theme
         colorLayoutElement = document.querySelector('.color-flip');
@@ -397,10 +404,14 @@ export default (function () {
 
     // The value shown after a command's name, e.g. "font mono"
     function setValue(button, value) {
-        button.querySelector('b').textContent = value;
+        button.querySelector('b').textContent = t(value);
     }
 
     function updateLabels() {
+        article.setAttribute('aria-label', t('Text'));
+        document.querySelector('.language span').textContent = i18n.currentLanguage() === 'es' ? 'español' : 'English';
+        document.querySelector('.language').dataset.code = i18n.currentLanguage().toUpperCase();
+        files.refreshLabels();
         setValue(changeFontElement, fontNames[fontScheme]);
         setValue(fontSizeElement, fontSizeName(fontSize));
         setValue(caret.elements().cursor, caret.isBlock() ? 'block' : 'thin');
@@ -449,7 +460,7 @@ export default (function () {
             button.prepend(note);
         }
 
-        note.textContent = text;
+        note.textContent = t(text);
         note.classList.add('visible');
         commandsElement.classList.remove('hidden');
         clearTimeout(button.noteTimer);
@@ -459,8 +470,8 @@ export default (function () {
 
     // The hidden copy is what a screen reader says: answers and warnings, not hover hints
     function renderStatus() {
-        statusMessage.textContent = statusNotice || statusHint || statusSticky;
-        statusSaid.textContent = statusNotice || statusSticky;
+        statusMessage.textContent = t(statusNotice || statusHint || statusSticky);
+        statusSaid.textContent = t(statusNotice || statusSticky);
     }
 
     // The caret follows the font: block with mono, thin with sans and serif,
@@ -531,7 +542,11 @@ export default (function () {
         const text = files.getEditorPlainText();
 
         previewTimer = null;
-        showcase.innerHTML = text.trim() ? markdown.render(text) : EMPTY_PREVIEW;
+        showcase.innerHTML = text.trim() ? markdown.render(text) : EMPTY_PREVIEW.replace('Here your text is rendered as you write it.', t('Here your text is rendered as you write it.'));
+        showcase.querySelectorAll('.code-block .copy').forEach(button => {
+            button.textContent = t('copy');
+            button.dataset.hint = t('copy this block');
+        });
         syncPreviewScroll();
     }
 
@@ -558,8 +573,8 @@ export default (function () {
 
         const result = await util.copyText(button.parentNode.querySelector('pre').textContent);
 
-        button.textContent = result;
-        setTimeout(() => { button.textContent = 'copy'; }, 1200);
+        button.textContent = t(result);
+        setTimeout(() => { button.textContent = t('copy'); }, 1200);
         setStatus(result === 'copied' ? 'copied' : 'could not copy');
     }
 
@@ -612,6 +627,7 @@ export default (function () {
         body.classList.add(shown);
         document.documentElement.className = shown;   // the first paint reads it from here (index.html)
         setValue(colorLayoutElement, schemeNames[colorScheme]);
+        ripples.set(body.classList.contains('is-empty') && isRipplesOn);
     }
 
     // The operating system switched between light and dark
@@ -835,7 +851,7 @@ export default (function () {
     function onRipplesClick() {
         setRipples(!isRipplesOn);
         saveState();
-        setStatus(`ripples ${isRipplesOn ? 'on' : 'off'}`);
+        setStatus(`background ${isRipplesOn ? 'on' : 'off'}`);
     }
 
     function onSpellingClick() {
@@ -899,7 +915,7 @@ export default (function () {
     function commandItems() {
         const key = isTouch ? () => '' : formatKeys;
         const items = [];
-        const add = (group, label, run, more) => items.push({ group, label, run, ...more });
+        const add = (group, label, run, more) => items.push({ group, label: group === 'open' ? label : t(label), run, ...more });
 
         if (shared.active) {
             if (shared.doc) {
@@ -967,6 +983,8 @@ export default (function () {
         }
 
         // the same order as the column: the page first (size, theme), then the text
+        add('appearance', 'language español', () => changeLanguage('es'), { current: i18n.currentLanguage() === 'es' });
+        add('appearance', 'language English', () => changeLanguage('en'), { current: i18n.currentLanguage() === 'en' });
         FONT_SIZES.forEach((size) => {
             add('appearance', `size ${fontSizeName(size)}`, () => changeFontSize(size), { current: size === fontSize, key: size === fontSize ? `${key('Mod +')} ${key('Mod -')}`.trim() : '' });
         });
@@ -982,7 +1000,7 @@ export default (function () {
             keySounds.SETS.forEach((name) => {
                 add('appearance', `sound ${name}`, () => keySounds.change(name), { current: name === keySounds.current(), key: name === keySounds.current() ? key('Mod Shift Y') : '' });
             });
-            add('appearance', `ripples ${isRipplesOn ? 'off' : 'on'}`, onRipplesClick, { hint: 'the animation on an empty page' });
+            add('appearance', `background ${isRipplesOn ? 'off' : 'on'}`, onRipplesClick, { hint: 'the animation on an empty page' });
         }
 
         if (!isTouch) {
@@ -1001,6 +1019,17 @@ export default (function () {
         return items;
     }
 
+
+    function changeLanguage(language) {
+        picker.close(false);
+        i18n.setLanguage(language);
+        statusHint = statusNotice = '';
+        updateLabels();
+        counter.update();
+        if (isMarkdownModeOn) renderPreview();
+        renderStatus();
+        saveState();
+    }
 
     // The welcome block shows while the document has no text and at most one (empty) line.
     // The text itself is left alone: after deleting everything the browser keeps

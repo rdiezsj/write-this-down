@@ -17,6 +17,7 @@ Se conserva el copyright de Nazir Dashtiev sobre el código original. Su incorpo
 Modificaciones realizadas el **27 de octubre de 2026** por el proyecto Write This Down:
 
 - Identidad independiente de WTD en interfaz, metadatos, enlaces, almacenamiento y copias; retirada del traslado entre dominios del proyecto original.
+- Interfaz bilingüe español/inglés, título completo y fondo propio de degradados sin caracteres, con movimiento reducido respetado.
 - Sustitución de los iconos originales por el diseño propio «Líneas y cursor».
 - Renombrado de la compilación tipográfica como WTD Mono, con glifos y avisos de licencia conservados.
 - Retirada de la telemetría heredada y de su configuración y documentación.

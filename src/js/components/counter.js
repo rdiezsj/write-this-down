@@ -1,3 +1,4 @@
+import { t, currentLanguage } from './i18n';
 import documents from './documents';
 import util from './utils';
 
@@ -48,8 +49,8 @@ export default (function () {
             && article.contains(selection.anchorNode)
             && article.contains(selection.focusNode);
         const counts = count(selected ? selection.toString() : util.articleToText(article));
-        const words = counts.words.toLocaleString();
-        const characters = counts.characters.toLocaleString();
+        const words = counts.words.toLocaleString(currentLanguage());
+        const characters = counts.characters.toLocaleString(currentLanguage());
         const parts = [`${words} ${counts.words === 1 ? 'word' : 'words'}`];
 
         if (selected) {
@@ -65,14 +66,14 @@ export default (function () {
         // A document's name is its first line, already on screen: the status line
         // names only a shared document
         statusTitle.textContent = '';
-        statistic.textContent = parts.join(' · ');
+        statistic.textContent = parts.map(t).join(' · ');
         ctx.documentsElement.querySelector('.count').textContent = documents.list().length;
 
         const shared = ctx.sharedTitle();
 
         if (shared) {
             statusTitle.textContent = shared.title;
-            statistic.textContent = shared.counts ? parts.join(' · ') : '';
+            statistic.textContent = shared.counts ? parts.map(t).join(' · ') : '';
         }
 
         statistic.classList.toggle('selection', selected);

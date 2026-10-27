@@ -3,7 +3,7 @@
 // document in focus mode takes typing
 export const expect = {
     textbox: 'textbox Text true', live: 'polite', dialogs: 5, aboutFocus: 'description modal', afterEsc: 'content', typed: 'hello again',
-    reduced: 'none / 0s', normal: 'caret-blink / 0.075s', contrast: '0.55', normalOpacity: '0.16', focusNewDoc: 'abc',
+    reduced: 'none / 0s', normal: 'caret-blink / 0.075s', contrast: '0.55', normalOpacity: '0.24', focusNewDoc: 'abc',
 };
 
 export default async (t) => {

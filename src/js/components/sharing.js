@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import app from './app';
 import util from './utils';
 import editor from './editor';
@@ -50,7 +51,7 @@ export default (function () {
         const length = linkFor(share.encode(sharedDocument())).length;
 
         long.hidden = length <= LONG_LINK;
-        long.textContent = long.hidden ? '' : `This text makes a link of about ${sizeOf(length)} characters; some messengers cut links this long. It still opens in a browser.`;
+        long.textContent = t(long.hidden ? '' : `This text makes a link of about ${sizeOf(length)} characters; some messengers cut links this long. It still opens in a browser.`);
 
         app.openModal(shareModal);
         showShareStep('choose');
@@ -142,22 +143,22 @@ export default (function () {
                 const hint = shareModal.querySelector('[data-step="seed"] .hint');
 
                 if (!seed) {
-                    hint.textContent = 'the seed word is empty';
+                    hint.textContent = t('the seed word is empty');
                     return;
                 }
 
-                hint.textContent = 'locking…';
+                hint.textContent = t('locking…');
 
                 let link;
 
                 try {
                     link = linkFor(await share.encrypt(sharedDocument(), seed));
                 } catch (e) {
-                    hint.textContent = 'locking needs https';   // crypto.subtle exists in secure contexts only
+                    hint.textContent = t('locking needs https');   // crypto.subtle exists in secure contexts only
                     return;
                 }
 
-                hint.textContent = 'The seed word is not kept anywhere. Lost means lost.';
+                hint.textContent = t('The seed word is not kept anywhere. Lost means lost.');
                 showReady(link, typed, null);
                 break;
             }
@@ -187,9 +188,9 @@ export default (function () {
     function markCopied(row, result) {
         const hint = row.querySelector('.hint');
 
-        hint.textContent = result === 'failed' ? 'not allowed, select and copy the field' : result;
+        hint.textContent = t(result === 'failed' ? 'not allowed, select and copy the field' : result);
         clearTimeout(row.copiedTimer);
-        row.copiedTimer = setTimeout(() => { hint.textContent = ''; }, 2500);
+        row.copiedTimer = setTimeout(() => { hint.textContent = t(''); }, 2500);
     }
 
     // The last step: the link, and for a private link the seed word beside it, each
@@ -204,8 +205,8 @@ export default (function () {
         ready.classList.toggle('private', isPrivate);
         ready.querySelector('.link-output').value = link;
         ready.querySelector('.seed-output').value = seed;
-        ready.querySelector('.share-size').textContent = sizeNote(link);
-        ready.querySelectorAll('.hint').forEach((hint) => { hint.textContent = ''; });
+        ready.querySelector('.share-size').textContent = t(sizeNote(link));
+        ready.querySelectorAll('.hint').forEach((hint) => { hint.textContent = t(''); });
 
         if (result === 'shared') {
             app.removeOverlay();
@@ -214,18 +215,18 @@ export default (function () {
         }
 
         if (isPrivate) {
-            ready.querySelector('h1').textContent = 'Private link ready';
-            ready.querySelector('.share-note').textContent = `Copy both. Send the link one way and the seed word another. WTD keeps neither.`;
+            ready.querySelector('h1').textContent = t('Private link ready');
+            ready.querySelector('.share-note').textContent = t(`Copy both. Send the link one way and the seed word another. WTD keeps neither.`);
         } else if (result === 'copied') {
-            ready.querySelector('h1').textContent = 'Link copied';
-            ready.querySelector('.share-note').textContent = `It is on the clipboard. Anyone who has the link can read the text.`;
-            ready.querySelector('[data-choice="copy-link"] .hint').textContent = 'copied';
+            ready.querySelector('h1').textContent = t('Link copied');
+            ready.querySelector('.share-note').textContent = t(`It is on the clipboard. Anyone who has the link can read the text.`);
+            ready.querySelector('[data-choice="copy-link"] .hint').textContent = t('copied');
         } else {
-            ready.querySelector('h1').textContent = 'Link ready';
-            ready.querySelector('.share-note').textContent = `Copy it below. Anyone who has the link can read the text.`;
+            ready.querySelector('h1').textContent = t('Link ready');
+            ready.querySelector('.share-note').textContent = t(`Copy it below. Anyone who has the link can read the text.`);
         }
 
-        ready.querySelector('.foot').textContent = isPrivate ? '↑↓ select · enter copy · esc close' : 'enter copy again · esc close';
+        ready.querySelector('.foot').textContent = t(isPrivate ? '↑↓ select · enter copy · esc close' : 'enter copy again · esc close');
         showShareStep('ready');
     }
 
@@ -287,7 +288,7 @@ export default (function () {
     function openUnlock() {
         const input = unlockModal.querySelector('.unlock-input');
 
-        unlockModal.querySelector('.unlock-error').textContent = '';
+        unlockModal.querySelector('.unlock-error').textContent = t('');
         app.openModal(unlockModal);
         app.selectChoice(unlockModal, app.visibleChoices(unlockModal)[0]);
         app.sticky('');
@@ -301,21 +302,21 @@ export default (function () {
         const seed = share.normaliseSeed(input.value);
 
         if (!seed) {
-            error.textContent = 'the seed word is empty';
+            error.textContent = t('the seed word is empty');
             return;
         }
 
-        error.textContent = 'unlocking…';
+        error.textContent = t('unlocking…');
 
         const doc = await share.decrypt(app.shared.fragment, seed);
 
         if (!doc) {
-            error.textContent = 'wrong seed word';
+            error.textContent = t('wrong seed word');
             input.select();
             return;
         }
 
-        error.textContent = '';
+        error.textContent = t('');
         input.value = '';
         app.removeOverlay();
         showShared(doc);

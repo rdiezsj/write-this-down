@@ -3,15 +3,15 @@
 // written anywhere else is a drift: test/seo.test.mjs checks index.html against
 // this file. Plain data, no code, so the build (gulp) and the tests can both read it.
 export default {
-    name: 'Write This Down',
+    name: 'Write this down!',
     shortName: 'WTD',
-    title: 'Write This Down - Online Text Editor',
+    title: 'Write this down!',
     line: 'A private place to write.',
-    description: 'Write This Down is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.',
+    description: 'Write this down! is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.',
     url: 'https://rdiezsj.github.io/write-this-down/',
     language: 'en',
     publisher: {
-        name: 'Write This Down',
+        name: 'Write this down!',
         url: 'https://github.com/rdiezsj/write-this-down',
     },
     price: 0,

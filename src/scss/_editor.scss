@@ -63,8 +63,7 @@ article {
 		margin: 0;
 	}
 
-	// each line no wider than its words, so the ripples know where they are (the
-	// wordmark has its width already; fit-content on an svg is nothing in Safari)
+	// Keep each line as wide as its words; the wordmark has its own width.
 	.divider, p {
 		width: fit-content;
 	}
@@ -75,7 +74,7 @@ article {
 	display: block;
 }
 
-// The ripples (ripples.js): faint characters and water behind an empty page, under
+// The background (ripples.js): soft colour gradients behind an empty page, under
 // everything, gone on the first key. The body goes clear so it shows through;
 // the html keeps the colour behind it.
 canvas.ripples {

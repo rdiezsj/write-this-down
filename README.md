@@ -1,10 +1,11 @@
-# Write This Down
+# Write this down! (WTD)
 
 Editor de texto privado y minimalista. Write This Down es un proyecto independiente; el origen del código, las modificaciones y los avisos de autoría están en [ATTRIBUTION.md](ATTRIBUTION.md).
 
+La interfaz permite elegir español o inglés desde la barra inferior o el menú. La elección se guarda en el navegador y no traduce el contenido de las notas.
+
 Los documentos se guardan en el navegador mediante `localStorage`. No hay cuenta ni servidor de documentos. La aplicación no incluye telemetría. Exportar, crear un enlace compartido o copiar a una carpeta son acciones que decide la persona que escribe. Un enlace compartido contiene el texto en su fragmento (`#`); quien tenga el enlace podrá leerlo, salvo que esté bloqueado con una palabra semilla.
 
-La interfaz está en inglés.
 
 ## Funciones
 

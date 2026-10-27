@@ -5,7 +5,7 @@
   "scripts": {
     "build": "NODE_ENV=production gulp default",
     "dev": "NODE_ENV=development gulp dev",
-    "test": "node --test test/share.test.mjs test/markdown.test.mjs test/names.test.mjs test/tidy.test.mjs test/seo.test.mjs test/pages.test.mjs test/licenses.test.mjs",
+    "test": "node --test test/share.test.mjs test/markdown.test.mjs test/names.test.mjs test/tidy.test.mjs test/seo.test.mjs test/pages.test.mjs test/licenses.test.mjs test/i18n.test.mjs",
     "test:browser": "node test/browser/run.mjs"
   },
   "repository": {

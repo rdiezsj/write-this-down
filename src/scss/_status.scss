@@ -108,3 +108,16 @@
 	color: var(--accent);
 	opacity: 0.8;
 }
+
+
+// En una barra estrecha, el código conserva espacio para el recuento y el menú.
+.language::after {
+    content: attr(data-code);
+    display: none;
+}
+
+@media (max-width: 360px) {
+    .status, .status-right { gap: 1ch; }
+    .language span { display: none; }
+    .language::after { display: inline; }
+}

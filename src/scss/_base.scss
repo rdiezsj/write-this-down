@@ -96,7 +96,8 @@ kbd {
 // The WTD wordmark
 .wordmark {
 	display: block;
-	width: 130px;
+	width: 350px;
+	max-width: 100%;
 	height: 36px;
 	fill: currentColor;
 }

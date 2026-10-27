@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import app from './app';
 import util from './utils';
 
@@ -130,7 +131,7 @@ export default (function () {
             placeholder: 'filter headings',
             items: list.length
                 ? list.map(h => ({ label: `${'  '.repeat(h.level - 1)}${h.text}`, hint: '', run: () => goToHeading(h) }))
-                : [{ label: 'no headings', hint: 'lines that start with # are headings', run: () => {} }],
+                : [{ label: t('no headings'), hint: 'lines that start with # are headings', run: () => {} }],
         });
     }
 

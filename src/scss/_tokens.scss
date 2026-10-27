@@ -112,5 +112,5 @@
 // so the page has its colour from the first paint
 html {
 	background: var(--bg, #ffffff);
-	--ui-idle: 0.16;   // the interface at rest; raised by "increase contrast" (see Accessibility)
+	--ui-idle: 0.24;   // the interface at rest; raised by "increase contrast" (see Accessibility)
 }

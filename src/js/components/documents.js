@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import util from './utils';
 import keys from '../keys';
 
@@ -274,7 +275,7 @@ export default (function () {
     }
 
     function titleOf(doc) {
-        return doc.auto || 'Untitled';
+        return doc.auto || t('Untitled');
     }
 
     function isOwnKey(key) {

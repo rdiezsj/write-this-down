@@ -66,7 +66,7 @@ async function browser(options = {}) {
         // the page, fresh: no storage, reloaded
         async open(path = '/', wait = 1500) {
             await send('Page.navigate', { url: BASE + path }); await sleep(wait);
-            await ev('localStorage.clear()'); await send('Page.reload'); await sleep(wait);
+            await ev("localStorage.clear(); localStorage['language'] = 'en'"); await send('Page.reload'); await sleep(wait);
         },
         async goto(path = '/', wait = 1500) { await send('Page.navigate', { url: BASE + path }); await sleep(wait); },
         async reload(wait = 1500) { await send('Page.reload'); await sleep(wait); },

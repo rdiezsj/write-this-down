@@ -2,23 +2,23 @@
 <html lang="en">
 	<head>
 		<!-- MISC/META -->
-		<title>Write This Down - Online Text Editor</title>
+		<title>Write this down!</title>
 		<meta charset="utf-8">
-		<meta name="description" content="Write This Down is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.">
+		<meta name="description" content="Write this down! is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.">
 		<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0, viewport-fit=cover" />
 
 		<!-- For search engines and AI assistants (facts in src/facts.mjs; test/seo.test.mjs
 		     keeps these in step with it). -->
 		<link rel="canonical" href="https://rdiezsj.github.io/write-this-down/">
 		<meta property="og:type" content="website">
-		<meta property="og:site_name" content="Write This Down">
-		<meta property="og:title" content="Write This Down - Online Text Editor">
-		<meta property="og:description" content="Write This Down is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.">
+		<meta property="og:site_name" content="Write this down!">
+		<meta property="og:title" content="Write this down!">
+		<meta property="og:description" content="Write this down! is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.">
 		<meta property="og:url" content="https://rdiezsj.github.io/write-this-down/">
 		<meta name="twitter:card" content="summary">
-		<meta name="twitter:title" content="Write This Down - Online Text Editor">
-		<meta name="twitter:description" content="Write This Down is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.">
-		<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Write This Down","alternateName":"WTD","url":"https://rdiezsj.github.io/write-this-down/","description":"Write This Down is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","inLanguage":"en","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Project","name":"Write This Down","url":"https://github.com/rdiezsj/write-this-down"}}</script>
+		<meta name="twitter:title" content="Write this down!">
+		<meta name="twitter:description" content="Write this down! is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.">
+		<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Write this down!","alternateName":"WTD","url":"https://rdiezsj.github.io/write-this-down/","description":"Write this down! is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","inLanguage":"en","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Project","name":"Write this down!","url":"https://github.com/rdiezsj/write-this-down"}}</script>
 
 		<!-- Apply the saved or system theme before painting the page. -->
 		<script>try{var s=localStorage.getItem('scheme')||'scheme-system';if(s==='scheme-system')s=matchMedia('(prefers-color-scheme: dark)').matches?'scheme-dark-and-white':'scheme-light';document.documentElement.className=s}catch(e){}</script>
@@ -34,24 +34,24 @@
 		<link rel="manifest" href="./site.webmanifest">
 		<meta name="theme-color" content="#ffffff">
 		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-title" content="Write This Down">
+		<meta name="apple-mobile-web-app-title" content="Write this down!">
 
 	</head>
 
 	<body class="scheme-light size-s" style="display: none">
 		<!-- The WTD wordmark, reused in the empty state and in About -->
 		<svg xmlns="http://www.w3.org/2000/svg" style="display: none">
-			<symbol id="wordmark" viewBox="0 0 130 36"><text x="0" y="29" font-family="WTD Mono, monospace" font-size="34" font-weight="700" fill="currentColor">WTD</text></symbol>
+			<symbol id="wordmark" viewBox="0 0 350 36"><text x="0" y="29" font-family="WTD Mono, monospace" font-size="34" font-weight="700" fill="currentColor">Write this down!</text></symbol>
 		</svg>
 
 		<div class="overlay" data-nosnippet>
-			<div class="description modal" role="dialog" aria-label="About Write This Down" tabindex="-1">
-				<svg class="wordmark" role="img" aria-label="Write This Down"><use href="#wordmark"></use></svg>
+			<div class="description modal" role="dialog" aria-label="About Write this down!" tabindex="-1">
+				<svg class="wordmark" role="img" aria-label="Write this down!"><use href="#wordmark"></use></svg>
 				<p>A private place to write.</p>
 				<ul>
 					<li>You open the page and type.</li>
 					<li>It is a local app. Everything you write lives in this browser's own storage, and that is the only copy. There is no server, no account, and nothing is ever sent out.</li>
-					<li>A share link carries the text inside itself. A private link is locked with a seed word that Write This Down never sees.</li>
+					<li>A share link carries the text inside itself. A private link is locked with a seed word that Write this down! never sees.</li>
 					<li>After the first visit it works offline. It installs as an app.</li>
 					<li>It reads and writes plain text and Markdown.</li>
 					<li class="for-keys">Every command has a key. <kbd data-keys="Mod K"></kbd> lists them.</li>
@@ -59,7 +59,7 @@
 					<li>No analytics, cookies or tracking.</li>
 				</ul>
 				<pre class="divider" aria-hidden="true">▄▁▁▁▁▁▁▁▁▁▁▁</pre>
-				<p>Write This Down is an independent project.</p>
+				<p>Write this down! is an independent project.</p>
 				<p class="links"><a href="https://github.com/rdiezsj/write-this-down/issues" target="_blank">suggest an improvement</a> · <a href="./ATTRIBUTION.md" target="_blank">Attribution and modifications</a></p>
 				<p><a href="./js/THIRD_PARTY_LICENSES.txt" target="_blank">Third-party software licenses</a> · <a href="./fonts/LICENSE.txt" target="_blank">Font licenses</a> · <a href="./words.LICENSE.txt" target="_blank">Word list attribution</a></p>
 				<p class="credits">
@@ -93,6 +93,7 @@
 					<tr><td>Spellcheck</td><td><kbd data-keys="Mod Shift ;"></kbd></td></tr>
 					<tr><td>Fullscreen</td><td><kbd data-keys="Mod Shift F"></kbd></td></tr>
 					<tr><th colspan="2">Appearance</th></tr>
+					<tr><td>Interface language: English / español</td><td>in the menu or the bottom bar</td></tr>
 					<tr><td>Size: s, m, l</td><td><kbd data-keys="Mod +"></kbd> larger, <kbd data-keys="Mod -"></kbd> smaller; past l the browser zooms</td></tr>
 					<tr><td>Theme: system, light, dark, green, sand, night</td><td><kbd data-keys="Mod Shift E"></kbd></td></tr>
 					<tr><td>Font: mono, sans, serif</td><td><kbd data-keys="Mod Shift A"></kbd></td></tr>
@@ -124,7 +125,7 @@
 			<div class="share-modal modal" role="dialog" aria-label="Share this document" tabindex="-1">
 				<div class="share-step" data-step="choose">
 					<h1>Share this document</h1>
-					<p>Write This Down puts the text inside the link itself. Nothing is stored anywhere: not on a server, not by Write This Down. The link is the only copy, and it works for as long as someone keeps it. It cannot be taken back: whoever has the link has the text, as with a file you have sent.</p>
+					<p>Write this down! puts the text inside the link itself. Nothing is stored anywhere: not on a server, not by Write this down!. The link is the only copy, and it works for as long as someone keeps it. It cannot be taken back: whoever has the link has the text, as with a file you have sent.</p>
 					<p>It is a snapshot of the text as it is now, not a shared document: later changes, yours or theirs, do not travel.</p>
 					<p class="share-long" hidden></p>
 					<ul class="choices">
@@ -136,7 +137,7 @@
 				<div class="share-step" data-step="seed">
 					<h1>Seed word</h1>
 					<label class="field"><input class="seed-input" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off"></label>
-					<p>Four words Write This Down chose at random. Keep them, or type your own. A short seed is easy to guess.</p>
+					<p>Four words Write this down! chose at random. Keep them, or type your own. A short seed is easy to guess.</p>
 					<ul class="choices">
 						<li class="choice" data-choice="make"><span class="label">make the link</span><span class="hint">The seed word is not kept anywhere. Lost means lost.</span></li>
 					</ul>
@@ -165,7 +166,7 @@
 			<div class="backup-modal modal" role="dialog" aria-label="A copy that outlives this browser" tabindex="-1">
 				<h1>A copy that outlives this browser</h1>
 				<p>Your text lives in this browser's own storage. That is private, and it is also fragile: it goes when the browser's data is cleared, and it does not follow you to another device.</p>
-				<p class="for-folder">On this browser Write This Down can keep a folder up to date as you write: every document as a <b>.md</b> file, and everything in one <b>.json</b>. Pick the folder once; if it is in iCloud or Dropbox, the copy follows you. Its <b>documents</b> folder is Write This Down's: a .md file there that is no longer a document is removed.</p>
+				<p class="for-folder">On this browser Write this down! can keep a folder up to date as you write: every document as a <b>.md</b> file, and everything in one <b>.json</b>. Pick the folder once; if it is in iCloud or Dropbox, the copy follows you. Its <b>documents</b> folder is Write this down!'s: a .md file there that is no longer a document is removed.</p>
 				<p class="for-no-folder"></p>
 				<p class="backup-state"></p>
 				<ul class="choices">
@@ -175,7 +176,7 @@
 					<li class="choice" data-choice="export-zip"><span class="label">export everything as .md (zip)</span><span class="hint">every document as a file, in one .zip</span></li>
 					<li class="choice" data-choice="export"><span class="label">export everything as .json</span><span class="hint">every document and setting, for import</span></li>
 				</ul>
-				<p class="for-touch">On an iPhone or iPad, add Write This Down to the home screen: Safari then keeps its storage instead of clearing it after 7 days.</p>
+				<p class="for-touch">On an iPhone or iPad, add Write this down! to the home screen: Safari then keeps its storage instead of clearing it after 7 days.</p>
 				<p class="foot for-keys">↑↓ select · enter run · esc close</p>
 			</div>
 
@@ -233,10 +234,11 @@
 				     hidden while a message shows and on phones. Fill it with a few words and a link. -->
 				<a class="status-note" target="_blank" rel="noopener"></a>
 				<span class="status-said" aria-live="polite"></span>
+				<button class="language" data-hint="switch interface language" aria-label="switch interface language"><span>English</span></button>
 				<button class="palette" data-hint="every command, with its key" data-keys="Mod K">menu</button>
 				<button class="help" data-hint="keyboard shortcuts">keys</button>
 				<button class="backup" data-hint="a copy that outlives this browser">backup</button>
-				<button class="about" data-hint="about Write This Down">about</button>
+				<button class="about" data-hint="about Write this down!">about</button>
 			</div>
 		</div>
 

@@ -2,7 +2,7 @@
 import { deflateSync, strToU8 } from 'fflate';
 
 export const expect = {
-    title: 'Write This Down - Online Text Editor',
+    title: 'Write this down!',
     oldDataIgnored: true, ownStorage: true, persisted: true, folderDatabase: true,
     fontLoaded: true, backupFormat: 'wtd-backup', backupName: true,
     zipName: true, zipManifest: true, imported: true, transferIgnored: true,

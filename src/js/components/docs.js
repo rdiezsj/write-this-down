@@ -1,3 +1,4 @@
+import { t, currentLanguage } from './i18n';
 import app from './app';
 import caret from './caret';
 import editor from './editor';
@@ -35,7 +36,7 @@ export default (function () {
         const current = documents.current();
         const items = documents.list().map(doc => ({
             label: documents.titleOf(doc),
-            hint: new Date(doc.updated).toLocaleDateString(),
+            hint: new Date(doc.updated).toLocaleDateString(currentLanguage()),
             text: documents.searchText(doc),
             current: current && doc.id === current.id,
             run: () => openDocument(doc.id),
@@ -97,13 +98,13 @@ export default (function () {
     function trashItem() {
         const count = documents.trash().length;
 
-        return { label: 'trash…', hint: `${count} ${count === 1 ? 'document' : 'documents'}, gone after ${documents.TRASH_DAYS} days`, run: openTrashPicker };
+        return { label: t('trash…'), hint: `${count} ${count === 1 ? 'document' : 'documents'}, gone after ${documents.TRASH_DAYS} days`, run: openTrashPicker };
     }
 
     function openTrashPicker() {
         const items = documents.trash().map(doc => ({
             label: documents.titleOf(doc),
-            hint: `deleted ${new Date(doc.deleted).toLocaleDateString()}`,
+            hint: `deleted ${new Date(doc.deleted).toLocaleDateString(currentLanguage())}`,
             run: () => restoreDocument(doc),
             actions: {
                 restore: () => restoreDocument(doc),
@@ -111,7 +112,7 @@ export default (function () {
             },
         }));
 
-        items.push({ label: 'empty trash', hint: 'for good', run: emptyTrash });
+        items.push({ label: t('empty trash'), hint: 'for good', run: emptyTrash });
 
         app.openPicker({
             kind: 'trash',
@@ -130,7 +131,7 @@ export default (function () {
     }
 
     function destroyDocument(doc) {
-        if (window.confirm(`Delete "${documents.titleOf(doc)}" for good?`)) {
+        if (window.confirm(t(`Delete "${documents.titleOf(doc)}" for good?`))) {
             documents.destroy(doc.id);
         }
 
@@ -144,7 +145,7 @@ export default (function () {
     function emptyTrash() {
         const count = documents.trash().length;
 
-        if (window.confirm(`Empty the trash? ${count} ${count === 1 ? 'document' : 'documents'}, for good.`)) {
+        if (window.confirm(t(`Empty the trash? ${count} ${count === 1 ? 'document' : 'documents'}, for good.`))) {
             documents.trash().forEach(doc => documents.destroy(doc.id));
             app.setStatus('trash emptied', 3000);
         }
@@ -175,7 +176,7 @@ export default (function () {
 
         const now = new Date();
         const iso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-        const names = [iso, now.toLocaleDateString()];
+        const names = [iso, now.toLocaleDateString(currentLanguage())];
         const existing = documents.list().find(doc => names.includes(documents.titleOf(doc)));
 
         if (existing) {

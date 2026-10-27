@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import app from './app';
 import util from './utils';
 import caret from './caret';
@@ -34,8 +35,8 @@ export default (function () {
         picker.kind = options.kind;
         picker.items = options.items;
         picker.input.value = '';
-        picker.input.placeholder = options.placeholder || '';
-        picker.foot.textContent = options.foot || '';
+        picker.input.placeholder = t(options.placeholder || '');
+        picker.foot.textContent = t(options.foot || '');
         picker.element.classList.toggle('plain', options.filter === false);
         picker.element.classList.toggle('at-caret', !!options.at);
         picker.element.dataset.kind = options.kind;
@@ -112,7 +113,7 @@ export default (function () {
             }
 
             if (terms.length && item.text && terms.every(term => item.text.includes(term))) {
-                byText.push({ ...item, hint: 'in the text' });
+                byText.push({ ...item, hint: t('in the text') });
             }
 
             return false;
@@ -134,7 +135,7 @@ export default (function () {
 
     function renderPicker() {
         if (picker.shown.length === 0) {
-            picker.list.innerHTML = '<li class="picker-empty">nothing matches</li>';
+            picker.list.innerHTML = `<li class="picker-empty">${t('nothing matches')}</li>`;
             return;
         }
 
@@ -143,16 +144,16 @@ export default (function () {
         picker.list.innerHTML = picker.shown.map((item, index) => {
             const names = Object.keys(item.actions || {});
             const actions = names.length
-                ? `<span class="acts">${names.map(name => `<button class="act" data-act="${name}">${name}</button>`).join('')}</span>`
+                ? `<span class="acts">${names.map(name => `<button class="act" data-act="${name}">${t(name)}</button>`).join('')}</span>`
                 : '';
-            const hint = item.hint ? `<span class="hint">${util.escapeHtml(item.hint)}</span>` : '';
+            const hint = item.hint ? `<span class="hint">${util.escapeHtml(t(item.hint))}</span>` : '';
             const key = item.key ? `<span class="key">${util.escapeHtml(item.key)}</span>` : '';
             const classes = `picker-item${index === picker.index ? ' selected' : ''}${item.current ? ' current' : ''}`;
             let heading = '';
 
             if (item.group && item.group !== group) {
                 group = item.group;
-                heading = `<li class="picker-heading">${group}</li>`;
+                heading = `<li class="picker-heading">${t(group)}</li>`;
             }
 
             return `${heading}<li class="${classes}" data-index="${index}" role="option"><span class="label">${util.escapeHtml(item.label)}</span>${actions}${hint}${key}</li>`;

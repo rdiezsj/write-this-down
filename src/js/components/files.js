@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import app from './app';
 import util from './utils';
 import editor from './editor';
@@ -27,7 +28,7 @@ export default (function () {
     // dialog explains where the text lives and offers the ways out. See folder.js.
 
     function updateBackupWord(state) {
-        backupElement.textContent = state === 'on' ? 'backup on' : state === 'paused' ? 'backup paused' : 'backup';
+        backupElement.textContent = t(state === 'on' ? 'backup on' : state === 'paused' ? 'backup paused' : 'backup');
         backupElement.classList.toggle('attention', state === 'paused');
     }
 
@@ -37,31 +38,31 @@ export default (function () {
         const ua = navigator.userAgent;
         const safari = /Safari/.test(ua) && !/Chrome|Chromium|Edg|OPR/.test(ua);
         const firefox = /Firefox/.test(ua);
-        const how = 'Keep a copy with "export everything": one file, now and then, to a place you trust. Importing it later brings every document back.';
+        const how = t('Keep a copy with "export everything": one file, now and then, to a place you trust. Importing it later brings every document back.');
 
         if (safari) {
-            return `Safari deletes a site's storage after 7 days without a visit, unless the app is on the home screen, and it cannot write to a folder. ${how}`;
+            return `${t("Safari deletes a site's storage after 7 days without a visit, unless the app is on the home screen, and it cannot write to a folder.")} ${how}`;
         }
 
         if (firefox) {
-            return `Firefox keeps the storage until you clear site data, but it cannot write to a folder. ${how}`;
+            return `${t("Firefox keeps the storage until you clear site data, but it cannot write to a folder.")} ${how}`;
         }
 
-        return `This browser cannot write to a folder. ${how}`;
+        return `${t("This browser cannot write to a folder.")} ${how}`;
     }
 
     function openBackup() {
         const state = folder.state();
 
-        backupModal.querySelector('.for-no-folder').textContent = storageNote();
+        backupModal.querySelector('.for-no-folder').textContent = t(storageNote());
 
         backupModal.classList.toggle('folder', state !== 'unsupported');
         backupModal.classList.toggle('folder-on', state === 'on');
         backupModal.classList.toggle('folder-paused', state === 'paused');
         backupModal.querySelector('.backup-state').textContent =
-            state === 'on' ? `Copying to the folder "${folder.name()}" as you write.`
+            t(state === 'on' ? `Copying to the folder "${folder.name()}" as you write.`
             : state === 'paused' ? `The folder "${folder.name()}" is set; after a closed tab the browser asks once more. Choose “Allow on every visit” and it stops asking.`
-            : '';
+            : '');
         app.openModal(backupModal);
         app.selectChoice(backupModal, app.visibleChoices(backupModal)[0]);
         backupModal.focus();
@@ -251,6 +252,7 @@ export default (function () {
 
     return {
         init,
+        refreshLabels: () => updateBackupWord(folder.state()),
         openBackup,
         openFilePicker,
         exportEverything,

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Write This Down - 404</title>
+		<title>Write this down! - 404</title>
 		<meta charset="utf-8">
 		<base href="/write-this-down/">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,12 +17,12 @@
 			.nothing-here .four { display: block; width: min(264px, 60vw); height: auto; margin: 0 auto 32px; fill: var(--fg); }
 			.nothing-here p { margin: 0 0 0.5em; }
 			.nothing-here a { color: var(--accent); text-decoration: none; }
-			.nothing-here .name { position: fixed; left: 20px; bottom: 16px; width: 93px; height: 18px; color: var(--fg); opacity: 0.3; }
+			.nothing-here .name { position: fixed; left: 20px; bottom: 16px; width: 200px; height: 22px; color: var(--fg); opacity: 0.3; }
 		</style>
 	</head>
 	<body class="nothing-here">
 		<svg xmlns="http://www.w3.org/2000/svg" style="display: none">
-			<symbol id="wordmark" viewBox="0 0 130 36"><text x="0" y="29" font-family="WTD Mono, monospace" font-size="34" font-weight="700" fill="currentColor">WTD</text></symbol>
+			<symbol id="wordmark" viewBox="0 0 350 36"><text x="0" y="29" font-family="WTD Mono, monospace" font-size="34" font-weight="700" fill="currentColor">Write this down!</text></symbol>
 		</svg>
 		<section>
 			<svg class="four" viewBox="0 0 11 5" role="img" aria-label="404">
@@ -30,9 +30,20 @@
 <path d="M4 0h3v1h-3zM4 1h1v1h-1zM6 1h1v1h-1zM4 2h1v1h-1zM6 2h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM4 4h3v1h-3z"/>
 <path d="M8 0h1v1h-1zM10 0h1v1h-1zM8 1h1v1h-1zM10 1h1v1h-1zM8 2h3v1h-3zM10 3h1v1h-1zM10 4h1v1h-1z"/>
 			</svg>
-			<p>There is nothing at this address.</p>
-			<p>The editor is at <a href="./">Write This Down</a>.</p>
+			<p class="missing-message">There is nothing at this address.</p>
+			<p><span class="editor-message">The editor is at </span><a href="./">Write this down!</a>.</p>
 		</section>
-		<svg class="name" role="img" aria-label="Write This Down"><use href="#wordmark"></use></svg>
+		<svg class="name" role="img" aria-label="Write this down!"><use href="#wordmark"></use></svg>
+        <script>
+            try {
+                const first = (navigator.languages || [navigator.language]).find(value => /^(es|en)\b/i.test(value));
+                const language = localStorage.getItem('language') || (first && /^es\b/i.test(first) ? 'es' : 'en');
+                document.documentElement.lang = language === 'es' ? 'es' : 'en';
+                if (language === 'es') {
+                    document.querySelector('.missing-message').textContent = 'No hay nada en esta dirección.';
+                    document.querySelector('.editor-message').textContent = 'El editor está en ';
+                }
+            } catch (e) {}
+        </script>
 	</body>
 </html>
