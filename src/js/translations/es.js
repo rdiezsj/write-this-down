@@ -46,7 +46,7 @@ export default {
     'Theme: system, light, dark, green, sand, night': 'Tema: sistema, claro, oscuro, verde, arena, noche',
     'Font: mono, sans, serif': 'Fuente: mono, sans, serif', 'Cursor: block, thin': 'Cursor: bloque, fino',
     'Key sounds: off, soft, click, blip, typewriter': 'Sonido: desactivado, suave, clic, tono, máquina',
-    'Interface language: English / español': 'Idioma de la interfaz: English / español',
+    'Interface language: english / español': 'Idioma de la interfaz: english / español',
     'in the menu or the bottom bar': 'en el menú o la barra inferior',
     'Move the line up or down': 'Mover la línea hacia arriba o abajo',
     "Indent, outdent (four spaces; the selected lines, or the caret's)": 'Añadir o quitar sangría (cuatro espacios; líneas seleccionadas o la actual)',

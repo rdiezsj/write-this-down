@@ -2,7 +2,7 @@
 // contents panel's widths, each end of the status line brightening on its own, the
 // hint apart from the words, the documents list centred; the size scales the page
 export const expect = {
-    groups: 3, gaps: '12,12', column1000: 'none', statusWords: 'English,menu,keys,backup,about',
+    groups: 3, gaps: '12,12', column1000: 'none', statusWords: 'english,menu,keys,backup,about',
     hoverRight: { backup: '1', about: '0.55', counter: '0.24' }, hoverLeft: { counter: '1', about: '0.24' }, hintGap: 20, edgeGap: 20,
     docsCentred: true, panel1280: 'block', panel1200: 'picker', panelMarkdown2000: 'block', panelMarkdown1500: 'picker',
     sizes: 's 760 12px block|m 912 14.4px block|l 1115 17.6px none', sizes1920: 'l 1115 17.6px block', panelL1920: 'block', panelL1800: 'picker',

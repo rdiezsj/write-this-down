@@ -409,7 +409,7 @@ export default (function () {
 
     function updateLabels() {
         article.setAttribute('aria-label', t('Text'));
-        document.querySelector('.language span').textContent = i18n.currentLanguage() === 'es' ? 'español' : 'English';
+        document.querySelector('.language span').textContent = i18n.currentLanguage() === 'es' ? 'español' : 'english';
         document.querySelector('.language').dataset.code = i18n.currentLanguage().toUpperCase();
         files.refreshLabels();
         setValue(changeFontElement, fontNames[fontScheme]);
@@ -984,7 +984,7 @@ export default (function () {
 
         // the same order as the column: the page first (size, theme), then the text
         add('appearance', 'language español', () => changeLanguage('es'), { current: i18n.currentLanguage() === 'es' });
-        add('appearance', 'language English', () => changeLanguage('en'), { current: i18n.currentLanguage() === 'en' });
+        add('appearance', 'language english', () => changeLanguage('en'), { current: i18n.currentLanguage() === 'en' });
         FONT_SIZES.forEach((size) => {
             add('appearance', `size ${fontSizeName(size)}`, () => changeFontSize(size), { current: size === fontSize, key: size === fontSize ? `${key('Mod +')} ${key('Mod -')}`.trim() : '' });
         });

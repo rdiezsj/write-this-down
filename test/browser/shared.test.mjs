@@ -3,8 +3,8 @@
 // Wide enough for the contents panel at size l (1280 px times the size's scale)
 export const options = { width: 1920 };
 export const expect = {
-    writer: 'font serif size l theme night', reader: 'font serif size l theme system', column: 'import to edit,contents off,size l,theme system,font serif', status: 'English,about',
-    menu: 'import to edit,export as .md,export as .txt,print or save as PDF…,contents on,language español,language English,size s,size m,size l,theme system,theme light,theme dark,theme green,theme sand,theme night,font mono,font sans,font serif,keys,about',
+    writer: 'font serif size l theme night', reader: 'font serif size l theme system', column: 'import to edit,contents off,size l,theme system,font serif', status: 'english,about',
+    menu: 'import to edit,export as .md,export as .txt,print or save as PDF…,contents on,language español,language english,size s,size m,size l,theme system,theme light,theme dark,theme green,theme sand,theme night,font mono,font sans,font serif,keys,about',
     rendered: 'article=none showcase=block h1=true', boxInert: true, markdownKeyIgnored: true, contentsPanel: 'contents on panel=block items=1', jump: true,
     afterImport: 'shared=false font mono size s theme system markdown=false', imported: '# Shared note',
     lockedDialog: 'This link is locked', wrongSeed: 'wrong seed word', unlocked: true,

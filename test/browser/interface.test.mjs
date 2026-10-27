@@ -5,7 +5,7 @@ export const expect = {
     gradient: true, reducedStill: true, spanish: 'es', newLabel: 'nueva', menuLabel: 'menú',
     savedLanguage: 'es', spanishMenu: true, shareMenu: true, darkChosen: true, noteIntact: true,
     hiddenWithText: true, documentTitleIntact: true, english: 'en', englishLabel: 'new',
-    reloadLanguage: 'en', backupLanguage: 'en', backgroundOff: true, sharedLanguageStored: true,
+    englishSelector: 'english', reloadLanguage: 'en', backupLanguage: 'en', backgroundOff: true, sharedLanguageStored: true,
 };
 
 export default async t => {
@@ -46,6 +46,7 @@ export default async t => {
     out.documentTitleIntact = await t.ev(`[...document.querySelectorAll('.picker-list .label')].some(n=>n.textContent==='new document')`);
     await t.key('Escape'); await t.click('.language');
     out.english = await t.ev('document.documentElement.lang');
+    out.englishSelector = await t.ev(`document.querySelector('.language span').textContent`);
     out.englishLabel = await t.ev(`document.querySelector('.new-doc').textContent`);
     out.noteIntact = before === await t.ev(`document.querySelector('article').innerHTML`);
     await t.reload();
