@@ -25,7 +25,7 @@ export default {
     // the product, as lists the generated files can name
     formats: { reads: ['.txt', '.md'], writes: ['.md', '.txt', 'PDF (print)', '.json backup', '.zip of .md files'] },
     themes: ['system', 'light', 'dark', 'green', 'sand', 'night'],
-    fonts: ['mono (WTD Mono, a build of Iosevka)', 'sans (Inter)', 'serif (Literata)'],
+    fonts: ['mono (IBM Plex Mono)', 'sans (Inter)', 'serif (Literata)'],
     sizes: ['s', 'm', 'l'],
     cursors: ['block', 'thin'],
     sounds: ['off', 'soft', 'click', 'blip', 'typewriter'],
@@ -44,7 +44,7 @@ export default {
     ],
 
     credits: [
-        'WTD Mono is a build of Iosevka',
+        'IBM Plex Mono by IBM',
         'Inter by Rasmus Andersson',
         'Literata by TypeTogether for Google Fonts',
     ],

@@ -1,11 +1,10 @@
 Fonts in this folder and their licences
 =======================================
 
-WTD Mono (WTDMono-*.woff2)
-  Derived from Nanotype Mono (formerly Zen Mono); renamed for Write This Down.
-  A build of Iosevka v34.4.0 made with fonts/wtd-mono.build-plans.toml.
-  Copyright (c) 2015-2026, Belleve Invis (belleve@typeof.net).
-  Copyright (c) 2025, Ahmed Hatem (https://github.com/ahatem).
+IBM Plex Mono (IBMPlexMono-*.woff2)
+  Copyright © 2017 IBM Corp. with Reserved Font Name "Plex"
+  Unmodified complete WOFF2 files from @ibm/plex-mono 2.5.0.
+  The original IBM notice and full licence are in IBM-Plex-OFL.txt.
 
 Inter (inter-*.woff2)
   Copyright (c) 2016 The Inter Project Authors (https://github.com/rsms/inter).

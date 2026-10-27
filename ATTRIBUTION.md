@@ -19,7 +19,7 @@ Modificaciones realizadas el **27 de octubre de 2026** por el proyecto Write Thi
 - Identidad independiente de WTD en interfaz, metadatos, enlaces, almacenamiento y copias; retirada del traslado entre dominios del proyecto original.
 - Interfaz bilingüe español/inglés, título completo y fondo propio de degradados sin caracteres, con movimiento reducido respetado.
 - Sustitución de los iconos originales por el diseño propio «Líneas y cursor».
-- Renombrado de la compilación tipográfica como WTD Mono, con glifos y avisos de licencia conservados.
+- Sustitución de la fuente monoespaciada original por IBM Plex Mono, con archivos y avisos OFL de IBM sin modificar.
 - Retirada de la telemetría heredada y de su configuración y documentación.
 - Adaptación de las rutas de recursos para servir la aplicación desde una subruta.
 - Distribución de los avisos completos de las bibliotecas incorporadas y actualización de la procedencia de la lista de palabras.

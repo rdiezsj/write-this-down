@@ -1,0 +1,14 @@
+{
+  "package": "@ibm/plex-mono",
+  "version": "2.5.0",
+  "source": "https://registry.npmjs.org/@ibm/plex-mono/-/plex-mono-2.5.0.tgz",
+  "directory": "package/fonts/complete/woff2/",
+  "license": "OFL-1.1",
+  "modified": false,
+  "sha256": {
+    "IBMPlexMono-Bold.woff2": "ea576f38d05cc44cca48c45314984beb8cc1d2b886f58e1dce99f15dc344eb1d",
+    "IBMPlexMono-BoldItalic.woff2": "03e97fe28d44cc2bdf18d77284046bc9019ee626bdab1f06e7ea64837680824b",
+    "IBMPlexMono-Italic.woff2": "2024bf2b08027dcd6d09091385756e327744bbe26b782c411381dffc40ffc622",
+    "IBMPlexMono-Regular.woff2": "ba204497f16b6d334cee9d1e963a831b73e3a56e1d6300a8489d18df7214b350"
+  }
+}

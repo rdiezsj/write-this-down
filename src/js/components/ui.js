@@ -56,9 +56,9 @@ export default (function () {
     const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
 
     // Font schemes for the text, in the order the font command cycles through them.
-    // The interface itself is always in WTD Mono.
+    // The interface itself is always in IBM Plex Mono.
     let fontSchemes = [
-        "font-scheme-monospace",    // WTD Mono
+        "font-scheme-monospace",    // IBM Plex Mono
         "font-scheme-sans-serif",   // Inter
         "font-scheme-serif",        // Literata
     ];

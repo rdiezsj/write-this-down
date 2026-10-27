@@ -6,7 +6,7 @@ Los recursos de terceros mantienen las siguientes licencias y atribuciones.
 
 ## Fuentes (`public/fonts`, SIL Open Font License 1.1)
 
-- **WTD Mono**: derivada de Nanotype Mono (antes Zen Mono), versión de [Iosevka](https://github.com/be5invis/Iosevka), de Belleve Invis, compilada con `fonts/wtd-mono.build-plans.toml`, que añade cirílico y símbolos de teclado. El aviso de la fuente incluye también a Ahmed Hatem. WTD cambia los nombres de familia y archivos; conserva los glifos y los avisos OFL.
+- **IBM Plex Mono**: [IBM Plex](https://github.com/IBM/plex), de IBM Corp.; archivos WOFF2 completos sin modificar del paquete oficial `@ibm/plex-mono` 2.5.0. Copyright © 2017 IBM Corp., con nombre reservado «Plex». Aviso original en `public/fonts/IBM-Plex-OFL.txt`.
 - **Inter**: [Inter Project Authors](https://github.com/rsms/inter).
 - **Literata**: [Literata Project Authors](https://github.com/googlefonts/literata).
 

@@ -20,7 +20,7 @@ export default async t => {
     out.ownStorage = await t.ev(`!!localStorage['wtd.docs'] && !!localStorage['wtd.doc.'+localStorage['wtd.current']]`);
     out.persisted = await t.ev(`document.querySelector('article').textContent.includes('WTD identity check')`);
     out.folderDatabase = await t.ev(`indexedDB.databases().then(d => d.some(x => x.name === 'wtd'))`);
-    out.fontLoaded = await t.ev(`document.fonts.load('14px "WTD Mono"').then(f => f.length > 0 && f.every(x => x.status === 'loaded'))`);
+    out.fontLoaded = await t.ev(`Promise.all(['14px "IBM Plex Mono"','bold 14px "IBM Plex Mono"','italic 14px "IBM Plex Mono"','italic bold 14px "IBM Plex Mono"'].map(s=>document.fonts.load(s))).then(groups=>groups.every(f=>f.length>0&&f.every(x=>x.status==='loaded')) && getComputedStyle(document.body).fontFamily.startsWith('"IBM Plex Mono"'))`);
     await t.ev(`window.__saved=[]; window.__urls=new Map(); URL.createObjectURL=b=>{let u='blob:wtd-'+window.__saved.length;window.__urls.set(u,b);return u}; URL.revokeObjectURL=()=>{}; HTMLAnchorElement.prototype.click=function(){window.__saved.push({name:this.download,blob:window.__urls.get(this.href)})}`);
     await t.click('.backup');
     await t.ev(`document.querySelector('.backup-modal [data-choice="export"]').click()`);
