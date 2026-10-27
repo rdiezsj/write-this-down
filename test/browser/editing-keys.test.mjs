@@ -1,0 +1,67 @@
+// ⌥↑ ⌥↓ move the line (and keep it on screen); ⌘⌥1–6 / ⌘⌥0 headings; ⌘] ⌘[ indent; ⌘-click opens an address
+export const expect = {
+    down: 'one||two|four https://nanotype.app/x, done|## five', upTwice: 'two|one||four https://nanotype.app/x, done|## five', upAtTopUnchanged: true, undoMove: 'one|two||four https://nanotype.app/x, done|## five',
+    h2: '## four https://nanotype.app/x, done', h4: '#### four https://nanotype.app/x, done', h0: 'four https://nanotype.app/x, done', h5to0: 'five',
+    indent: '    one', outdent: 'one', tabAtEnd: '    two', tabKeepsCaret: '    twox', shiftTab: 'twox', opened: 1, wordOpensNothing: 1, moveStaysVisible: true,
+    renumbered: '1. a|2. b|3. |4. c|5. d||7. x', undoRenumber: '1. a|2. b|3. c|4. d||7. x',
+    nested: '1. a|    1. b|2. c|3. d||7. x', nestedCaret: '    1. bx', unnested: '1. a|2. bx|3. c|4. d||7. x',
+    twoNested: '1. a|2. bx|    1. c|    2. d||7. x', childRestarts: '1. a|2. bx|3. c|    1. d||7. x',
+};
+
+export default async (t) => {
+    await t.open('/');
+    await t.focus(); await t.insert('one\ntwo\n\nfour https://nanotype.app/x, done\n## five', 400);
+    const out = {};
+    const all = async () => (await t.lines()).join('|');
+    let opened = 0;
+    t.listeners.push((msg) => { if (msg.method === 'Target.targetCreated' && msg.params.targetInfo.type === 'page') opened++; });
+    await t.send('Target.setDiscoverTargets', { discover: true }); await t.sleep(300);
+    opened = 0;   // the targets that already existed were just announced
+
+    await t.caretTo('two', 1); await t.key('ArrowDown', 'ArrowDown', 1); out.down = await all();
+    await t.key('ArrowUp', 'ArrowUp', 1); await t.key('ArrowUp', 'ArrowUp', 1); out.upTwice = await all();
+    await t.key('ArrowUp', 'ArrowUp', 1); out.upAtTopUnchanged = (await all()) === out.upTwice;
+    await t.key('z', 'KeyZ', 4, { commands: ['undo'] }); out.undoMove = await all();
+
+    await t.caretTo('four', 2); await t.key('2', 'Digit2', 5); out.h2 = (await t.lines())[3];
+    await t.key('4', 'Digit4', 5); out.h4 = (await t.lines())[3];
+    await t.key('0', 'Digit0', 5); out.h0 = (await t.lines())[3];
+    await t.caretTo('five', 4); await t.key('0', 'Digit0', 5); out.h5to0 = (await t.lines())[4];
+
+    await t.caretTo('one', 1); await t.key(']', 'BracketRight', 4); out.indent = (await t.lines())[0];
+    await t.key('[', 'BracketLeft', 4); out.outdent = (await t.lines())[0];
+    await t.caretTo('two', 3); await t.key('Tab', 'Tab', 0); out.tabAtEnd = (await t.lines())[1];
+    await t.type('x'); out.tabKeepsCaret = (await t.lines())[1];
+    await t.key('Tab', 'Tab', 8); out.shiftTab = (await t.lines())[1]; await t.key('Backspace', 'Backspace', 0);
+
+    const b = JSON.parse(await t.ev(`(() => { const d = [...document.querySelector('article').childNodes].find(x => x.textContent.includes('https')); const rg = document.createRange(); const i = d.firstChild.data.indexOf('https'); rg.setStart(d.firstChild, i + 5); rg.setEnd(d.firstChild, i + 6); return JSON.stringify(rg.getBoundingClientRect()) })()`));
+    await t.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: b.x + 2, y: b.y + b.height / 2, button: 'left', clickCount: 1, modifiers: 4 });
+    await t.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: b.x + 2, y: b.y + b.height / 2, button: 'left', clickCount: 1, modifiers: 4 }); await t.sleep(600);
+    out.opened = opened;
+    const w = await t.rect('article');
+    await t.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: w.x + 5, y: w.y + 8, button: 'left', clickCount: 1, modifiers: 4 });
+    await t.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: w.x + 5, y: w.y + 8, button: 'left', clickCount: 1, modifiers: 4 }); await t.sleep(300);
+    out.wordOpensNothing = opened;
+
+    // a line moved far keeps on screen
+    await t.ev(`document.querySelector('article').innerHTML = ''; document.querySelector('article').focus()`);
+    await t.insert(Array.from({ length: 60 }, (_, i) => 'line ' + i).join('\n'), 300);
+    await t.caretTo('line 1', 2); await t.ev(`document.body.scrollTop = 0`);
+    for (let i = 0; i < 40; i++) await t.key('ArrowDown', 'ArrowDown', 1);
+    out.moveStaysVisible = await t.ev(`(() => { let n = window.getSelection().anchorNode; while (n.parentNode !== document.querySelector('article')) n = n.parentNode; const r = n.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight })()`);
+
+    // Enter inside a numbered list renumbers what follows; a blank line ends the list; ⌘Z twice takes it all back (the renumbering, then the line with its marker)
+    await t.ev(`document.querySelector('article').innerHTML = ''; document.querySelector('article').focus()`);
+    await t.insert('1. a\n2. b\n3. c\n4. d\n\n7. x', 300);
+    await t.caretTo('2. b', 4); await t.key('Enter', 'Enter', 0, { text: '\r' }); await t.sleep(300); out.renumbered = await all();
+    await t.key('z', 'KeyZ', 4, { commands: ['undo'] }); await t.key('z', 'KeyZ', 4, { commands: ['undo'] }); out.undoRenumber = await all();
+
+    // Tab on a numbered item starts an inner list at 1 and the outer list closes the gap; ⇧Tab the reverse; the caret stays in its words
+    await t.caretTo('2. b', 4); await t.key('Tab', 'Tab', 0); await t.sleep(200); out.nested = await all();
+    await t.type('x'); out.nestedCaret = (await t.lines())[1];
+    await t.key('Tab', 'Tab', 8); await t.sleep(200); out.unnested = await all();
+    await t.caretTo('3. c', 4); await t.key('Tab', 'Tab', 0); await t.sleep(200); await t.caretTo('3. d', 4); await t.key('Tab', 'Tab', 0); await t.sleep(200); out.twoNested = await all();
+    await t.caretTo('1. c', 4); await t.key('Tab', 'Tab', 8); await t.sleep(200); out.childRestarts = await all();
+
+    return out;
+};

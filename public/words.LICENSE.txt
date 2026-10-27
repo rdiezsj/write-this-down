@@ -1,0 +1,15 @@
+EFF Large Wordlist — atribución de la copia utilizada por Write This Down
+
+Autor: Electronic Frontier Foundation (EFF).
+Recurso original: https://www.eff.org/files/2016/07/18/eff_large_wordlist.txt
+Información: https://www.eff.org/deeplinks/2016/07/new-wordlists-random-passphrases
+Licencia: Creative Commons Attribution 4.0 International (CC BY 4.0).
+Texto de la licencia: https://creativecommons.org/licenses/by/4.0/legalcode
+Política de copyright del titular: https://www.eff.org/copyright
+
+Esta copia se ha reconstruido a partir del recurso publicado por EFF el
+27 de octubre de 2026. Se han retirado los códigos numéricos de los dados y
+las cuatro palabras con guion: drop-down, felt-tip, t-shirt y yo-yo.
+Las 7772 palabras restantes se conservan en su orden original.
+
+Esta atribución no implica que EFF respalde Write This Down.
