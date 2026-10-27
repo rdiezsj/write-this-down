@@ -5,6 +5,7 @@ export default (function () {
     const still = window.matchMedia('(prefers-reduced-motion: reduce)');
     let canvas, context, on = false, request = 0, last = 0;
     let width = 0, height = 0;
+    const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
 
     function init() {
         canvas = document.createElement('canvas');
@@ -13,6 +14,14 @@ export default (function () {
         app.body.prepend(canvas);
         context = canvas.getContext('2d');
         window.addEventListener('resize', layout);
+        window.addEventListener('pointermove', event => {
+            if (!on || still.matches || event.pointerType === 'touch') return;
+            pointer.targetX = event.clientX / width - 0.5;
+            pointer.targetY = event.clientY / height - 0.5;
+        }, { passive: true });
+        document.addEventListener('pointerleave', () => {
+            pointer.targetX = pointer.targetY = 0;
+        });
         document.addEventListener('visibilitychange', refresh);
         still.addEventListener('change', refresh);
         layout();
@@ -37,8 +46,8 @@ export default (function () {
             : ['85,165,215', '160,130,205', '225,170,125'];
         colours.forEach((colour, i) => {
             const phase = time / 18000 + i * 2.1;
-            const x = width * (0.5 + Math.sin(phase) * 0.32);
-            const y = height * (0.5 + Math.cos(phase * 0.8) * 0.3);
+            const x = width * (0.5 + Math.sin(phase) * 0.32 + (still.matches ? 0 : pointer.x * 0.45));
+            const y = height * (0.5 + Math.cos(phase * 0.8) * 0.3 + (still.matches ? 0 : pointer.y * 0.45));
             const radius = Math.max(width, height) * 0.55;
             const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
             gradient.addColorStop(0, `rgba(${colour},${dark ? 0.12 : 0.15})`);
@@ -53,6 +62,8 @@ export default (function () {
         request = 0;
         if (!on || document.hidden) return;
         if (time - last >= 1000 / 20) {
+            pointer.x += (pointer.targetX - pointer.x) * 0.12;
+            pointer.y += (pointer.targetY - pointer.y) * 0.12;
             draw(time);
             last = time;
         }
