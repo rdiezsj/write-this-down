@@ -21,6 +21,10 @@ Los documentos se guardan en el navegador mediante `localStorage`. No hay cuenta
 
 El guardado local no sustituye a una copia de seguridad: borrar los datos del navegador, usar navegación privada o cambiar de origen puede hacer que los documentos dejen de estar disponibles. Exporta los documentos que quieras conservar.
 
+Si falla el guardado, WTD mantiene el texto en pantalla y bloquea el cambio o la creación de notas hasta que pueda guardarlo. Puedes exportar la nota actual a Markdown o texto y volver a intentar la operación después de liberar espacio.
+
+La copia a carpeta conserva los archivos preexistentes y las modificaciones externas. Ante un nombre ocupado escribe una copia con otro nombre; solo actualiza o elimina archivos propios cuyo contenido no haya cambiado. Los cambios externos no se importan automáticamente a las notas del navegador. Si borras los datos del navegador o detienes la conexión, WTD pierde su registro de archivos propios y los tratará como preexistentes al conectar de nuevo.
+
 ## Desarrollo local
 
 Requiere Node.js 24 y npm. Las pruebas de navegador requieren Google Chrome.

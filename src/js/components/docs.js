@@ -60,11 +60,12 @@ export default (function () {
     }
 
     function openDocument(id) {
-        editor.openDocument(id);
+        if (!editor.openDocument(id)) return false;
 
         if (!app.is.touch) {
             app.article.focus();
         }
+        return true;
     }
 
     // A copy of the document, opened
@@ -84,7 +85,7 @@ export default (function () {
 
     // To the trash, no question asked: the trash is the way back
     function deleteDocument(doc) {
-        editor.removeDocument(doc.id);
+        if (!editor.removeDocument(doc.id)) return;
         folder.writeAll();
         app.setStatus(documents.trash().some(d => d.id === doc.id)
             ? `moved "${documents.titleOf(doc)}" to trash · ${documents.TRASH_DAYS} days`
@@ -156,7 +157,7 @@ export default (function () {
             return;
         }
 
-        editor.createDocument('');
+        if (!editor.createDocument('')) return;
         app.removeOverlay();
         app.closePicker(false);
         app.article.focus();
@@ -182,10 +183,10 @@ export default (function () {
         if (existing) {
             app.removeOverlay();
             app.closePicker(false);
-            openDocument(existing.id);
+            if (!openDocument(existing.id)) return;
             app.setStatus(`today: ${documents.titleOf(existing)}`, 2000);
         } else {
-            editor.createDocument(util.textToHtml(`# ${iso}\n\n`));
+            if (!editor.createDocument(util.textToHtml(`# ${iso}\n\n`))) return;
             app.removeOverlay();
             app.closePicker(false);
             app.article.focus();

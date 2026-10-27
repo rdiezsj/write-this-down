@@ -1,0 +1,21 @@
+export const expect = { blockedOpen:true, blockedCreate:true, sticky:true, exportContainsDraft:true, recovered:true };
+export default async t => {
+    await t.open();
+    await t.ev(`localStorage['wtd.docs']=JSON.stringify([{id:'a',auto:'Saved A',updated:1},{id:'b',auto:'Saved B',updated:2}]);localStorage['wtd.current']='a';localStorage['wtd.doc.a']='<div>Saved A</div>';localStorage['wtd.doc.b']='<div>Saved B</div>'`);
+    await t.reload();
+    await t.ev(`window.__realStorage=localStorage;window.__failSave=true;Object.defineProperty(window,'localStorage',{configurable:true,value:new Proxy(window.__realStorage,{get:(s,k)=>typeof s[k]==='function'?s[k].bind(s):s[k],set:(s,k,v)=>{if(window.__failSave&&k==='wtd.doc.a')throw new DOMException('full','QuotaExceededError');s[k]=v;return true}})});document.querySelector('article').innerHTML='<div>UNSAVED A</div>';document.querySelector('article').dispatchEvent(new Event('input',{bubbles:true}))`);
+    await t.sleep(400);
+    await t.click('.documents');await t.filter('Saved B');await t.click('.picker-item');
+    const intact = `document.querySelector('article').textContent==='UNSAVED A'&&localStorage['wtd.current']==='a'`;
+    const out={blockedOpen:await t.ev(intact)};
+    await t.click('.new-doc');out.blockedCreate=await t.ev(intact+`&&JSON.parse(localStorage['wtd.docs']).length===2`);
+    out.sticky=(await t.status()).includes('could not save this text');
+    await t.ev(`window.__downloads=[];URL.createObjectURL=b=>{window.__downloads.push(b);return 'blob:test'};HTMLAnchorElement.prototype.click=function(){}`);
+    await t.click('.palette');await t.filter('export as .md');await t.ev(`[...document.querySelectorAll('.picker-item')].find(n=>n.querySelector('.label').textContent==='export as .md').click()`);
+    out.exportContainsDraft=await t.ev(`window.__downloads[0].text().then(s=>s==='UNSAVED A')`);
+    await t.ev('window.__failSave=false');
+    await t.click('.documents');await t.filter('Saved B');await t.click('.picker-item');
+    out.recovered=await t.ev(`localStorage['wtd.doc.a'].includes('UNSAVED A')&&document.querySelector('article').textContent==='Saved B'`);
+    await t.reload();out.recovered &&=await t.ev(`localStorage['wtd.doc.a'].includes('UNSAVED A')`);
+    return out;
+};

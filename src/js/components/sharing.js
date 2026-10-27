@@ -346,7 +346,7 @@ export default (function () {
 
         // created while the editor is still locked, so the shared text is not saved
         // over the reader's current document on the way
-        editor.createDocument(util.textToHtml(doc.text));
+        if (!editor.createDocument(util.textToHtml(doc.text))) return;
         leaveSharedView();
         editor.reload();
         history.replaceState(null, '', location.pathname + location.search);

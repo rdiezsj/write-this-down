@@ -167,15 +167,17 @@ export default (function () {
     // stays and nothing else is touched
     function saveContent(id, html, firstLine) {
         if (isStale()) {
+            const editing = currentId;
             load();
+            // Reload the index without switching away from the editor's pending text.
+            if (getById(editing) && !getById(editing).deleted) currentId = editing;
         }
 
         const doc = getById(id);
         const before = localStorage[CONTENT_PREFIX + id];
 
-        if (!doc || before === html) {
-            return true;
-        }
+        if (!doc || doc.deleted) return false;
+        if (before === html) return true;
 
         try {
             // most of the text gone in one save: keep what was there, in case

@@ -1043,7 +1043,7 @@ export default (function () {
 
     // Storage refused a save: the text is on screen but not kept. Say so until it is.
     function onStorageFull(full) {
-        statusSticky = full ? 'storage is full: this text is not being saved · export it, or delete old documents' : '';
+        statusSticky = full ? 'could not save this text · export it or free space, then try again' : '';
         renderStatus();
     }
 

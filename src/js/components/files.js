@@ -29,7 +29,7 @@ export default (function () {
 
     function updateBackupWord(state) {
         backupElement.textContent = t(state === 'on' ? 'backup on' : state === 'paused' ? 'backup paused' : 'backup');
-        backupElement.classList.toggle('attention', state === 'paused');
+        backupElement.classList.toggle('attention', state === 'paused' || folder.conflicts());
     }
 
     // What this browser does with its storage, said plainly, for browsers that
@@ -61,8 +61,11 @@ export default (function () {
         backupModal.classList.toggle('folder-paused', state === 'paused');
         backupModal.querySelector('.backup-state').textContent =
             t(state === 'on' ? `Copying to the folder "${folder.name()}" as you write.`
-            : state === 'paused' ? `The folder "${folder.name()}" is set; after a closed tab the browser asks once more. Choose “Allow on every visit” and it stops asking.`
+            : state === 'paused' ? 'Folder copy paused. Check permissions or available disk space, then resume.'
             : '');
+        if (folder.conflicts()) {
+            backupModal.querySelector('.backup-state').textContent += ' ' + t('Existing or externally edited files were kept. WTD created separate copies.');
+        }
         app.openModal(backupModal);
         app.selectChoice(backupModal, app.visibleChoices(backupModal)[0]);
         backupModal.focus();
@@ -166,7 +169,7 @@ export default (function () {
                     return;
                 }
 
-                editor.createDocument(util.textToHtml(reader.result));
+                if (!editor.createDocument(util.textToHtml(reader.result))) return;
                 app.setStatus(`imported ${file.name}`);
             };
 
@@ -210,6 +213,7 @@ export default (function () {
             return;
         }
 
+        if (!editor.saveState()) return;
         const result = backup.apply(data);
 
         if (result.newer) {

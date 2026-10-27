@@ -6,6 +6,7 @@ export default (function() {
 
     // Editor elements
     let contentField;
+    let editingId = null;
 
     let hasStorage = false;
 
@@ -49,7 +50,12 @@ export default (function() {
             contentField.addEventListener('input', scheduleSave, false);
             contentField.addEventListener('blur', saveState, false);
             window.addEventListener('pagehide', saveState, false);
-            window.addEventListener('beforeunload', saveState, false);
+            window.addEventListener('beforeunload', event => {
+                if (!saveState()) {
+                    event.preventDefault();
+                    event.returnValue = '';
+                }
+            }, false);
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'hidden') {
                     saveState();
@@ -95,10 +101,10 @@ export default (function() {
         saveTimer = null;
 
         if (!hasStorage || locked || !dirty) {
-            return;
+            return true;
         }
 
-        const written = documents.saveContent(documents.current().id, html(), util.firstLineOf(contentField));
+        const written = documents.saveContent(editingId, html(), util.firstLineOf(contentField));
 
         // storage is full: the text stays on screen and is tried again on the next change
         dirty = !written;
@@ -111,6 +117,8 @@ export default (function() {
             storageFull = !written;
             fullListener(storageFull);
         }
+
+        return written;
     }
 
     function onStorageFull(listener) {
@@ -123,7 +131,8 @@ export default (function() {
 
     // The kept copy of the current document, if a save had shrunk it
     function restorePrevious() {
-        if (!documents.restorePrevious(documents.current().id)) {
+        const current = documents.current();
+        if (!current || current.id !== editingId || current.deleted || !documents.restorePrevious(editingId)) {
             return false;
         }
 
@@ -134,13 +143,15 @@ export default (function() {
     }
 
     function loadState() {
-        if (locked) {
-            return;
+        if (locked || !saveState()) {
+            return false;
         }
 
-        contentField.innerHTML = util.plainHtml(documents.getContent(documents.current().id));
+        editingId = documents.current().id;
+        contentField.innerHTML = util.plainHtml(documents.getContent(editingId));
         dirty = false;
         notifyChange();
+        return true;
     }
 
     function lock() {
@@ -159,7 +170,7 @@ export default (function() {
             return;
         }
 
-        saveState();
+        if (!saveState()) return;
 
         const id = documents.current().id;
 
@@ -171,17 +182,17 @@ export default (function() {
     }
 
     function openDocument(id) {
-        if (id === documents.current().id) {
-            return;
+        if (id === editingId) {
+            return saveState();
         }
 
-        saveState();
+        if (!saveState()) return false;
         documents.setCurrent(id);
-        loadState();
+        return loadState();
     }
 
     function createDocument(html) {
-        saveState();
+        if (!saveState()) return null;
 
         const doc = documents.create(html || '');
 
@@ -204,11 +215,13 @@ export default (function() {
     function removeDocument(id) {
         const wasCurrent = id === documents.current().id;
 
+        if (!saveState()) return false;
         documents.remove(id);
 
         if (wasCurrent) {
             loadState();
         }
+        return true;
     }
 
     function onDocumentChange(listener) {
