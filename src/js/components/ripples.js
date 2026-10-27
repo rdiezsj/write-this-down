@@ -125,7 +125,7 @@ export default (function () {
 
         for (const target of [context, layerContext]) {
             target.setTransform(scale, 0, 0, scale, 0, 0);
-            target.font = `${FONT}px 'Nanotype Mono', monospace`;
+            target.font = `${FONT}px 'WTD Mono', monospace`;
             target.textBaseline = 'top';
         }
 

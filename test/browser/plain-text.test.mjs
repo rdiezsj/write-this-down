@@ -6,7 +6,7 @@ export const expect = {
     selection: { text: true }, spaces: { text: true, saved: true }, smallUndo: true, bigUndo: true, bigRedo: true, undoAfterTyping: true,
     afterCmdU: 'hello world', afterDrop: 'plain, no tags', afterPaste: 'hello world', formatEventCancelled: true, classInText: true, oldTagsOnLoad: 'old bold text<div>under line</div>',
     copied: '"two  sp"', cut: '"two  sp" | left: ""', attrs: 'off off',
-    urlOverWords: 'see [the docs](https://nanotype.app/x) now', urlAlone: 'see https://nanotype.app/x now', wordsOverWords: 'see hello now',
+    urlOverWords: 'see [the docs](https://example.com/x) now', urlAlone: 'see https://example.com/x now', wordsOverWords: 'see hello now',
 };
 
 export default async (t) => {
@@ -30,7 +30,7 @@ export default async (t) => {
     await paste(`${big}\nnew`); await t.sleep(200);
     out.selection = { text: (await text()) === `keep ${big}\nnew keep` };
     await set('<div><br></div>', 0, 0); await paste(`${big}\n    indented\n\n\nend`); await t.sleep(600);
-    out.spaces = { text: (await text()) === `${big}\n    indented\n\n\nend`, saved: (await t.ev(`localStorage['zen.doc.' + localStorage['zen.current']]`)).includes('end') };
+    out.spaces = { text: (await text()) === `${big}\n    indented\n\n\nend`, saved: (await t.ev(`localStorage['wtd.doc.' + localStorage['wtd.current']]`)).includes('end') };
     await set('<div>abc</div>', 0, 3); await paste('small'); await t.sleep(100); await t.ev(`document.execCommand('undo')`);
     out.smallUndo = (await text()) === 'abc';
     await set('<div>abc</div>', 0, 3); await paste(`${big}\nsecond\nthird`); await t.sleep(200);
@@ -50,7 +50,7 @@ export default async (t) => {
     await paste('', '<h1>Big</h1><p>para</p>'); await t.sleep(200);
     out.afterPaste = await html();
     await selectWord(); out.formatEventCancelled = await t.ev(`(() => { const e = new InputEvent('beforeinput', { inputType: 'formatBold', bubbles: true, cancelable: true }); return !document.querySelector('article').dispatchEvent(e) })()`);
-    await t.ev(`localStorage['zen.doc.' + localStorage['zen.current']] = 'old <b>bold</b> text<div><u>under</u> line</div>'`); await t.reload(1200);
+    await t.ev(`localStorage['wtd.doc.' + localStorage['wtd.current']] = 'old <b>bold</b> text<div><u>under</u> line</div>'`); await t.reload(1200);
     out.oldTagsOnLoad = await html();
 
     // a typed class="x" is text, not presentation: it survives the save and the reload
@@ -68,9 +68,9 @@ export default async (t) => {
 
     // a web address pasted over selected words links them; alone, or with words, it is plain
     const sel = async () => { await t.caretTo('the docs', 4); await t.ev(`window.getSelection().modify('extend', 'forward', 'word'); window.getSelection().modify('extend', 'forward', 'word')`); };
-    await t.ev(`document.querySelector('article').innerHTML = '<div>see the docs now</div>'`); await sel(); await paste('https://nanotype.app/x'); await t.sleep(200); out.urlOverWords = (await t.lines())[0];
+    await t.ev(`document.querySelector('article').innerHTML = '<div>see the docs now</div>'`); await sel(); await paste('https://example.com/x'); await t.sleep(200); out.urlOverWords = (await t.lines())[0];
     await t.ev(`document.querySelector('article').innerHTML = '<div>see the docs now</div>'`); await sel(); await paste('hello'); await t.sleep(200); out.wordsOverWords = (await t.lines())[0];
-    await t.ev(`document.querySelector('article').innerHTML = '<div>see now</div>'`); await t.caretTo('see', 4); await paste('https://nanotype.app/x '); await t.sleep(200); out.urlAlone = (await t.lines())[0];
+    await t.ev(`document.querySelector('article').innerHTML = '<div>see now</div>'`); await t.caretTo('see', 4); await paste('https://example.com/x '); await t.sleep(200); out.urlAlone = (await t.lines())[0];
 
     return out;
 };

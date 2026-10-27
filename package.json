@@ -1,7 +1,7 @@
 {
-  "name": "nanotype",
+  "name": "write-this-down",
   "version": "1.1.0",
-  "description": "Nanotype: a free, minimal, private online text editor",
+  "description": "Write This Down: a minimal, private Markdown notepad",
   "scripts": {
     "build": "NODE_ENV=production gulp default",
     "dev": "NODE_ENV=development gulp dev",
@@ -10,11 +10,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nazdash/nanotype.git"
+    "url": "git+https://github.com/rdiezsj/write-this-down.git"
   },
-  "author": "Nazir Dashtiev",
   "license": "AGPL-3.0-only",
-  "homepage": "https://nanotype.app/",
+  "homepage": "https://rdiezsj.github.io/write-this-down/",
   "private": true,
   "browserslist": "> 0.25%, not dead",
   "engines": {

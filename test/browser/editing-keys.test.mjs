@@ -1,7 +1,7 @@
 // ⌥↑ ⌥↓ move the line (and keep it on screen); ⌘⌥1–6 / ⌘⌥0 headings; ⌘] ⌘[ indent; ⌘-click opens an address
 export const expect = {
-    down: 'one||two|four https://nanotype.app/x, done|## five', upTwice: 'two|one||four https://nanotype.app/x, done|## five', upAtTopUnchanged: true, undoMove: 'one|two||four https://nanotype.app/x, done|## five',
-    h2: '## four https://nanotype.app/x, done', h4: '#### four https://nanotype.app/x, done', h0: 'four https://nanotype.app/x, done', h5to0: 'five',
+    down: 'one||two|four https://example.com/x, done|## five', upTwice: 'two|one||four https://example.com/x, done|## five', upAtTopUnchanged: true, undoMove: 'one|two||four https://example.com/x, done|## five',
+    h2: '## four https://example.com/x, done', h4: '#### four https://example.com/x, done', h0: 'four https://example.com/x, done', h5to0: 'five',
     indent: '    one', outdent: 'one', tabAtEnd: '    two', tabKeepsCaret: '    twox', shiftTab: 'twox', opened: 1, wordOpensNothing: 1, moveStaysVisible: true,
     renumbered: '1. a|2. b|3. |4. c|5. d||7. x', undoRenumber: '1. a|2. b|3. c|4. d||7. x',
     nested: '1. a|    1. b|2. c|3. d||7. x', nestedCaret: '    1. bx', unnested: '1. a|2. bx|3. c|4. d||7. x',
@@ -10,7 +10,7 @@ export const expect = {
 
 export default async (t) => {
     await t.open('/');
-    await t.focus(); await t.insert('one\ntwo\n\nfour https://nanotype.app/x, done\n## five', 400);
+    await t.focus(); await t.insert('one\ntwo\n\nfour https://example.com/x, done\n## five', 400);
     const out = {};
     const all = async () => (await t.lines()).join('|');
     let opened = 0;

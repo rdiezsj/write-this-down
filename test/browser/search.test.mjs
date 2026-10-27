@@ -23,7 +23,7 @@ export default async (t) => {
     await t.filter('eggs'); await t.key('Enter'); await t.sleep(300); out.opened = await t.ev(`document.querySelector('article').textContent.slice(0, 20)`);
     await t.click('.documents'); await t.filter('stripes'); out.docsStripes = await rows(); await t.click('.documents', 100);
 
-    await t.ev(`{ const idx = JSON.parse(localStorage['zen.docs']); const para = '<div>' + 'lorem ipsum dolor sit amet, consectetur adipiscing elit '.repeat(20) + '</div>'; for (let i = 0; i < 60; i++) { const id = 'perf' + i; idx.push({ id, auto: 'perf ' + i, updated: Date.now() - i }); localStorage['zen.doc.' + id] = para.repeat(70) + (i === 59 ? '<div>needle</div>' : ''); } localStorage['zen.docs'] = JSON.stringify(idx) }`);
+    await t.ev(`{ const idx = JSON.parse(localStorage['wtd.docs']); const para = '<div>' + 'lorem ipsum dolor sit amet, consectetur adipiscing elit '.repeat(20) + '</div>'; for (let i = 0; i < 60; i++) { const id = 'perf' + i; idx.push({ id, auto: 'perf ' + i, updated: Date.now() - i }); localStorage['wtd.doc.' + id] = para.repeat(70) + (i === 59 ? '<div>needle</div>' : ''); } localStorage['wtd.docs'] = JSON.stringify(idx) }`);
     await t.reload();
     out.bigStore = await t.ev(`Object.keys(localStorage).reduce((n, k) => n + localStorage[k].length, 0)`) > 4000000;
     out.openFast = await t.ev(`(() => { const s = performance.now(); document.querySelector('.palette').click(); return performance.now() - s })()`) < 150;

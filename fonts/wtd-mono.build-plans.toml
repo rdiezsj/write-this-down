@@ -1,15 +1,15 @@
-# Nanotype Mono (was Zen Mono). Iosevka build plan (where the glyph choices come
+# WTD Mono. Iosevka build plan (where the glyph choices come
 # from is in CREDITS.md): Regular and Bold only, Normal width only, Cyrillic
 # added to the subset.
 #
 # Iosevka v34.4.0:
 #   cp this file to Iosevka/private-build-plans.toml
 #   npm install
-#   npm run build -- --jCmd=4 webfont-unhinted::NanotypeMono
-#   copy dist/NanotypeMono/WOFF2-Unhinted/NanotypeMono-{Regular,Bold,Italic,BoldItalic}.woff2 to public/fonts/
+#   npm run build -- --jCmd=4 webfont-unhinted::WTDMono
+#   copy dist/WTDMono/WOFF2-Unhinted/WTDMono-{Regular,Bold,Italic,BoldItalic}.woff2 to public/fonts/
 
-[buildPlans.NanotypeMono]
-family = "Nanotype Mono"
+[buildPlans.WTDMono]
+family = "WTD Mono"
 spacing = "normal"
 serifs = "sans"
 noCvSs = true
@@ -17,7 +17,7 @@ noLigation = true
 exportGlyphNames = false
 webfontFormats = ["WOFF2"]
 
-[buildPlans.NanotypeMono.variants.design]
+[buildPlans.WTDMono.variants.design]
 one = "no-base"
 two = "straight-neck-serifless"
 three = "flat-top-serifless"
@@ -111,34 +111,34 @@ lig-plus-chain = "without-notch"
 lig-double-arrow-bar = "without-notch"
 lig-single-arrow-bar = "without-notch"
 
-[buildPlans.NanotypeMono.weights.Regular]
+[buildPlans.WTDMono.weights.Regular]
 shape = 400
 menu = 400
 css = 400
 
-[buildPlans.NanotypeMono.weights.Bold]
+[buildPlans.WTDMono.weights.Bold]
 shape = 700
 menu = 700
 css = 700
 
-[buildPlans.NanotypeMono.widths.Normal]
+[buildPlans.WTDMono.widths.Normal]
 shape = 600
 menu = 5
 css = "normal"
 
-[buildPlans.NanotypeMono.slopes.Upright]
+[buildPlans.WTDMono.slopes.Upright]
 angle = 0
 shape = "upright"
 menu = "upright"
 css = "normal"
 
-[buildPlans.NanotypeMono.slopes.Italic]
+[buildPlans.WTDMono.slopes.Italic]
 angle = 11.8
 shape = "italic"
 menu = "italic"
 css = "italic"
 
-[buildPlans.NanotypeMono.subset.include]
+[buildPlans.WTDMono.subset.include]
 ranges = [
   [
     32,
@@ -194,7 +194,7 @@ ranges = [
   ],
 ]
 
-[buildPlans.NanotypeMono.metricOverride]
+[buildPlans.WTDMono.metricOverride]
 xHeight = 520
 cap = 690
 ascender = 740

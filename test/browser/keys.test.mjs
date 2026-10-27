@@ -12,7 +12,7 @@ export default async (t) => {
     await t.focus();
 
     const press = (code, mods) => t.ev(`(() => { const e = new KeyboardEvent('keydown', { code: '${code}', key: '˜', keyCode: 0, which: 0, metaKey: ${!!(mods & 4)}, shiftKey: ${!!(mods & 8)}, altKey: ${!!(mods & 1)}, bubbles: true, cancelable: true }); (document.activeElement || document.body).dispatchEvent(e); return e.defaultPrevented })()`);
-    const state = () => t.ev(`({ focus: document.body.classList.contains('focus-mode'), md: document.body.classList.contains('markdown-mode'), lines: document.body.classList.contains('line-numbers'), font: document.querySelector('.font-flip b').textContent, theme: document.querySelector('.color-flip b').textContent, sound: document.querySelector('.sfx-mute b').textContent, cursor: document.querySelector('.caret b').textContent, size: document.querySelector('.font-size b').textContent, docs: JSON.parse(localStorage['zen.docs']).length })`);
+    const state = () => t.ev(`({ focus: document.body.classList.contains('focus-mode'), md: document.body.classList.contains('markdown-mode'), lines: document.body.classList.contains('line-numbers'), font: document.querySelector('.font-flip b').textContent, theme: document.querySelector('.color-flip b').textContent, sound: document.querySelector('.sfx-mute b').textContent, cursor: document.querySelector('.caret b').textContent, size: document.querySelector('.font-size b').textContent, docs: JSON.parse(localStorage['wtd.docs']).length })`);
     const checks = [
         ['KeyD', 4, 'focus on'], ['KeyD', 4, 'focus off'],
         ['KeyM', 12, 'markdown on'], ['KeyM', 12, 'markdown off'],

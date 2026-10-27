@@ -39,7 +39,7 @@ export default async (t) => {
     await t.click('.new-doc'); await t.insert('other'); await t.sleep(400);
     await t.click('.palette'); await t.filter('today'); await t.key('Enter'); await t.sleep(400);
     out.todayOpened = (await t.text()).startsWith(`# ${iso}`);
-    out.todayCount = await t.ev(`JSON.parse(localStorage['zen.docs']).filter(d => d.auto === '${iso}').length`);
+    out.todayCount = await t.ev(`JSON.parse(localStorage['wtd.docs']).filter(d => d.auto === '${iso}').length`);
 
     return out;
 };

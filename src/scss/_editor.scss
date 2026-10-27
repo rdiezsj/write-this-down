@@ -125,16 +125,6 @@ canvas.ripples {
 	}
 }
 
-// the new address, before anything was moved here
-.for-new-address {
-	display: none;
-
-	.new-address & {
-		display: block;
-		margin-top: 1.5em;
-	}
-}
-
 // Focus mode: only the paragraph with the caret is fully visible, and its line is
 // held a little above the middle of the screen (38% down, see caret.js).
 // The body's 48px top padding is part of that distance. The paddings add up to

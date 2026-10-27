@@ -16,6 +16,8 @@ Se conserva el copyright de Nazir Dashtiev sobre el código original. Su incorpo
 
 Modificaciones realizadas el **27 de octubre de 2026** por el proyecto Write This Down:
 
+- Identidad independiente de WTD en interfaz, metadatos, enlaces, almacenamiento y copias; retirada del traslado entre dominios del proyecto original.
+- Renombrado de la compilación tipográfica como WTD Mono, con glifos y avisos de licencia conservados.
 - Retirada de la telemetría heredada y de su configuración y documentación.
 - Adaptación de las rutas de recursos para servir la aplicación desde una subruta.
 - Distribución de los avisos completos de las bibliotecas incorporadas y actualización de la procedencia de la lista de palabras.

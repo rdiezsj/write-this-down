@@ -185,7 +185,7 @@ export default (function () {
         app.setStatus(`exported ${data.documents.length} ${data.documents.length === 1 ? 'document' : 'documents'} to ${name}`, 3000);
     }
 
-    // The same as plain .md files in a zip, for anything that is not Nanotype
+    // The same as plain .md files in a zip, for anything that is not WTD
     function exportEverythingZip() {
         const data = backup.collect();
         const blob = new Blob([backup.zipFiles(data)], { type: 'application/zip' });
@@ -205,14 +205,14 @@ export default (function () {
         }
 
         if (!backup.isBackup(data)) {
-            app.setStatus(`${name} is not a Nanotype (or Zen) backup`, 3000);
+            app.setStatus(`${name} is not a WTD backup`, 3000);
             return;
         }
 
         const result = backup.apply(data);
 
         if (result.newer) {
-            app.setStatus('this backup needs a newer Nanotype', 3000);
+            app.setStatus('this backup needs a newer WTD', 3000);
             return;
         }
 

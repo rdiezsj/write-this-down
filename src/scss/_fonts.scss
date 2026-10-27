@@ -1,42 +1,42 @@
 // Self-hosted fonts, all under the SIL Open Font License (see public/fonts/LICENSE.txt).
-// Nanotype Mono is the typeface of the whole interface and the default for the text;
-// it is compiled from Iosevka with fonts/nanotype-mono.build-plans.toml.
+// WTD Mono is the typeface of the whole interface and the default for the text;
+// it is compiled from Iosevka with fonts/wtd-mono.build-plans.toml.
 // Inter and Literata are only offered for the text.
 
-/* Nanotype Mono Regular */
+/* WTD Mono Regular */
 @font-face {
-	font-family: 'Nanotype Mono';
+	font-family: 'WTD Mono';
 	font-style: normal;
 	font-weight: 400;
 	font-display: swap;
-	src: url('../fonts/NanotypeMono-Regular.woff2') format('woff2');
+	src: url('../fonts/WTDMono-Regular.woff2') format('woff2');
 }
 
-/* Nanotype Mono Bold */
+/* WTD Mono Bold */
 @font-face {
-	font-family: 'Nanotype Mono';
+	font-family: 'WTD Mono';
 	font-style: normal;
 	font-weight: 700;
 	font-display: swap;
-	src: url('../fonts/NanotypeMono-Bold.woff2') format('woff2');
+	src: url('../fonts/WTDMono-Bold.woff2') format('woff2');
 }
 
-/* Nanotype Mono Italic */
+/* WTD Mono Italic */
 @font-face {
-	font-family: 'Nanotype Mono';
+	font-family: 'WTD Mono';
 	font-style: italic;
 	font-weight: 400;
 	font-display: swap;
-	src: url('../fonts/NanotypeMono-Italic.woff2') format('woff2');
+	src: url('../fonts/WTDMono-Italic.woff2') format('woff2');
 }
 
-/* Nanotype Mono BoldItalic */
+/* WTD Mono BoldItalic */
 @font-face {
-	font-family: 'Nanotype Mono';
+	font-family: 'WTD Mono';
 	font-style: italic;
 	font-weight: 700;
 	font-display: swap;
-	src: url('../fonts/NanotypeMono-BoldItalic.woff2') format('woff2');
+	src: url('../fonts/WTDMono-BoldItalic.woff2') format('woff2');
 }
 
 /* Inter 400 cyrillic-ext */

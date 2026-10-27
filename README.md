@@ -1,6 +1,6 @@
 # Write This Down
 
-Editor de texto privado y minimalista, derivado de [NanoType](https://github.com/nazdash/nanotype), de Nazir Dashtiev. Proyecto independiente, sin afiliación con su autor ni con Unit. El origen exacto, las modificaciones y los avisos de autoría están en [ATTRIBUTION.md](ATTRIBUTION.md).
+Editor de texto privado y minimalista. Write This Down es un proyecto independiente; el origen del código, las modificaciones y los avisos de autoría están en [ATTRIBUTION.md](ATTRIBUTION.md).
 
 Los documentos se guardan en el navegador mediante `localStorage`. No hay cuenta ni servidor de documentos. La aplicación no incluye telemetría. Exportar, crear un enlace compartido o copiar a una carpeta son acciones que decide la persona que escribe. Un enlace compartido contiene el texto en su fragmento (`#`); quien tenga el enlace podrá leerlo, salvo que esté bloqueado con una palabra semilla.
 
@@ -55,12 +55,12 @@ Sitio estático sin framework ni servidor de aplicación. Gulp genera `dist/` de
 | `fonts/`, `public/fonts/`, `public/sfx/` | Receta tipográfica, fuentes y sonidos |
 | `test/`, `test/browser/` | Pruebas unitarias y de navegador |
 
-Las claves `zen.*` y otros nombres heredados conservan la compatibilidad con los datos guardados de versiones anteriores.
+WTD utiliza claves `wtd.*`, base IndexedDB `wtd` y copias `wtd-backup`. No migra datos automáticamente desde otros proyectos.
 
 ## Documentación de la aplicación
 
 - [ATTRIBUTION.md](ATTRIBUTION.md) y [CREDITS.md](CREDITS.md): origen, autoría y recursos de terceros.
 
-El código se distribuye bajo [AGPL-3.0-only](LICENSE). Se conserva el copyright original de Nazir Dashtiev. Las fuentes, sonidos, lista de palabras y bibliotecas mantienen sus propias licencias; consulta los créditos. El nombre y la marca NanoType pertenecen al proyecto original.
+El código se distribuye bajo [AGPL-3.0-only](LICENSE). Se conserva el copyright original de Nazir Dashtiev. Las fuentes, sonidos, lista de palabras y bibliotecas mantienen sus propias licencias; consulta los créditos.
 
 El build distribuye los avisos de las bibliotecas en `dist/js/THIRD_PARTY_LICENSES.txt`, accesibles desde About, junto con los créditos y las licencias de los demás recursos.

@@ -2,30 +2,26 @@
 <html lang="en">
 	<head>
 		<!-- MISC/META -->
-		<title>Nanotype - Online Text Editor</title>
+		<title>Write This Down - Online Text Editor</title>
 		<meta charset="utf-8">
-		<meta name="description" content="Nanotype is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.">
+		<meta name="description" content="Write This Down is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.">
 		<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0, viewport-fit=cover" />
 
 		<!-- For search engines and AI assistants (facts in src/facts.mjs; test/seo.test.mjs
-		     keeps these in step with it). The canonical address is the new one: the old
-		     address serves this same page and hands documents over by script. -->
-		<link rel="canonical" href="https://nanotype.app/">
+		     keeps these in step with it). -->
+		<link rel="canonical" href="https://rdiezsj.github.io/write-this-down/">
 		<meta property="og:type" content="website">
-		<meta property="og:site_name" content="Nanotype">
-		<meta property="og:title" content="Nanotype - Online Text Editor">
-		<meta property="og:description" content="Nanotype is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.">
-		<meta property="og:url" content="https://nanotype.app/">
+		<meta property="og:site_name" content="Write This Down">
+		<meta property="og:title" content="Write This Down - Online Text Editor">
+		<meta property="og:description" content="Write This Down is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.">
+		<meta property="og:url" content="https://rdiezsj.github.io/write-this-down/">
 		<meta name="twitter:card" content="summary">
-		<meta name="twitter:title" content="Nanotype - Online Text Editor">
-		<meta name="twitter:description" content="Nanotype is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.">
-		<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Nanotype","alternateName":"Zen","url":"https://nanotype.app/","description":"Nanotype is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","inLanguage":"en","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Organization","name":"Unit","url":"https://unit.app/"}}</script>
+		<meta name="twitter:title" content="Write This Down - Online Text Editor">
+		<meta name="twitter:description" content="Write This Down is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.">
+		<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Write This Down","alternateName":"WTD","url":"https://rdiezsj.github.io/write-this-down/","description":"Write This Down is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","inLanguage":"en","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Project","name":"Write This Down","url":"https://github.com/rdiezsj/write-this-down"}}</script>
 
-		<!-- The saved theme's background before anything else loads, so a dark theme
-		     never flashes white. Documents arriving from the old address carry the
-		     theme at the end of the fragment (see move.js). No saved theme means
-		     "system": light or dark by the operating system. -->
-		<script>try{var s=localStorage.getItem('scheme')||(location.hash.match(/\.(scheme-[a-z-]+)$/)||[])[1]||'scheme-system';if(s==='scheme-system')s=matchMedia('(prefers-color-scheme: dark)').matches?'scheme-dark-and-white':'scheme-light';document.documentElement.className=s}catch(e){}</script>
+		<!-- Apply the saved or system theme before painting the page. -->
+		<script>try{var s=localStorage.getItem('scheme')||'scheme-system';if(s==='scheme-system')s=matchMedia('(prefers-color-scheme: dark)').matches?'scheme-dark-and-white':'scheme-light';document.documentElement.className=s}catch(e){}</script>
 
 		<!-- CSS -->
 		<link href="css/style.css" rel="stylesheet" media="all">
@@ -38,33 +34,24 @@
 		<link rel="manifest" href="./site.webmanifest">
 		<meta name="theme-color" content="#ffffff">
 		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-title" content="Nanotype">
+		<meta name="apple-mobile-web-app-title" content="Write This Down">
 
 	</head>
 
 	<body class="scheme-light size-s" style="display: none">
-		<!-- The pixel wordmark, reused in the empty state and in About -->
+		<!-- The WTD wordmark, reused in the empty state and in About -->
 		<svg xmlns="http://www.w3.org/2000/svg" style="display: none">
-			<symbol id="wordmark" viewBox="0 0 31 6">
-				<path d="M0 1h2v1h-2zM0 2h1v1h-1zM2 2h1v1h-1zM0 3h1v1h-1zM2 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1z"/>
-				<path d="M4 1h3v1h-3zM6 2h1v1h-1zM4 3h3v1h-3zM4 4h1v1h-1zM6 4h1v1h-1z"/>
-				<path d="M8 1h2v1h-2zM8 2h1v1h-1zM10 2h1v1h-1zM8 3h1v1h-1zM10 3h1v1h-1zM8 4h1v1h-1zM10 4h1v1h-1z"/>
-				<path d="M12 1h3v1h-3zM12 2h1v1h-1zM14 2h1v1h-1zM12 3h1v1h-1zM14 3h1v1h-1zM12 4h3v1h-3z"/>
-				<path d="M16 0h1v1h-1zM16 1h3v1h-3zM16 2h1v1h-1zM16 3h1v1h-1zM18 3h1v1h-1zM16 4h3v1h-3z"/>
-				<path d="M20 1h1v1h-1zM22 1h1v1h-1zM20 2h1v1h-1zM22 2h1v1h-1zM20 3h1v1h-1zM22 3h1v1h-1zM20 4h3v1h-3zM22 5h1v1h-1z"/>
-				<path d="M24 1h3v1h-3zM24 2h1v1h-1zM26 2h1v1h-1zM24 3h3v1h-3zM24 4h1v1h-1zM24 5h1v1h-1z"/>
-				<path d="M28 1h3v1h-3zM28 2h1v1h-1zM30 2h1v1h-1zM28 3h1v1h-1zM28 4h3v1h-3z"/>
-			</symbol>
+			<symbol id="wordmark" viewBox="0 0 130 36"><text x="0" y="29" font-family="WTD Mono, monospace" font-size="34" font-weight="700" fill="currentColor">WTD</text></symbol>
 		</svg>
 
 		<div class="overlay" data-nosnippet>
-			<div class="description modal" role="dialog" aria-label="About Nanotype" tabindex="-1">
-				<svg class="wordmark" role="img" aria-label="Nanotype"><use href="#wordmark"></use></svg>
+			<div class="description modal" role="dialog" aria-label="About Write This Down" tabindex="-1">
+				<svg class="wordmark" role="img" aria-label="Write This Down"><use href="#wordmark"></use></svg>
 				<p>A private place to write.</p>
 				<ul>
 					<li>You open the page and type.</li>
 					<li>It is a local app. Everything you write lives in this browser's own storage, and that is the only copy. There is no server, no account, and nothing is ever sent out.</li>
-					<li>A share link carries the text inside itself. A private link is locked with a seed word that Nanotype never sees.</li>
+					<li>A share link carries the text inside itself. A private link is locked with a seed word that Write This Down never sees.</li>
 					<li>After the first visit it works offline. It installs as an app.</li>
 					<li>It reads and writes plain text and Markdown.</li>
 					<li class="for-keys">Every command has a key. <kbd data-keys="Mod K"></kbd> lists them.</li>
@@ -72,19 +59,14 @@
 					<li>No analytics, cookies or tracking.</li>
 				</ul>
 				<pre class="divider" aria-hidden="true">▄▁▁▁▁▁▁▁▁▁▁▁</pre>
-				<p>Nanotype (prev. Zen) is made by the <a href="https://unit.app/" target="_blank">Unit</a> team.</p>
-				<p>Write This Down is derived from NanoType by Nazir Dashtiev. <a href="https://github.com/rdiezsj/write-this-down/blob/main/ATTRIBUTION.md" target="_blank">Attribution and modifications</a>.</p>
-				<p class="links">
-					<a href="mailto:support@unit.app">support@unit.app</a> ·
-					<a href="https://forms.gle/bFebcfkb7D4qwcY9A" target="_blank">suggest an improvement</a> ·
-					<a href="https://ko-fi.com/nanotype" target="_blank">buy me a coffee</a>
-				</p>
+				<p>Write This Down is an independent project.</p>
+				<p class="links"><a href="https://github.com/rdiezsj/write-this-down/issues" target="_blank">suggest an improvement</a> · <a href="./ATTRIBUTION.md" target="_blank">Attribution and modifications</a></p>
 				<p><a href="./js/THIRD_PARTY_LICENSES.txt" target="_blank">Third-party software licenses</a> · <a href="./fonts/LICENSE.txt" target="_blank">Font licenses</a> · <a href="./words.LICENSE.txt" target="_blank">Word list attribution</a></p>
 				<p class="credits">
-					Nanotype Mono is a build of <a href="https://github.com/be5invis/Iosevka" target="_blank">Iosevka</a>.
+					WTD Mono is a build of <a href="https://github.com/be5invis/Iosevka" target="_blank">Iosevka</a>.
 					Sans is <a href="https://rsms.me/inter/" target="_blank">Inter</a>, serif is <a href="https://fonts.google.com/specimen/Literata" target="_blank">Literata</a>.
 					Typewriter sounds by <a href="https://freesound.org/people/juskiddink/sounds/75105/" target="_blank">juskiddink</a>,
-					seed words from the <a href="https://www.eff.org/dice" target="_blank">EFF word list</a>. Since 2016 · <a href="https://github.com/nazdash/nanotype/blob/main/LICENSE" target="_blank">AGPL-3.0</a> · <a href="https://github.com/rdiezsj/write-this-down" target="_blank">source of this version</a>.
+					seed words from the <a href="https://www.eff.org/dice" target="_blank">EFF word list</a>. <a href="./LICENSE" target="_blank">AGPL-3.0</a> · <a href="https://github.com/rdiezsj/write-this-down" target="_blank">source</a>.
 				</p>
 			</div>
 
@@ -142,7 +124,7 @@
 			<div class="share-modal modal" role="dialog" aria-label="Share this document" tabindex="-1">
 				<div class="share-step" data-step="choose">
 					<h1>Share this document</h1>
-					<p>Nanotype puts the text inside the link itself. Nothing is stored anywhere: not on a server, not by Nanotype. The link is the only copy, and it works for as long as someone keeps it. It cannot be taken back: whoever has the link has the text, as with a file you have sent.</p>
+					<p>Write This Down puts the text inside the link itself. Nothing is stored anywhere: not on a server, not by Write This Down. The link is the only copy, and it works for as long as someone keeps it. It cannot be taken back: whoever has the link has the text, as with a file you have sent.</p>
 					<p>It is a snapshot of the text as it is now, not a shared document: later changes, yours or theirs, do not travel.</p>
 					<p class="share-long" hidden></p>
 					<ul class="choices">
@@ -154,7 +136,7 @@
 				<div class="share-step" data-step="seed">
 					<h1>Seed word</h1>
 					<label class="field"><input class="seed-input" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off"></label>
-					<p>Four words Nanotype chose at random. Keep them, or type your own. A short seed is easy to guess.</p>
+					<p>Four words Write This Down chose at random. Keep them, or type your own. A short seed is easy to guess.</p>
 					<ul class="choices">
 						<li class="choice" data-choice="make"><span class="label">make the link</span><span class="hint">The seed word is not kept anywhere. Lost means lost.</span></li>
 					</ul>
@@ -183,7 +165,7 @@
 			<div class="backup-modal modal" role="dialog" aria-label="A copy that outlives this browser" tabindex="-1">
 				<h1>A copy that outlives this browser</h1>
 				<p>Your text lives in this browser's own storage. That is private, and it is also fragile: it goes when the browser's data is cleared, and it does not follow you to another device.</p>
-				<p class="for-folder">On this browser Nanotype can keep a folder up to date as you write: every document as a <b>.md</b> file, and everything in one <b>.json</b>. Pick the folder once; if it is in iCloud or Dropbox, the copy follows you. Its <b>documents</b> folder is Nanotype's: a .md file there that is no longer a document is removed.</p>
+				<p class="for-folder">On this browser Write This Down can keep a folder up to date as you write: every document as a <b>.md</b> file, and everything in one <b>.json</b>. Pick the folder once; if it is in iCloud or Dropbox, the copy follows you. Its <b>documents</b> folder is Write This Down's: a .md file there that is no longer a document is removed.</p>
 				<p class="for-no-folder"></p>
 				<p class="backup-state"></p>
 				<ul class="choices">
@@ -193,18 +175,8 @@
 					<li class="choice" data-choice="export-zip"><span class="label">export everything as .md (zip)</span><span class="hint">every document as a file, in one .zip</span></li>
 					<li class="choice" data-choice="export"><span class="label">export everything as .json</span><span class="hint">every document and setting, for import</span></li>
 				</ul>
-				<p class="for-touch">On an iPhone or iPad, add Nanotype to the home screen: Safari then keeps its storage instead of clearing it after 7 days.</p>
+				<p class="for-touch">On an iPhone or iPad, add Write This Down to the home screen: Safari then keeps its storage instead of clearing it after 7 days.</p>
 				<p class="foot for-keys">↑↓ select · enter run · esc close</p>
-			</div>
-
-			<!-- Shown once to a visitor who arrived from the old address -->
-			<div class="moved-modal modal" role="dialog" aria-label="Zen is now Nanotype" tabindex="-1">
-				<svg class="wordmark" role="img" aria-label="Nanotype"><use href="#wordmark"></use></svg>
-				<p>Zen is now Nanotype. Same app, new address: <b>nanotype.app</b>.</p>
-				<p>Your documents and settings came with you. Update your bookmark, and add the app to your home screen again if you had it there.</p>
-				<ul class="choices">
-					<li class="choice" data-choice="ok"><span class="label">ok</span></li>
-				</ul>
 			</div>
 
 			<!-- A private link asks for its seed word before anything is shown -->
@@ -264,7 +236,7 @@
 				<button class="palette" data-hint="every command, with its key" data-keys="Mod K">menu</button>
 				<button class="help" data-hint="keyboard shortcuts">keys</button>
 				<button class="backup" data-hint="a copy that outlives this browser">backup</button>
-				<button class="about" data-hint="about Nanotype">about</button>
+				<button class="about" data-hint="about Write This Down">about</button>
 			</div>
 		</div>
 
@@ -293,7 +265,6 @@
 				<p>It never leaves this browser.</p>
 				<p class="for-keys"><kbd data-keys="Mod K"></kbd> lists every command.</p>
 				<p class="for-touch"><b>menu</b> lists every command.</p>
-				<p class="for-new-address" data-nosnippet>Used Zen before? Open <a href="https://zen.unit.app/">zen.unit.app</a> once to bring your documents here.</p>
 			</div>
 		</section>
 

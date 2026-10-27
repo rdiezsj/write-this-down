@@ -4,14 +4,14 @@ import util from './utils';
 import keys from '../keys';
 
 // A copy that outlives the browser: a folder the person picks once, kept up to date
-// with every document as <title>.md and everything as nanotype-backup.json.
+// with every document as <title>.md and everything as wtd-backup.json.
 // Chromium on a computer only (File System Access API). The folder handle can only
 // be kept in IndexedDB; after a browser restart Chrome asks once to confirm access.
 export default (function () {
     const DB = keys.DB;
     const STORE = keys.KV_STORE;
     const KEY = keys.FOLDER;
-    const MANIFEST = 'nanotype-backup.json';
+    const MANIFEST = 'wtd-backup.json';
     const DOCS_DIR = 'documents';
     const WRITE_DELAY = 2000;   // ms after the last save
 
@@ -88,7 +88,7 @@ export default (function () {
     // Needs a click: the folder picker
     async function choose() {
         try {
-            handle = await window.showDirectoryPicker({ mode: 'readwrite', id: 'nanotype', startIn: 'documents' });
+            handle = await window.showDirectoryPicker({ mode: 'readwrite', id: 'wtd', startIn: 'documents' });
         } catch (e) {
             return false;   // cancelled
         }

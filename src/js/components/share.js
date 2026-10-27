@@ -72,7 +72,7 @@ export default (function () {
         return unpacked;
     }
 
-    // What a fragment is: none, public, private, incomplete, or from a newer Zen
+    // What a fragment is: none, public, private, incomplete, or from a newer WTD
     function inspect(hash) {
         const match = /^#?s=(\d+)(e?)\.([A-Za-z0-9_-]*)$/.exec(hash || '');
 
@@ -205,24 +205,9 @@ export default (function () {
         }
     }
 
-    // Any JSON as a fragment-safe string, and back (used by the move to the new address)
-    function packJson(value) {
-        return toBase64Url(deflateSync(strToU8(JSON.stringify(value)), { level: 9 }));
-    }
-
-    function unpackJson(text) {
-        try {
-            return JSON.parse(strFromU8(inflateSync(fromBase64Url(text))));
-        } catch (e) {
-            return null;
-        }
-    }
-
     return {
         inspect,
         encode,
-        packJson,
-        unpackJson,
         decode,
         encrypt,
         decrypt,

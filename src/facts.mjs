@@ -1,22 +1,18 @@
 // The product's facts, in one place: what the page's metadata, the JSON-LD and the
-// generated files (robots.txt, sitemap.xml, llms.txt) say about Nanotype. A fact
+// generated files (robots.txt, sitemap.xml, llms.txt) say about Write This Down. A fact
 // written anywhere else is a drift: test/seo.test.mjs checks index.html against
 // this file. Plain data, no code, so the build (gulp) and the tests can both read it.
 export default {
-    name: 'Nanotype',
-    formerName: 'Zen',
-    title: 'Nanotype - Online Text Editor',
+    name: 'Write This Down',
+    shortName: 'WTD',
+    title: 'Write This Down - Online Text Editor',
     line: 'A private place to write.',
-    description: 'Nanotype is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.',
-    url: 'https://nanotype.app/',
-    formerUrl: 'https://zen.unit.app/',
+    description: 'Write This Down is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.',
+    url: 'https://rdiezsj.github.io/write-this-down/',
     language: 'en',
-    since: 2016,            // as Zen; Nanotype since October 2026
-    renamed: '2026-10',
     publisher: {
-        name: 'Unit',
-        url: 'https://unit.app/',
-        email: 'support@unit.app',
+        name: 'Write This Down',
+        url: 'https://github.com/rdiezsj/write-this-down',
     },
     price: 0,
     source: 'https://github.com/rdiezsj/write-this-down',
@@ -29,7 +25,7 @@ export default {
     // the product, as lists the generated files can name
     formats: { reads: ['.txt', '.md'], writes: ['.md', '.txt', 'PDF (print)', '.json backup', '.zip of .md files'] },
     themes: ['system', 'light', 'dark', 'green', 'sand', 'night'],
-    fonts: ['mono (Nanotype Mono, a build of Iosevka)', 'sans (Inter)', 'serif (Literata)'],
+    fonts: ['mono (WTD Mono, a build of Iosevka)', 'sans (Inter)', 'serif (Literata)'],
     sizes: ['s', 'm', 'l'],
     cursors: ['block', 'thin'],
     sounds: ['off', 'soft', 'click', 'blip', 'typewriter'],
@@ -48,7 +44,7 @@ export default {
     ],
 
     credits: [
-        'Nanotype Mono is a build of Iosevka',
+        'WTD Mono is a build of Iosevka',
         'Inter by Rasmus Andersson',
         'Literata by TypeTogether for Google Fonts',
     ],

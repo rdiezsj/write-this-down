@@ -4,7 +4,6 @@ import editor from './editor';
 import documents from './documents';
 import share from './share';
 import backup from './backup';
-import move from './move';
 import folder from './folder';
 import counter from './counter';
 import keySounds from './key-sounds';
@@ -55,9 +54,9 @@ export default (function () {
     const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
 
     // Font schemes for the text, in the order the font command cycles through them.
-    // The interface itself is always in Nanotype Mono.
+    // The interface itself is always in WTD Mono.
     let fontSchemes = [
-        "font-scheme-monospace",    // Nanotype Mono
+        "font-scheme-monospace",    // WTD Mono
         "font-scheme-sans-serif",   // Inter
         "font-scheme-serif",        // Literata
     ];
@@ -133,18 +132,11 @@ export default (function () {
 
         bindElements();
 
-        // Documents moved from the old address arrive in the fragment (see move.js)
-        try {
-            sharing.openMovedFromHash();
-        } catch (error) {
-            console.error('Nanotype: could not take the moved documents', error);
-        }
-
         // A share link shows its document instead of the reader's own
         try {
             sharing.openSharedFromHash();
         } catch (error) {
-            console.error('Nanotype: could not open the shared document', error);
+            console.error('WTD: could not open the shared document', error);
         }
 
         // Whatever goes wrong while restoring saved settings, the page must still appear
@@ -157,7 +149,7 @@ export default (function () {
                 applyFontLook();
             }
         } catch (error) {
-            console.error('Nanotype: could not restore saved settings', error);
+            console.error('WTD: could not restore saved settings', error);
         }
 
         document.addEventListener('fullscreenchange', () => {

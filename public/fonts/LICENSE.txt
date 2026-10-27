@@ -1,8 +1,9 @@
 Fonts in this folder and their licences
 =======================================
 
-Nanotype Mono (NanotypeMono-*.woff2)
-  A build of Iosevka v34.4.0 made with fonts/nanotype-mono.build-plans.toml.
+WTD Mono (WTDMono-*.woff2)
+  Derived from Nanotype Mono (formerly Zen Mono); renamed for Write This Down.
+  A build of Iosevka v34.4.0 made with fonts/wtd-mono.build-plans.toml.
   Copyright (c) 2015-2026, Belleve Invis (belleve@typeof.net).
   Copyright (c) 2025, Ahmed Hatem (https://github.com/ahatem).
 

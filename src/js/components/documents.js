@@ -1,14 +1,13 @@
 import util from './utils';
 import keys from '../keys';
 
-// Document store. The list lives in localStorage['zen.docs'],
-// each document's HTML in localStorage['zen.doc.<id>'].
+// Document store. The list lives in localStorage['wtd.docs'],
+// each document's HTML in localStorage['wtd.doc.<id>'].
 export default (function () {
     const INDEX_KEY = keys.DOCS;
     const CURRENT_KEY = keys.CURRENT;
     const CONTENT_PREFIX = keys.DOC_PREFIX;
     const PREVIOUS_SUFFIX = keys.PREVIOUS_SUFFIX;   // the copy kept when a document lost most of its text
-    const LEGACY_CONTENT_KEY = keys.LEGACY_CONTENT;   // single-document Zen stored the text here
 
     // A save that shrinks a document this much keeps the previous copy
     const SHRINK_KEEP_FROM = 2000;   // characters the document had
@@ -29,10 +28,7 @@ export default (function () {
         load();
 
         if (docs.length === 0) {
-            const legacyContent = localStorage[LEGACY_CONTENT_KEY] || '';
-
-            currentId = create(legacyContent).id;
-            localStorage.removeItem(LEGACY_CONTENT_KEY);
+            currentId = create('').id;
         }
 
         // what has been in the trash long enough goes
@@ -131,8 +127,7 @@ export default (function () {
         return doc;
     }
 
-    // Add a document that already has an id (a backup, or the move from the old
-    // address). An id that is already here is left alone: null says so.
+    // Add a document that already has an id (from a backup). An id that is already here is left alone: null says so.
     function add(doc, html) {
         if (!doc.id || getById(doc.id)) {
             return null;

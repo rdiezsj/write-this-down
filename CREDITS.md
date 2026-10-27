@@ -1,12 +1,12 @@
 # Créditos
 
-Write This Down deriva de [NanoType](https://github.com/nazdash/nanotype), de Nazir Dashtiev. El código original conserva su copyright y su licencia AGPL-3.0-only. [ATTRIBUTION.md](ATTRIBUTION.md) identifica la revisión de origen y las modificaciones de este proyecto.
+El código original conserva su copyright y su licencia AGPL-3.0-only. [ATTRIBUTION.md](ATTRIBUTION.md) identifica su autoría, repositorio y revisión de origen, y las modificaciones de este proyecto.
 
 Los recursos de terceros mantienen las siguientes licencias y atribuciones.
 
 ## Fuentes (`public/fonts`, SIL Open Font License 1.1)
 
-- **Nanotype Mono**: versión de [Iosevka](https://github.com/be5invis/Iosevka), de Belleve Invis, compilada con `fonts/nanotype-mono.build-plans.toml`, que añade cirílico y símbolos de teclado. El aviso de la fuente incluye también a Ahmed Hatem.
+- **WTD Mono**: derivada de Nanotype Mono (antes Zen Mono), versión de [Iosevka](https://github.com/be5invis/Iosevka), de Belleve Invis, compilada con `fonts/wtd-mono.build-plans.toml`, que añade cirílico y símbolos de teclado. El aviso de la fuente incluye también a Ahmed Hatem. WTD cambia los nombres de familia y archivos; conserva los glifos y los avisos OFL.
 - **Inter**: [Inter Project Authors](https://github.com/rsms/inter).
 - **Literata**: [Literata Project Authors](https://github.com/googlefonts/literata).
 

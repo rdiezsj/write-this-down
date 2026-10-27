@@ -14,7 +14,7 @@ export default async (t) => {
             for (const caret of ['{}', '{"font-scheme-monospace":false}', '{"font-scheme-serif":true}']) {
                 for (const content of contents) {
                     t.errors.length = 0;
-                    await t.ev(`localStorage.clear(); localStorage['zen.docs'] = JSON.stringify([{id: 'd1', title: '', auto: '', updated: 1}]); localStorage['zen.current'] = 'd1'; localStorage['zen.doc.d1'] = ${JSON.stringify(content)}; localStorage['focus-mode'] = '${focus}'; localStorage['font-scheme'] = '${font}'; localStorage['caret-prefs'] = '${caret}'`);
+                    await t.ev(`localStorage.clear(); localStorage['wtd.docs'] = JSON.stringify([{id: 'd1', title: '', auto: '', updated: 1}]); localStorage['wtd.current'] = 'd1'; localStorage['wtd.doc.d1'] = ${JSON.stringify(content)}; localStorage['focus-mode'] = '${focus}'; localStorage['font-scheme'] = '${font}'; localStorage['caret-prefs'] = '${caret}'`);
                     await t.reload(900);
                     total++;
 

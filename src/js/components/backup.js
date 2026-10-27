@@ -4,14 +4,14 @@ import util from './utils';
 import keys from '../keys';
 
 // Everything in one piece: every document and every setting. Used by "export
-// everything", by "import a backup", and by the move to the new address.
+// everything" and by "import a backup".
 //
-//   { format: 'zen-backup', version: 1, exported: ISO date, current: id,
+//   { format: 'wtd-backup', version: 1, exported: ISO date, current: id,
 //     settings: { key: value }, documents: [{ id, updated, text }] }
 // (older files also carry a `title` per document, from when documents could be
 // renamed; it is ignored, the first line names the document)
 export default (function () {
-    const FORMAT = 'zen-backup';   // the format's name is a contract with every backup file out there, like the storage keys
+    const FORMAT = 'wtd-backup';   // WTD's backup format
     const VERSION = 1;
 
     // The settings ui.js keeps in localStorage
@@ -98,13 +98,13 @@ export default (function () {
     }
 
     function fileName() {
-        return `nanotype-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        return `wtd-backup-${new Date().toISOString().slice(0, 10)}.json`;
     }
 
     // The same, as plain files: documents/<title>.md for each document, and the
     // .json beside them so the zip is a full backup too
     function zipFileName() {
-        return `nanotype-${new Date().toISOString().slice(0, 10)}.zip`;
+        return `wtd-${new Date().toISOString().slice(0, 10)}.zip`;
     }
 
     function zipFiles(data) {
@@ -114,7 +114,7 @@ export default (function () {
         data.documents.forEach((doc) => {
             files[`documents/${util.fileName(util.firstLine(doc.text), 'md', taken)}`] = strToU8(doc.text);
         });
-        files['nanotype-backup.json'] = strToU8(JSON.stringify(data, null, 1));
+        files['wtd-backup.json'] = strToU8(JSON.stringify(data, null, 1));
 
         return zipSync(files);
     }

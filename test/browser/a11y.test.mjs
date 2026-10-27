@@ -2,7 +2,7 @@
 // named for a screen reader; the caret kept across the menu and a dialog; a new
 // document in focus mode takes typing
 export const expect = {
-    textbox: 'textbox Text true', live: 'polite', dialogs: 6, aboutFocus: 'description modal', afterEsc: 'content', typed: 'hello again',
+    textbox: 'textbox Text true', live: 'polite', dialogs: 5, aboutFocus: 'description modal', afterEsc: 'content', typed: 'hello again',
     reduced: 'none / 0s', normal: 'caret-blink / 0.075s', contrast: '0.55', normalOpacity: '0.16', focusNewDoc: 'abc',
 };
 

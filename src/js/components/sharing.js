@@ -3,18 +3,16 @@ import util from './utils';
 import editor from './editor';
 import documents from './documents';
 import share from './share';
-import move from './move';
 import files from './files';
-import keys from '../keys';
 
 // Sharing: the share dialog (a public or a private link), the shared view a link
 // opens (read-only, rendered, the reader's commands only), the locked link's
-// dialog, and the hand-over from the old address.
+// dialog.
 export default (function () {
     // Above this many characters the link may be cut by some messengers
     const LONG_LINK = 30000;
 
-    let shareModal, unlockModal, movedModal, shareElement, importSharedElement;
+    let shareModal, unlockModal, shareElement, importSharedElement;
 
     function init() {
         shareElement = document.querySelector('.share');
@@ -23,29 +21,15 @@ export default (function () {
         importSharedElement.onclick = importShared;
         shareModal = app.overlay.querySelector('.share-modal');
         unlockModal = app.overlay.querySelector('.unlock-modal');
-        movedModal = app.overlay.querySelector('.moved-modal');
         app.bindChoices(shareModal, onShareChoice);
         app.bindChoices(unlockModal, tryUnlock);
-        app.bindChoices(movedModal, app.removeOverlay);
         shareModal.addEventListener('keydown', onShareModalKeyDown);
     }
 
-    // After the page is up: a locked link asks for its seed word (the field can
-    // only take focus now); a visitor from the old address is told, once
+    // A locked link asks for its seed word after the page is ready.
     function afterStart() {
         if (app.shared.locked) {
             openUnlock();
-        }
-
-        if (movedMessage) {
-            app.setStatus(movedMessage, 15000);
-
-            if (!app.shared.active && !localStorage[keys.MOVED_SEEN]) {
-                localStorage[keys.MOVED_SEEN] = '1';
-                app.openModal(movedModal);
-                app.selectChoice(movedModal, app.visibleChoices(movedModal)[0]);
-                movedModal.focus();
-            }
         }
     }
 
@@ -231,7 +215,7 @@ export default (function () {
 
         if (isPrivate) {
             ready.querySelector('h1').textContent = 'Private link ready';
-            ready.querySelector('.share-note').textContent = `Copy both. Send the link one way and the seed word another. Nanotype keeps neither.`;
+            ready.querySelector('.share-note').textContent = `Copy both. Send the link one way and the seed word another. WTD keeps neither.`;
         } else if (result === 'copied') {
             ready.querySelector('h1').textContent = 'Link copied';
             ready.querySelector('.share-note').textContent = `It is on the clipboard. Anyone who has the link can read the text.`;
@@ -243,31 +227,6 @@ export default (function () {
 
         ready.querySelector('.foot').textContent = isPrivate ? '↑↓ select · enter copy · esc close' : 'enter copy again · esc close';
         showShareStep('ready');
-    }
-
-    // THE MOVE TO THE NEW ADDRESS (see move.js)
-
-    let movedMessage = '';
-
-    function openMovedFromHash() {
-        const result = move.receiveFromHash();
-
-        if (result) {
-            editor.reload();
-        }
-
-        if (location.hash === '#moved') {
-            history.replaceState(null, '', location.pathname + location.search);
-            movedMessage = result && result.failed
-                ? 'your documents did not come along: on the old address use "export everything" and import the file here'
-                : documents.isBlank() ? 'Zen has moved here. It is Nanotype now.' : 'Zen has moved here as Nanotype. Your documents came with you.';
-        }
-
-        // the new address, empty, reached directly: say where the old documents are.
-        // Not after a forward from an old address: that visit was the "open it once".
-        if (move.isNewAddress() && documents.isBlank() && !movedMessage) {
-            app.body.classList.add('new-address');
-        }
     }
 
     /*********************************************
@@ -300,7 +259,7 @@ export default (function () {
         } else if (info.kind === 'private') {
             app.shared.locked = true;   // the seed dialog opens once the page is shown
         } else {
-            showSharedProblem(info.kind === 'newer' ? 'this link needs a newer Nanotype' : 'this link is incomplete');
+            showSharedProblem(info.kind === 'newer' ? 'this link needs a newer WTD' : 'this link is incomplete');
         }
     }
 
@@ -416,7 +375,6 @@ export default (function () {
         afterStart,
         onShareClick,
         openSharedFromHash,
-        openMovedFromHash,
         openUnlock,
         onUnlockDismissed,
         importShared,

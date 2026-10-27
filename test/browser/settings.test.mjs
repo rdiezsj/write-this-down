@@ -3,7 +3,7 @@
 export const expect = {
     freshDarkOs: 'scheme-dark-and-white/system', osToLight: 'scheme-light/system', chosenLightUnderDark: 'scheme-light/light', storedLightDarkOs: 'scheme-light/light',
     cycle: 'light,dark,green,sand,night,system', duplicate: 'Recipe|Recipe', opened: 'Recipeflour',
-    zipName: true, zipFiles: 'documents/Notes (2).md,documents/Notes.md,documents/Recipe (2).md,documents/Recipe.md,documents/abcd quoted.md,nanotype-backup.json',
+    zipName: true, zipFiles: 'documents/Notes (2).md,documents/Notes.md,documents/Recipe (2).md,documents/Recipe.md,documents/abcd quoted.md,wtd-backup.json',
     emptyPreview: 'Here your text is rendered as you write it.|', frontmatter: '<dl class="frontmatter"><div><dt>title</dt><dd>Notes</dd></div></dl>', copyWord: 'copy', copied: 'let a = 1;\n', copyAfter: 'copied',
     nothingToShare: 'nothing to share', fileDrop: 'dropped note|imported note.md', dragHint: 'drop to import as a new document (.txt, .md; .json restores a backup)|true', dragLeft: '|false',
 };
@@ -24,14 +24,14 @@ export default async (t) => {
 
     await t.focus(); await t.insert('Recipe\n\nflour, water'); await t.ev(`document.querySelector('article').blur()`); await t.sleep(400);
     await t.click('.documents'); await t.key('d', 'KeyD', 4); await t.sleep(400);
-    out.duplicate = await t.ev(`JSON.parse(localStorage['zen.docs']).map(d => d.auto).join('|')`);
+    out.duplicate = await t.ev(`JSON.parse(localStorage['wtd.docs']).map(d => d.auto).join('|')`);
     out.opened = await t.ev(`document.querySelector('article').textContent.slice(0, 11)`);
 
     await t.ev(`window.__saved = []; const make = URL.createObjectURL.bind(URL); URL.createObjectURL = (blob) => { window.__saved.push({ blob }); return make(blob) }; HTMLAnchorElement.prototype.click = function () { window.__saved[window.__saved.length - 1].name = this.download }`);   // the download is a link click on a blob url (util.download)
     await t.click('.new-doc'); await t.insert('Notes\n\nfirst'); await t.click('.new-doc'); await t.insert('Notes\n\nsecond'); await t.click('.new-doc'); await t.insert('a/b:c*d? "quoted"\nline');
     await t.ev(`document.querySelector('article').blur()`); await t.sleep(400);
     await t.click('.palette'); await t.filter('zip'); await t.key('Enter'); await t.sleep(500);
-    out.zipName = /^nanotype-\d{4}-\d{2}-\d{2}\.zip$/.test(await t.ev(`window.__saved[0].name`));
+    out.zipName = /^wtd-\d{4}-\d{2}-\d{2}\.zip$/.test(await t.ev(`window.__saved[0].name`));
     out.zipFiles = await t.ev(`window.__saved[0].blob.arrayBuffer().then(b => { const u = new Uint8Array(b); const names = []; let i = 0; while (i < u.length - 4) { if (u[i] === 0x50 && u[i+1] === 0x4b && u[i+2] === 3 && u[i+3] === 4) { const n = u[i+26] | (u[i+27] << 8); const e = u[i+28] | (u[i+29] << 8); names.push(new TextDecoder().decode(u.slice(i + 30, i + 30 + n))); i += 30 + n + e; } else i++; } return names.sort().join(',') })`);
 
     await t.click('.new-doc'); await t.click('.markdown', 300);

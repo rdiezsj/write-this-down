@@ -93,13 +93,12 @@ kbd {
 	visibility: hidden;
 }
 
-// The "nanotype" wordmark, drawn on a pixel grid
+// The WTD wordmark
 .wordmark {
 	display: block;
-	width: 186px;
+	width: 130px;
 	height: 36px;
 	fill: currentColor;
-	shape-rendering: crispEdges;
 }
 
 // A rule made of block characters

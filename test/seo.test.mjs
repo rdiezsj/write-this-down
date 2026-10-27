@@ -3,7 +3,7 @@
 // generated files in dist/ (when a build exists) are what src/seo.mjs makes of it
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import facts from '../src/facts.mjs';
 import { jsonLd, files } from '../src/seo.mjs';
 
@@ -31,26 +31,25 @@ test('the JSON-LD on the page is the one built from the facts', () => {
     assert.equal(onPage.operatingSystem, 'Any');
 });
 
-test('About says the same about privacy, the maker and the former name', () => {
+test('About says the same about privacy, the independent project', () => {
     const about = text(html.match(/<div class="description modal"[\s\S]*?<\/div>\s*<div class="help-modal/)[0]);
     // The same privacy promise appears in About and the generated description.
     assert.ok(about.includes('No analytics, cookies or tracking.'), about);
     assert.ok(facts.privacy.includes('No analytics, cookies or tracking.'));
-    assert.ok(about.includes(`(prev. ${facts.formerName})`));
-    assert.ok(about.includes(facts.publisher.email));
+    assert.ok(about.includes(`${facts.name} is an independent project.`));
     assert.ok(html.includes(`href="${facts.publisher.url}"`));
 });
 
 test('the manifest agrees', () => {
     const manifest = JSON.parse(readFileSync(new URL('../public/site.webmanifest', import.meta.url), 'utf8'));
     assert.equal(manifest.name, facts.title);
-    assert.equal(manifest.short_name, facts.name);
+    assert.equal(manifest.short_name, facts.shortName);
 });
 
 test('the generated files are current (when a build exists) and well formed', () => {
     const generated = files();
-    assert.match(generated['robots.txt'], /^User-agent: \*\nAllow: \/\n\nSitemap: https:\/\/nanotype\.app\/sitemap\.xml\n$/);
-    assert.match(generated['sitemap.xml'], /<loc>https:\/\/nanotype\.app\/<\/loc>/);
+    assert.equal(generated['robots.txt'], `User-agent: *\nAllow: /\n\nSitemap: ${facts.url}sitemap.xml\n`);
+    assert.ok(generated['sitemap.xml'].includes(`<loc>${facts.url}</loc>`));
     assert.ok(generated['llms.txt'].startsWith(`# ${facts.name}\n\n> ${facts.description}`));
     assert.ok(generated['llms-full.txt'].includes(facts.privacy));
     assert.ok(!/undefined|\[object/.test(generated['llms.txt'] + generated['llms-full.txt']));
@@ -68,4 +67,24 @@ test('the service worker does not cache the generated files', () => {
     const gulpfile = readFileSync(new URL('../gulpfile.mjs', import.meta.url), 'utf8');
     const assets = gulpfile.match(/const assets = \[([\s\S]*?)\];/)[1];
     ['robots.txt', 'sitemap.xml', 'llms.txt', 'llms-full.txt'].forEach(name => assert.ok(!assets.includes(name), name));
+});
+
+
+test('la identidad pública y el código no conservan enlaces ni marca del producto original', () => {
+    const forbidden = /nanotype|nazdash|zen\.unit\.(?:app|ms)|support@unit\.app|ko-fi\.com|forms\.gle/i;
+    const root = new URL('../', import.meta.url);
+    const scan = dir => {
+        for (const entry of readdirSync(new URL(dir, root), { withFileTypes: true })) {
+            const path = `${dir}${entry.name}`;
+            if (entry.isDirectory()) scan(`${path}/`);
+            else if (/\.(?:js|mjs|scss|html|webmanifest|json|toml)$/.test(path)) {
+                assert.ok(!forbidden.test(readFileSync(new URL(path, root), 'utf8')), path);
+            }
+        }
+    };
+    for (const dir of ['src/', 'public/', 'fonts/']) scan(dir);
+    const pkg = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'));
+    assert.equal(pkg.name, 'write-this-down');
+    assert.equal(pkg.homepage, facts.url);
+    assert.equal(pkg.repository.url, `git+${facts.source}.git`);
 });

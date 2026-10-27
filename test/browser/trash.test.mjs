@@ -8,8 +8,8 @@ export const expect = {
 
 export default async (t) => {
     await t.open('/');
-    const index = () => t.ev(`JSON.parse(localStorage['zen.docs']).map(d => (d.auto || '-') + (d.deleted ? '*' : '')).join(',')`);
-    const keys = () => t.ev(`Object.keys(localStorage).filter(k => k.startsWith('zen.doc.')).length`);
+    const index = () => t.ev(`JSON.parse(localStorage['wtd.docs']).map(d => (d.auto || '-') + (d.deleted ? '*' : '')).join(',')`);
+    const keys = () => t.ev(`Object.keys(localStorage).filter(k => k.startsWith('wtd.doc.')).length`);
     const rowWith = (word) => `[...document.querySelectorAll('.picker-item')].find(r => r.textContent.includes(${JSON.stringify(word)}))`;
     const out = {};
 
@@ -47,7 +47,7 @@ export default async (t) => {
     out.emptied = await index() + ' / ' + await t.status();
 
     await t.click('.documents'); await t.ev(`${rowWith('gamma')}.querySelector('[data-act=delete]').click()`); await t.sleep(300);
-    await t.ev(`{ const d = JSON.parse(localStorage['zen.docs']); d.find(x => x.deleted).deleted = Date.now() - 31 * 86400000; localStorage['zen.docs'] = JSON.stringify(d) }`);
+    await t.ev(`{ const d = JSON.parse(localStorage['wtd.docs']); d.find(x => x.deleted).deleted = Date.now() - 31 * 86400000; localStorage['wtd.docs'] = JSON.stringify(d) }`);
     await t.reload();
     out.expired = await index() + ' / keys ' + await keys();
 

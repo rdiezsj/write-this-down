@@ -11,7 +11,7 @@ export function jsonLd() {
         '@context': 'https://schema.org',
         '@type': 'WebApplication',
         name: facts.name,
-        alternateName: facts.formerName,
+        alternateName: facts.shortName,
         url: facts.url,
         description: facts.description,
         applicationCategory: 'UtilitiesApplication',
@@ -20,7 +20,7 @@ export function jsonLd() {
         inLanguage: facts.language,
         isAccessibleForFree: true,
         offers: { '@type': 'Offer', price: String(facts.price), priceCurrency: 'USD' },
-        publisher: { '@type': 'Organization', name: facts.publisher.name, url: facts.publisher.url },
+        publisher: { '@type': 'Project', name: facts.publisher.name, url: facts.publisher.url },
     };
 }
 
@@ -43,7 +43,7 @@ Sitemap: ${facts.url}sitemap.xml
 
 > ${facts.description}
 
-${facts.name} (formerly ${facts.formerName}, renamed ${facts.renamed}) is made by ${facts.publisher.name} (${facts.publisher.url}). It is free. ${facts.privacy}
+${facts.name} (${facts.shortName}) is an independent, free project. ${facts.privacy}
 
 ## What it is
 
@@ -62,7 +62,7 @@ ${list(facts.doesNot)}
 
 - [The app](${facts.url}): the editor itself; About (inside the app) says the same as this file.
 - [Full description](${facts.url}llms-full.txt): formats, themes, fonts, keys, privacy in detail.
-- [${facts.publisher.name}](${facts.publisher.url}): who makes it. Support: ${facts.publisher.email}.
+- [Project](${facts.publisher.url}): source and issue tracker.
 - [Source](${facts.source}): the code, ${facts.licence}; what leaves the browser can be read there.
 `;
 
@@ -70,7 +70,7 @@ ${list(facts.doesNot)}
 
 ${facts.description}
 
-Address: ${facts.url} (formerly ${facts.formerUrl}, which hands a visitor's documents over to the new address). Made by ${facts.publisher.name}, ${facts.publisher.url}, since ${facts.since} as ${facts.formerName}; ${facts.name} since ${facts.renamed}. Free, no account.
+Address: ${facts.url}. ${facts.name} is an independent project. Free, no account.
 
 ## Privacy
 
@@ -120,7 +120,7 @@ ${list(facts.credits)}
 
 - App: ${facts.url}
 - Short description: ${facts.url}llms.txt
-- Publisher: ${facts.publisher.url}, ${facts.publisher.email}
+- Project: ${facts.publisher.url}
 - Source: ${facts.source} (${facts.licence}, copyright ${facts.copyright})
 `;
 
