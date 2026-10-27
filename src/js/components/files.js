@@ -77,6 +77,8 @@ export default (function () {
                 if (await folder.choose()) {
                     app.removeOverlay();
                     app.setStatus(`copying to "${folder.name()}" as you write`, 4000);
+                } else if (folder.state() === 'paused') {
+                    openBackup();
                 }
                 break;
 
@@ -84,6 +86,8 @@ export default (function () {
                 if (await folder.resume()) {
                     app.removeOverlay();
                     app.setStatus(`copying to "${folder.name()}" again`, 4000);
+                } else if (folder.state() === 'paused') {
+                    openBackup();
                 }
                 break;
 

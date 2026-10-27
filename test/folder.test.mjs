@@ -44,6 +44,7 @@ function setup(root=directory()) {
     const persisted=new Map();
     const documents=[{id:'a',text:'Same',updated:1}];
     let chosen=root;
+    let failPersist=false;
     let locked=Promise.resolve();
     const navigator={locks:{request(name,run){const next=locked.then(run);locked=next.catch(()=>{});return next;}}};
     const indexedDB={open(){
@@ -52,7 +53,7 @@ function setup(root=directory()) {
             const done=result=>{const request={result};queueMicrotask(()=>{request.onsuccess?.();transaction.oncomplete?.();});return request;};
             transaction.objectStore=()=>({
                 get:key=>done(persisted.get(key)),
-                put(value,key){persisted.set(key,{...value,entries:value.entries?JSON.parse(JSON.stringify(value.entries)):undefined,manifest:value.manifest?{...value.manifest}:undefined});return done();},
+                put(value,key){if(failPersist)throw new DOMException('full','QuotaExceededError');persisted.set(key,{...value,entries:value.entries?JSON.parse(JSON.stringify(value.entries)):undefined,manifest:value.manifest?{...value.manifest}:undefined});return done();},
                 delete(key){persisted.delete(key);return done();},
             });return transaction;
         }}};queueMicrotask(()=>request.onsuccess());return request;
@@ -60,7 +61,7 @@ function setup(root=directory()) {
     const util={firstLine:text=>text.split('\n')[0],fileName(base,ext,taken){let n=`${base}.${ext}`;for(let i=2;taken?.has(n);i++)n=`${base} (${i}).${ext}`;taken?.add(n);return n;}};
     const make=()=>component('folder',{documents:{},backup:{collect:()=>({format:'wtd-backup',version:1,documents:documents.map(d=>({...d}))})},
         util,keys,crypto:webcrypto,TextEncoder,navigator,window:{showDirectoryPicker:async()=>chosen},indexedDB});
-    return {root,documents,make,persisted,choose:r=>{chosen=r;}};
+    return {root,documents,make,persisted,choose:r=>{chosen=r;},failPersistence:value=>{failPersist=value;}};
 }
 
 test('conserva archivos y manifiesto ajenos, también nombres con distinta capitalización',async()=>{
@@ -142,4 +143,10 @@ test('un fallo de disco conserva la copia anterior y libera el escritor para rei
     const dir=s.root.files.get('documents');dir.failWrite=true;s.documents[0].text='Same\nNEW';
     await folder.writeAll();assert.equal(folder.state(),'paused');assert.equal(dir.files.get('Same.md'),'Same');
     dir.failWrite=false;await folder.resume();assert.equal(dir.files.get('Same.md'),'Same\nNEW');assert.equal(dir.maximum,1);
+});
+
+test('no empieza a escribir si no puede conservar el registro de propiedad',async()=>{
+    const s=setup();s.failPersistence(true);const folder=s.make();
+    assert.equal(await folder.choose(),false);assert.equal(folder.state(),'paused');assert.equal(s.root.files.size,0);
+    s.failPersistence(false);assert.equal(await folder.resume(),true);
 });

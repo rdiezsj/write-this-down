@@ -94,47 +94,43 @@ export default (function () {
         }
     }
 
-    // Needs a click: the folder picker
-    async function choose() {
-        try {
-            handle = await window.showDirectoryPicker({ mode: 'readwrite', id: 'wtd', startIn: 'documents' });
-        } catch (e) {
-            return false;   // cancelled
-        }
-
-        const selected = handle;
+    async function connect(selected) {
         setState('off');
         clearTimeout(timer);
         await queue;
-        await exclusive(async () => {
-            const saved = await kv('readonly', store => store.get(KEY));
-            const same = saved && saved.handle && await saved.handle.isSameEntry(selected);
-            record = same ? saved : { handle: selected, entries: {} };
-            handle = selected;
-            await kv('readwrite', store => store.put(record, KEY));
-        });
-        setState('on');
-        await writeAll();
+        try {
+            await exclusive(async () => {
+                const saved = await kv('readonly', store => store.get(KEY));
+                const same = saved && saved.handle && await saved.handle.isSameEntry(selected);
+                record = same ? saved : { handle: selected, entries: {} };
+                handle = selected;
+                await kv('readwrite', store => store.put(record, KEY));
+            });
+            setState('on');
+            await writeAll();
+            return state === 'on';
+        } catch (error) {
+            setState('paused');
+            return false;
+        }
+    }
 
-        return true;
+    // Needs a click: the folder picker
+    async function choose() {
+        let selected;
+        try {
+            selected = await window.showDirectoryPicker({ mode: 'readwrite', id: 'wtd', startIn: 'documents' });
+        } catch (e) {
+            return false;   // cancelled
+        }
+        return connect(selected);
     }
 
     // Needs a click: Chrome confirms access after a restart
     async function resume() {
-        if (!handle) {
-            return false;
-        }
-
+        if (!handle) return false;
         const permission = await handle.requestPermission({ mode: 'readwrite' });
-
-        if (permission !== 'granted') {
-            return false;
-        }
-
-        setState('on');
-        await writeAll();
-
-        return true;
+        return permission === 'granted' ? connect(handle) : false;
     }
 
     async function stop() {
