@@ -1,0 +1,21 @@
+export const expect={present:true,inlineBlocked:true,connectionBlocked:true,directives:true,theme:true,fonts:true,edited:true,preview:true,noUnexpectedViolations:true};
+export default async t=>{
+ await t.send('Network.setBlockedURLs',{urls:['https://csp-blocked.test/*']});
+ await t.open();
+ const out={present:await t.ev(`!!document.querySelector('meta[http-equiv="Content-Security-Policy"]')`)};
+ await t.ev(`(()=>{window.__violations=[];document.addEventListener('securitypolicyviolation',e=>window.__violations.push(e.effectiveDirective));const injected=document.createElement('script');injected.textContent='window.__untrusted=1';document.head.append(injected)})()`);
+ out.connectionBlocked=await t.ev(`fetch('https://csp-blocked.test/probe').then(()=>false,()=>true)`);
+ await t.sleep(200);
+ out.inlineBlocked=await t.ev(`window.__untrusted!==1`);
+ out.directives=await t.ev(`__violations.includes('script-src-elem')&&__violations.includes('connect-src')`);
+ await t.ev(`__violations.length=0;localStorage.scheme='scheme-night'`);await t.reload();
+ out.theme=await t.ev(`document.documentElement.classList.contains('scheme-night')`);
+ await t.ev(`window.__violations=[];document.addEventListener('securitypolicyviolation',e=>__violations.push(e.effectiveDirective))`);
+ out.fonts=await t.ev(`document.fonts.ready.then(()=>document.fonts.check('15px "IBM Plex Mono"'))`);
+ await t.focus();await t.insert('# CSP note\n\n**works**');out.edited=(await t.text()).includes('CSP note');
+ await t.click('.markdown');out.preview=await t.ev(`document.querySelector('.markdown-showcase strong').textContent==='works'`);
+ for(let i=0;i<4;i++) await t.click('.sfx-mute',40);
+ await t.focus();await t.type(' sound');await t.sleep(200);
+ out.noUnexpectedViolations=await t.ev(`__violations.length===0`);
+ return out;
+};

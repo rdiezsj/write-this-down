@@ -8,6 +8,7 @@ import { deleteAsync } from 'del';
 import fs from 'fs';
 import { Transform } from 'stream';
 import { files as seoFiles } from './src/seo.mjs';
+import { applyCsp } from './src/csp.mjs';
 import ThirdPartyLicensesPlugin from './scripts/third-party-licenses.mjs';
 
 const sass = gulpSass(dartSass);
@@ -59,6 +60,10 @@ function js() {
 // Copy public to dist
 function copyPublic() {
   return gulp.src(paths.public, { encoding: false })
+    .pipe(new Transform({ objectMode: true, transform(file, encoding, callback) {
+      if (process.env.NODE_ENV === 'production' && file.path.endsWith('.html')) file.contents = Buffer.from(applyCsp(String(file.contents)));
+      callback(null, file);
+    }}))
     .pipe(gulp.dest(paths.dist));
 }
 

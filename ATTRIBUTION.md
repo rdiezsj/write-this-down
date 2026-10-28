@@ -20,6 +20,7 @@ Modificaciones realizadas el **27 y 28 de octubre de 2026** por el proyecto Writ
 - Interfaz bilingüe español/inglés, título completo y fondo propio de degradados sin caracteres, con movimiento reducido respetado.
 - Sustitución de los iconos originales por el diseño propio «Líneas y cursor».
 - Sustitución de la fuente monoespaciada original por IBM Plex Mono, con archivos y avisos OFL de IBM sin modificar.
+- Política CSP de distribución con hashes de scripts y comprobación de actualización entre versiones.
 - Zoom móvil sin restricciones y autorización explícita para cargar imágenes recibidas por enlaces compartidos.
 - Corrección del salto a encabezados en documentos compartidos.
 - Coherencia de documentos entre pestañas, recuperación conservadora de índices dañados y límites efectivos en enlaces compartidos; actualización de las herramientas de construcción.
