@@ -19,6 +19,7 @@ export default {
     LEGACY_CARET: 'caret',            // the one cursor setting before the per-font one
 
     // IndexedDB: the folder copy's handle
+    BRIDGE_DB: 'wtd.bridge',            // extension's local bridge coordinator
     DB: 'wtd',
     KV_STORE: 'kv',
     FOLDER: 'folder',
