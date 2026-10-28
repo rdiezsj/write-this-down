@@ -1,0 +1,20 @@
+export const options = { width:390, height:844, touch:true };
+export const expect = { scale:true, typed:true, selection:true, about:true, backup:true, narrow:true };
+export default async t => {
+    await t.send('Emulation.setDeviceMetricsOverride', {width:390,height:844,deviceScaleFactor:1,mobile:true});
+    await t.open();
+    await t.send('Emulation.setPageScaleFactor', {pageScaleFactor:2});
+    await t.focus(); await t.insert('zoom keeps this text');
+    const out = {scale:await t.ev('visualViewport.scale >= 2'), typed:(await t.text())==='zoom keeps this text'};
+    await t.caretTo('zoom',0); await t.ev(`getSelection().modify('extend','forward','word')`);
+    out.selection=await t.ev(`getSelection().toString()==='zoom'`);
+    await t.ev('getSelection().collapseToEnd()');
+    await t.click('.about');
+    out.about=await t.ev(`document.querySelector('.overlay').style.display==='block' && document.activeElement.classList.contains('description')`);
+    await t.key('Escape'); await t.click('.backup');
+    out.backup=await t.ev(`document.querySelector('.overlay').style.display==='block'`);
+    await t.key('Escape');
+    await t.send('Emulation.setDeviceMetricsOverride',{width:320,height:844,deviceScaleFactor:1,mobile:true});
+    out.narrow=await t.ev('document.documentElement.scrollWidth<=innerWidth');
+    return out;
+};

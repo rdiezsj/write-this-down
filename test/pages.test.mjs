@@ -71,3 +71,8 @@ test('la copia pública conserva exactamente los recursos binarios',()=>{
     };
     scan('');
 });
+
+test('el viewport permite ampliar al menos al 200%', () => {
+    const viewport = read('public/index.html').match(/name="viewport" content="([^"]+)"/)[1];
+    assert.doesNotMatch(viewport, /(?:maximum-scale|minimum-scale|user-scalable)\s*=/);
+});
