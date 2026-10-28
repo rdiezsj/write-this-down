@@ -474,7 +474,7 @@ export default (function () {
     function renderStatus() {
         const recovery = documents.recovery();
         const recovered = recovery ? (recovery.preserved ? 'notes recovered · export a backup'
-            : 'storage could not be repaired · notes are read-only; export a backup') : '';
+            : 'storage could not be repaired · saving is paused; export a backup') : '';
         const sticky = statusSticky || recovered;
         statusMessage.textContent = t(statusNotice || statusHint || sticky);
         statusSaid.textContent = t(statusNotice || sticky);

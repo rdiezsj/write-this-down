@@ -138,7 +138,7 @@ export default {
     'this link is too large': 'este enlace es demasiado grande',
     'could not update the document · free space and try again': 'no se ha podido actualizar el documento · libera espacio y vuelve a intentarlo',
     'notes recovered · export a backup': 'notas recuperadas · exporta una copia de seguridad',
-    'storage could not be repaired · notes are read-only; export a backup': 'no se ha podido reparar el almacenamiento · notas de solo lectura; exporta una copia',
+    'storage could not be repaired · saving is paused; export a backup': 'no se ha podido reparar el almacenamiento · guardado pausado; exporta una copia',
     'could not save this text · export it or free space, then try again': 'no se ha podido guardar este texto · expórtalo o libera espacio y vuelve a intentarlo',
     'previous version restored · run again to go back': 'versión anterior recuperada · repite para volver',
     'copy': 'copiar', 'copied': 'copiado', 'could not copy': 'no se pudo copiar',

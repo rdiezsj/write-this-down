@@ -1,4 +1,4 @@
-export const expect={twoTabs:true,allNotes:true,recovered:true,evidence:true,exported:true,readonly:true,readonlyExport:true,recoveryText:'RECOVERED NOTE',recoveryStatus:'notas recuperadas · exporta una copia de seguridad',readOnlyText:'RECOVERED NOTE',readOnlyStatus:'no se ha podido reparar el almacenamiento · notas de solo lectura; exporta una copia'};
+export const expect={twoTabs:true,allNotes:true,recovered:true,evidence:true,exported:true,readonly:true,readonlyExport:true,recoveryText:'RECOVERED NOTE',recoveryStatus:'notas recuperadas · exporta una copia de seguridad',readOnlyText:'RECOVERED NOTE',readOnlyStatus:'no se ha podido reparar el almacenamiento · guardado pausado; exporta una copia'};
 export default async t=>{
     await t.open();
     await t.ev(`localStorage.clear();localStorage.language='en';localStorage['wtd.docs']=JSON.stringify([{id:'a',auto:'TAB A',updated:1}]);localStorage['wtd.current']='a';localStorage['wtd.doc.a']='<div>TAB A</div>'`);
@@ -30,7 +30,7 @@ export default async t=>{
     await t.ev(`localStorage['wtd.docs']='BROKEN AGAIN'`);
     await t.send('Page.addScriptToEvaluateOnNewDocument',{source:`const original=localStorage;Object.defineProperty(window,'localStorage',{configurable:true,value:new Proxy(original,{get:(s,k)=>typeof s[k]==='function'?s[k].bind(s):s[k],set:(s,k,v)=>{if(k.startsWith('wtd.recovery.index.'))throw new DOMException('full','QuotaExceededError');s[k]=v;return true;}})});`});
     await t.reload();
-    out.readonly=await t.ev(`localStorage['wtd.docs']==='BROKEN AGAIN'&&document.querySelector('article').textContent==='RECOVERED NOTE'&&document.querySelector('.status-message').textContent.includes('solo lectura')`);
+    out.readonly=await t.ev(`localStorage['wtd.docs']==='BROKEN AGAIN'&&document.querySelector('article').textContent==='RECOVERED NOTE'&&document.querySelector('.status-message').textContent.includes('guardado pausado')`);
     out.readOnlyText=await t.ev(`document.querySelector('article').textContent`);out.readOnlyStatus=await t.status();
     await t.ev(capture);await t.click('.backup');await t.click('.backup-modal [data-choice="export"]');
     out.readonlyExport=await t.ev(`window.__files[0].text().then(s=>JSON.parse(s).documents.some(d=>d.text.includes('RECOVERED NOTE')))`);
