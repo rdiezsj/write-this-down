@@ -101,3 +101,30 @@ test('el aviso deja de indicar solo lectura cuando ya se puede reparar el almace
     const s=stores();s.fail(true);const a=s.make();a.init();assert.equal(a.recovery().preserved,false);
     s.fail(false);assert.equal(a.saveContent('a','UPDATED','UPDATED'),true);assert.equal(a.recovery().preserved,true);
 });
+
+test('el puente prepara cada cambio antes de tocar la nota y confirma después',()=>{
+    const s=stores(),docs=s.make(),events=[];docs.init();
+    docs.setBridgeRecorder({prepare(note){events.push(['prepare',note.state,note.id,s.data[keys.DOC_PREFIX+note.id]]);return 'op';},applied(id){events.push(['applied',id]);return true;}});
+    const created=docs.create('B');assert.ok(created);
+    assert.equal(docs.saveContent(created.id,'B nueva','B nueva'),true);
+    assert.equal(docs.remove(created.id),true);
+    assert.equal(docs.restore(created.id),true);
+    assert.equal(docs.destroy(created.id),true);
+    assert.deepEqual(events.map(event=>event[0]),['prepare','applied','prepare','applied','prepare','applied','prepare','applied','prepare','applied']);
+    assert.deepEqual(events.filter(event=>event[0]==='prepare').map(event=>event[1]),['active','active','trash','active','removed']);
+    assert.equal(events[0][3],undefined);assert.equal(events[2][3],'B');
+});
+
+test('si el puente no puede preparar un cambio, el texto anterior permanece',()=>{
+    const s=stores(),docs=s.make();docs.init();docs.setBridgeRecorder({prepare:()=>false,applied:()=>{throw Error('no debe llegar');}});
+    assert.equal(docs.saveContent('a','NUEVO','NUEVO'),false);assert.equal(s.data[keys.DOC_PREFIX+'a'],'A');
+    assert.equal(docs.create('B'),null);assert.equal(docs.list().length,1);
+});
+
+test('restaurar la versión anterior prepara una operación antes de intercambiar textos',()=>{
+    const s=stores(),docs=s.make(),events=[];docs.init();
+    docs.setBridgeRecorder({prepare(note){events.push([note.state,note.html,s.data[keys.DOC_PREFIX+'a']]);return 'op';},applied(){events.push(['applied']);return true;}});
+    assert.equal(docs.restorePrevious('a'),true);
+    assert.deepEqual(events,[['active','OLDER A','A'],['applied']]);
+    assert.equal(s.data[keys.DOC_PREFIX+'a'],'OLDER A');assert.equal(s.data[keys.DOC_PREFIX+'a'+keys.PREVIOUS_SUFFIX],'A');
+});

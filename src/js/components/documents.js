@@ -25,6 +25,21 @@ export default (function () {
     let writable = true;
     let recoveryNotice = null;
     let temporary = null;
+    let bridgeRecorder = null;
+
+    // The recorder is installed only when the local bridge is enabled.
+    function setBridgeRecorder(recorder) { bridgeRecorder = recorder; }
+    function prepareBridge(doc, html, state) {
+        if (!bridgeRecorder) return null;
+        const note = { id: doc.id, updated: doc.updated || 0, state, received: false };
+        if (state !== 'removed') { note.html = html || ''; note.auto = doc.auto || ''; }
+        if (state === 'trash') note.deleted = doc.deleted;
+        try { return bridgeRecorder.prepare(note) || false; } catch { return false; }
+    }
+    function finishBridge(token) {
+        if (token === null) return true;
+        try { return bridgeRecorder.applied(token); } catch { return false; }
+    }
 
     function init() {
         load();
@@ -194,6 +209,9 @@ export default (function () {
             updated: Date.now(),
         };
 
+        const token = prepareBridge(doc, html || '', 'active');
+        if (token === false) return null;
+
         docs.unshift(doc);
 
         // a full store: nothing is left half-made, and null says so
@@ -203,7 +221,7 @@ export default (function () {
         }
 
         saveIndex();
-        return doc;
+        return finishBridge(token) ? doc : null;
     }
 
     // Add a document that already has an id (from a backup). An id that is already here is left alone: null says so.
@@ -220,6 +238,9 @@ export default (function () {
             updated: doc.updated || Date.now(),
         };
 
+        const token = prepareBridge(added, html || '', 'active');
+        if (token === false) return null;
+
         docs.push(added);
 
         if (!write(CONTENT_PREFIX + added.id, html || '') || !writeMeta(added)) {
@@ -228,7 +249,7 @@ export default (function () {
         }
 
         saveIndex();
-        return added;
+        return finishBridge(token) ? added : null;
     }
 
     // True when nothing has been written yet: at most one document, and it is empty
@@ -257,6 +278,10 @@ export default (function () {
         if (!doc || doc.deleted) return false;
         if (before === html && doc.auto === firstLine) return true;
 
+        const updated = Date.now();
+        const token = prepareBridge({ ...doc, updated, auto: firstLine }, html, 'active');
+        if (token === false) return false;
+
         try {
             // most of the text gone in one save: keep what was there, in case
             if (before && before.length >= SHRINK_KEEP_FROM && html.length < before.length * SHRINK_RATIO) {
@@ -264,7 +289,7 @@ export default (function () {
             }
 
             localStorage[CONTENT_PREFIX + id] = html;
-            doc.updated = Date.now();
+            doc.updated = updated;
             doc.auto = firstLine;
             if (!writeMeta(doc)) return false;
             saveIndex();
@@ -272,7 +297,7 @@ export default (function () {
             return false;
         }
 
-        return true;
+        return finishBridge(token);
     }
 
     function hasPrevious(id) {
@@ -288,6 +313,22 @@ export default (function () {
 
         if (previous === undefined) {
             return false;
+        }
+
+        if (bridgeRecorder) {
+            const doc = getById(id);
+            if (!doc || doc.deleted) return false;
+            const restored = { ...doc, updated: Date.now(), auto: util.firstLine(util.htmlToText(previous)) };
+            const token = prepareBridge(restored, previous, 'active');
+            if (token === false) return false;
+            try {
+                // The prepared operation retains the restored text if a later write fails.
+                localStorage[CONTENT_PREFIX + id + PREVIOUS_SUFFIX] = current || '';
+                localStorage[CONTENT_PREFIX + id] = previous;
+                if (!writeMeta(restored)) return false;
+                saveIndex();
+                return finishBridge(token);
+            } catch { return false; }
         }
 
         localStorage[CONTENT_PREFIX + id] = previous;
@@ -307,7 +348,11 @@ export default (function () {
         if (docs.filter(item => !item.deleted).length === 1 && !create('')) return false;
         if (isEmpty(id)) {
             if (!forget(id)) return false;
-        } else if (!writeMeta({ ...doc, deleted: Date.now() })) return false;
+        } else {
+            const deleted = { ...doc, deleted: Date.now() };
+            const token = prepareBridge(deleted, getContent(id), 'trash');
+            if (token === false || !writeMeta(deleted) || !finishBridge(token)) return false;
+        }
         refresh();
         if (currentId === id) currentId = current().id;
         saveIndex();
@@ -322,9 +367,11 @@ export default (function () {
         if (!doc || !doc.deleted) return false;
         const restored = { ...doc, updated: Date.now() };
         delete restored.deleted;
+        const token = prepareBridge(restored, getContent(id), 'active');
+        if (token === false) return false;
         if (!writeMeta(restored)) return false;
         saveIndex();
-        return true;
+        return finishBridge(token);
     }
 
     // Gone for good; keep a tombstone so an obsolete cache cannot resurrect it.
@@ -336,11 +383,13 @@ export default (function () {
     }
 
     function forget(id) {
+        const token = prepareBridge({ id, updated: Date.now() }, '', 'removed');
+        if (token === false) return false;
         if (!writeMeta({ id, removed: true })) return false;
         docs = docs.filter(doc => doc.id !== id);
         localStorage.removeItem(CONTENT_PREFIX + id);
         localStorage.removeItem(CONTENT_PREFIX + id + PREVIOUS_SUFFIX);
-        return true;
+        return finishBridge(token);
     }
 
     // A document's text as something to search in: tags out, the few entities the
@@ -385,5 +434,6 @@ export default (function () {
         titleOf,
         searchText,
         isOwnKey,
+        setBridgeRecorder,
     }
 })();
