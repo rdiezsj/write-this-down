@@ -1,11 +1,12 @@
-export const options = { width: 390, height: 844 };
-export const expect = { lang: 'es', titleFits: true, noOverflow: true, selectorFits: true, aboutFits: true, narrowFooter: true, narrowTitle: true, spanish404: true, english404: true };
+export const options = { width: 390, height: 844, touch: true };
+export const expect = { touchInput: true, lang: 'es', titleFits: true, noOverflow: true, selectorFits: true, aboutFits: true, narrowFooter: true, narrowTitle: true, spanish404: true, english404: true };
 export default async t => {
     await t.send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
     await t.open();
     await t.ev(`localStorage['language']='es'`); await t.reload();
     await t.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
     const out = {
+        touchInput: await t.ev(`matchMedia('(hover: none)').matches && matchMedia('(pointer: coarse)').matches`),
         lang: await t.ev('document.documentElement.lang'),
         titleFits: await t.ev(`document.querySelector('.welcome .wordmark').getBoundingClientRect().right <= innerWidth`),
         noOverflow: await t.ev('document.documentElement.scrollWidth <= innerWidth'),

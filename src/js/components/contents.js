@@ -96,7 +96,7 @@ export default (function () {
 
         // in a shared view the rendered text is what is shown: its n-th heading
         if (app.shared.active && app.is.markdown()) {
-            const index = headings().indexOf(heading);
+            const index = headings().findIndex(item => item.node === heading.node);
             const rendered = app.showcase.querySelectorAll('h1, h2, h3, h4, h5, h6')[index];
 
             if (rendered) {

@@ -33,7 +33,7 @@ export default async (t) => {
 
     // today
     await t.click('.palette'); await t.filter('today'); await t.key('Enter'); await t.sleep(400);
-    const iso = new Date().toISOString().slice(0, 10);
+    const iso = await t.ev(`(() => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); })()`);
     out.todayStarted = (await t.lines())[0] === `# ${iso}`;
     await t.type('journal'); await t.sleep(400);
     await t.click('.new-doc'); await t.insert('other'); await t.sleep(400);

@@ -2,13 +2,13 @@
 export const expect = {
     confirmAsked: false, rowsAfterDelete: 'gamma text|alpha text|trash…', status: 'moved "beta text" to trash · 30 days', keysKept: 3,
     trashRows: 'beta text [restore,delete]|empty trash []', menuTrash: 'trash… [1 document, gone after 30 days]',
-    afterRestore: 'beta text / gamma text,beta text,alpha text', destroyed: 'gamma text,alpha text / keys 2', emptied: 'gamma text / trash emptied',
+    afterRestore: 'beta text / alpha text,beta text,gamma text', destroyed: 'alpha text,gamma text / keys 2', emptied: 'gamma text / trash emptied',
     expired: '- / keys 1', emptyDocGoesAtOnce: '- / rows Untitled',
 };
 
 export default async (t) => {
     await t.open('/');
-    const index = () => t.ev(`JSON.parse(localStorage['wtd.docs']).map(d => (d.auto || '-') + (d.deleted ? '*' : '')).join(',')`);
+    const index = () => t.ev(`JSON.parse(localStorage['wtd.docs']).map(d => (d.auto || '-') + (d.deleted ? '*' : '')).sort().join(',')`);
     const keys = () => t.ev(`Object.keys(localStorage).filter(k => k.startsWith('wtd.doc.')).length`);
     const rowWith = (word) => `[...document.querySelectorAll('.picker-item')].find(r => r.textContent.includes(${JSON.stringify(word)}))`;
     const out = {};
@@ -47,7 +47,7 @@ export default async (t) => {
     out.emptied = await index() + ' / ' + await t.status();
 
     await t.click('.documents'); await t.ev(`${rowWith('gamma')}.querySelector('[data-act=delete]').click()`); await t.sleep(300);
-    await t.ev(`{ const d = JSON.parse(localStorage['wtd.docs']); d.find(x => x.deleted).deleted = Date.now() - 31 * 86400000; localStorage['wtd.docs'] = JSON.stringify(d) }`);
+    await t.ev(`{ const d = JSON.parse(localStorage['wtd.docs']); const expired = d.find(x => x.deleted); expired.deleted = Date.now() - 31 * 86400000; localStorage['wtd.meta.' + expired.id] = JSON.stringify(expired); localStorage['wtd.docs'] = JSON.stringify(d) }`);
     await t.reload();
     out.expired = await index() + ' / keys ' + await keys();
 

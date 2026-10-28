@@ -5,7 +5,7 @@ export const options = { width: 1920 };
 export const expect = {
     writer: 'font serif size l theme night', reader: 'font serif size l theme system', column: 'import to edit,contents off,size l,theme system,font serif', status: 'english,about',
     menu: 'import to edit,export as .md,export as .txt,print or save as PDF…,contents on,language español,language english,size s,size m,size l,theme system,theme light,theme dark,theme green,theme sand,theme night,font mono,font sans,font serif,keys,about',
-    rendered: 'article=none showcase=block h1=true', boxInert: true, markdownKeyIgnored: true, contentsPanel: 'contents on panel=block items=1', jump: true,
+    rendered: 'article=none showcase=block h1=true', boxInert: true, markdownKeyIgnored: true, contentsPanel: 'contents on panel=block items=2', jump: true,
     afterImport: 'shared=false font mono size s theme system markdown=false', imported: '# Shared note',
     lockedDialog: 'This link is locked', wrongSeed: 'wrong seed word', unlocked: true,
     longNote: 'short=hidden long=shown:This text makes a link of about',
@@ -13,7 +13,7 @@ export const expect = {
 
 export default async (t) => {
     await t.open('/');
-    await t.focus(); await t.insert('# Shared note\n\nbody with **bold** and `code`\n\n- [ ] a task\n\n```js\nlet a = 1;\n```');
+    await t.focus(); await t.insert('# Shared note\n\nbody with **bold** and `code`\n\n- [ ] a task\n\n```js\nlet a = 1;\n```' + '\n\nbody paragraph'.repeat(50) + '\n\n## Target heading' + '\n\nfollowing paragraph'.repeat(30));
     for (const c of ['.font-flip', '.font-flip', '.font-size', '.font-size']) await t.click(c, 50);
     for (let i = 0; i < 5; i++) await t.click('.color-flip', 50);
     const look = () => t.ev(`document.querySelector('.font-flip').textContent + ' ' + document.querySelector('.font-size').textContent + ' ' + document.querySelector('.color-flip').textContent`);
@@ -42,8 +42,8 @@ export default async (t) => {
     out.boxInert = await t.ev(`document.querySelector('article').textContent.includes('[ ]') && !document.querySelector('.task-list-item-checkbox').checked`);
     await t.key('M', 'KeyM', 12); out.markdownKeyIgnored = await t.ev(`document.body.classList.contains('markdown-mode')`);
     await t.click('.contents', 300); out.contentsPanel = await t.ev(`document.querySelector('.contents').textContent + ' panel=' + getComputedStyle(document.querySelector('.contents-panel')).display + ' items=' + document.querySelectorAll('.contents-panel button').length`);
-    await t.ev(`document.querySelector('.contents-panel button').click()`); await t.sleep(200);
-    out.jump = await t.ev(`Math.abs(document.querySelector('.markdown-showcase h1').getBoundingClientRect().top - 48) < 60`);
+    await t.ev(`document.querySelectorAll('.contents-panel button')[1].click()`); await t.sleep(200);
+    out.jump = await t.ev(`Math.abs(document.querySelector('.markdown-showcase h2').getBoundingClientRect().top - 48) < 60`);
     await t.click('.contents', 100);
     await t.click('.import-shared', 600);
     out.afterImport = await t.ev(`'shared=' + document.body.classList.contains('shared')`) + ' ' + await look() + await t.ev(`' markdown=' + document.body.classList.contains('markdown-mode')`);

@@ -5,7 +5,7 @@
 //   npm run test:browser -- slash     only the suites whose name contains "slash"
 //   WTD_URL=http://localhost:3002 npm run test:browser -- offline
 //
-// A suite:  export const expect = { … };  export const options = { width, height, flags };
+// A suite:  export const expect = { … };  export const options = { width, height, flags, touch };
 //           export default async (t) => ({ … });
 // `t` is the toolkit below. Values that vary (times, ids) are left out of `expect`
 // by the suite, which returns booleans or rounded numbers instead.
@@ -29,7 +29,12 @@ const freePort = () => new Promise((resolve) => {
 async function browser(options = {}) {
     const port = await freePort();
     const profile = mkdtempSync(join(tmpdir(), 'wtd-test-'));
-    const flags = ['--headless=new', '--disable-gpu', '--no-first-run', '--hide-scrollbars', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, `--window-size=${options.width || 1280},${options.height || 800}`, ...(options.flags || []), 'about:blank'];
+    // Chrome headless puede anunciar hover:none aun con un viewport de escritorio.
+    // Fijar el dispositivo antes de cargar la app; las suites táctiles lo declaran.
+    const pointer = options.touch
+        ? 'primaryPointerType=2,availablePointerTypes=2,primaryHoverType=0,availableHoverTypes=0'
+        : 'primaryPointerType=4,availablePointerTypes=4,primaryHoverType=2,availableHoverTypes=2';
+    const flags = [`--blink-settings=${pointer}`, '--headless=new', '--disable-gpu', '--no-first-run', '--hide-scrollbars', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, `--window-size=${options.width || 1280},${options.height || 800}`, ...(options.flags || []), 'about:blank'];
     const chrome = spawn(CHROME, flags, { stdio: 'ignore' });
     let target = null;
 
@@ -117,6 +122,7 @@ async function browser(options = {}) {
     };
 
     await send('Runtime.enable'); await send('Page.enable'); await send('Network.enable');
+    if (options.touch) await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
     // Protección frente a versiones antiguas: sus peticiones de telemetría
     // nunca deben salir del navegador de pruebas. Ejecutar solo contra el servidor local.
     await send('Network.setBlockedURLs', { urls: ['*/stats/*'] });

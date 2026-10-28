@@ -2,18 +2,18 @@
 // named for a screen reader; the caret kept across the menu and a dialog; a new
 // document in focus mode takes typing
 export const expect = {
-    textbox: 'textbox Text true', live: 'polite', dialogs: 5, aboutFocus: 'description modal', afterEsc: 'content', typed: 'hello again',
+    desktopInput: true, filterFocused: true, textbox: 'textbox Text true', live: 'polite', dialogs: 5, aboutFocus: 'description modal', afterEsc: 'content', typed: 'hello again',
     reduced: 'none / 0s', normal: 'caret-blink / 0.075s', contrast: '0.55', normalOpacity: '0.24', focusNewDoc: 'abc',
 };
 
 export default async (t) => {
     await t.open('/');
-    const out = {};
+    const out = { desktopInput: await t.ev(`matchMedia('(hover: hover)').matches && matchMedia('(pointer: fine)').matches`) };
     await t.focus(); await t.insert('hello');
     out.textbox = await t.ev(`(a => a.getAttribute('role') + ' ' + a.getAttribute('aria-label') + ' ' + a.getAttribute('aria-multiline'))(document.querySelector('article'))`);
     out.live = await t.ev(`document.querySelector('.status-said').getAttribute('aria-live')`);
     out.dialogs = await t.ev(`[...document.querySelectorAll('.modal')].filter(m => m.getAttribute('role') === 'dialog' && m.getAttribute('aria-label')).length`);
-    await t.key('k', 'KeyK', 4); await t.filter('about'); await t.key('Enter'); await t.sleep(200);
+    await t.key('k', 'KeyK', 4); await t.filter('about'); out.filterFocused = await t.ev(`document.activeElement === document.querySelector('.picker input')`); await t.key('Enter'); await t.sleep(200);
     out.aboutFocus = await t.ev(`document.activeElement.className`);
     await t.key('Escape', 'Escape'); out.afterEsc = await t.ev(`document.activeElement.className`);
     await t.insert(' again'); out.typed = await t.text();

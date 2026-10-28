@@ -22,12 +22,23 @@ export default async (t) => {
     await metrics(1280, 800); await t.sleep(200);
     out.statusWords = await t.ev(`[...document.querySelectorAll('.status-right button')].filter(e => getComputedStyle(e).display !== 'none').map(e => e.textContent).join(',')`);
 
-    const b = await t.rect('.status .backup'); await t.mouse(b.x + b.width / 2, b.y + b.height / 2, 'move');
+    // Esperar el estado visual, no un plazo fijo: bajo carga una transición
+    // puede seguir a medio fotograma aunque hayan pasado 200 ms de reloj.
+    const hover = async selector => {
+        const box = await t.rect(selector);
+        await t.mouse(box.x + box.width / 2, box.y + box.height / 2, 'move');
+        for (let i = 0; i < 40; i++) {
+            if (await t.ev(`getComputedStyle(document.querySelector(${JSON.stringify(selector)})).opacity === '1'`)) return;
+            await t.sleep(50);
+        }
+        throw new Error(`hover no alcanza opacidad 1: ${selector}`);
+    };
+    await hover('.status .backup');
     out.hoverRight = await t.ev(`({ backup: getComputedStyle(document.querySelector('.status .backup')).opacity, about: getComputedStyle(document.querySelector('.status .about')).opacity, counter: getComputedStyle(document.querySelector('.statistic')).opacity })`);
-    const c = await t.rect('.statistic'); await t.mouse(c.x + c.width / 2, c.y + c.height / 2, 'move');
+    await hover('.statistic');
     out.hoverLeft = await t.ev(`({ counter: getComputedStyle(document.querySelector('.statistic')).opacity, about: getComputedStyle(document.querySelector('.status .about')).opacity })`);
     await t.ev(`document.querySelector('.status-message').textContent = 'every command, with its key ⌘K'`);
-    out.hintGap = await t.ev(`Math.round(document.querySelector('.status .palette').getBoundingClientRect().left - document.querySelector('.status-message').getBoundingClientRect().right)`);
+    out.hintGap = await t.ev(`Math.round(document.querySelector('.status .language').getBoundingClientRect().left - document.querySelector('.status-message').getBoundingClientRect().right)`);
     out.edgeGap = await t.ev(`Math.round(innerWidth - document.querySelector('.status .about').getBoundingClientRect().right)`);
 
     await t.click('.documents'); out.docsCentred = await t.ev(`(() => { const p = document.querySelector('.picker').getBoundingClientRect(); return Math.abs(p.left + p.width / 2 - innerWidth / 2) < 2 && Math.round(p.width) === 560 })()`); await t.key('Escape', 'Escape');

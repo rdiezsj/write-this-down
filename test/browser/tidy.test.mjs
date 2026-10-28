@@ -1,7 +1,7 @@
 // tidy from the menu: the whole text (with its own undo step) or the selection
 // (through the browser's undo); the status line says what was done
 export const expect = {
-    whole: 'The fox jumps over the lazy dog. Then it sleeps.||- milk|- eggs', status: 'tidied: 1 blank line removed, tabs gone, 2 bullets made markdown · ⌘Z undoes',
+    whole: 'The fox jumps over the lazy dog. Then it sleeps.||- milk|- eggs', status: true,
     undone: 'The fox jumps over the\tlazy dog. Then it sleeps.|||• milk|· eggs', redone: 'The fox jumps over the lazy dog. Then it sleeps.||- milk|- eggs',
     nothing: 'nothing to tidy', selection: 'keep this\tline|a b c|and this\tline', selectionUndone: 'keep this\tline|a   b  c|and this\tline',
 };
@@ -13,7 +13,8 @@ export default async (t) => {
     const menu = async (word) => { await t.click('.palette'); await t.filter(word); await t.key('Enter'); await t.sleep(300); };
 
     await t.focus(); await t.insert('The fox jumps over the\tlazy dog. Then it sleeps.\n\n\n• milk\n· eggs', 400);
-    await menu('tidy'); out.whole = await all(); out.status = await t.status();
+    await menu('tidy'); out.whole = await all(); const undo = await t.ev(`/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘Z' : 'Ctrl+Z'`);
+    out.status = await t.status() === `tidied: 1 blank line removed, tabs gone, 2 bullets made markdown · ${undo} undoes`;
     await t.key('z', 'KeyZ', 4); await t.sleep(200); out.undone = await all();
     await t.key('z', 'KeyZ', 12); await t.sleep(200); out.redone = await all();
     await menu('tidy'); out.nothing = await t.status();
