@@ -10,7 +10,7 @@
     "test:browser:build": "node test/browser/check.mjs",
     "build:extension": "npm run build && node scripts/build-extension.mjs",
     "test:extension": "node --test test/extension.test.mjs test/bridge-content.test.mjs && node test/extension/run.mjs",
-    "test:bridge": "node --test test/bridge-protocol.test.mjs test/bridge-reconcile.test.mjs test/bridge-database.test.mjs test/bridge-journal.test.mjs test/bridge-transport.test.mjs test/bridge-client.test.mjs"
+    "test:bridge": "node --test test/bridge-protocol.test.mjs test/bridge-reconcile.test.mjs test/bridge-database.test.mjs test/bridge-journal.test.mjs test/bridge-transport.test.mjs test/bridge-client.test.mjs test/bridge-sanitizer.test.mjs"
   },
   "repository": {
     "type": "git",

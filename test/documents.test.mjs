@@ -144,3 +144,24 @@ test('restaurar una nota recibida conserva su restricción en sus metadatos',()=
     assert.equal(docs.isReceived('recibida'),true);
     const restarted=s.make();restarted.init();assert.equal(restarted.isReceived('recibida'),true);
 });
+
+test('la instantánea del puente incluye notas, papelera y tombstones sin cambiar el almacén',()=>{
+ const s=stores(),docs=s.make();docs.init();
+ s.data[keys.DOC_PREFIX+'papelera']='DESCARTADA';s.data[keys.META_PREFIX+'papelera']=JSON.stringify({id:'papelera',auto:'DESCARTADA',updated:3,deleted:4});
+ s.data[keys.META_PREFIX+'eliminada']=JSON.stringify({id:'eliminada',removed:true});
+ const before=JSON.stringify(s.data),notes=JSON.parse(JSON.stringify(docs.snapshotForBridge()));
+ assert.equal(notes.find(x=>x.id==='a').html,'A');
+ assert.equal(notes.find(x=>x.id==='papelera').state,'trash');
+ assert.equal(notes.find(x=>x.id==='eliminada').state,'removed');
+ assert.equal(JSON.stringify(s.data),before);
+});
+
+test('la instantánea del puente no omite datos cuando la recuperación está en solo lectura',()=>{
+ const s=stores('CORRUPTO');s.fail(true);const docs=s.make();docs.init();
+ assert.equal(docs.snapshotForBridge(),null);assert.equal(s.data[keys.DOCS],'CORRUPTO');assert.equal(s.data[keys.DOC_PREFIX+'a'],'A');
+});
+
+test('la instantánea se detiene ante metadatos dañados aunque se haya conservado su evidencia',()=>{
+ const s=stores(),docs=s.make();docs.init();s.data[keys.META_PREFIX+'otra']='CORRUPTO';
+ assert.equal(docs.snapshotForBridge(),null);assert.equal(s.data[keys.META_PREFIX+'otra'],'CORRUPTO');
+});

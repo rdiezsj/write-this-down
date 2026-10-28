@@ -277,6 +277,28 @@ export default (function () {
         try { return JSON.parse(raw)?.received === true; } catch { return true; }
     }
 
+    function snapshotForBridge() {
+        refresh();
+        if (!writable) return null;
+        const notes = docs.filter(doc => !temporary || doc.id !== temporary.id).map(doc => {
+            const note = { id: doc.id, html: getContent(doc.id), auto: doc.auto || '', updated: doc.updated || 0,
+                state: doc.deleted ? 'trash' : 'active', received: isReceived(doc.id) };
+            if (doc.deleted) note.deleted = doc.deleted;
+            return note;
+        });
+        for (const key of Object.keys(localStorage)) {
+            if (!key.startsWith(keys.META_PREFIX)) continue;
+            try {
+                const doc = JSON.parse(localStorage[key]);
+                const id = key.slice(keys.META_PREFIX.length);
+                if (!valid(doc) || doc.id !== id) return null;
+                if (doc?.id === id && doc.removed === true)
+                    notes.push({ id, updated: doc.updated || 0, state: 'removed', received: doc.received === true });
+            } catch { return null; }
+        }
+        return notes;
+    }
+
     // Returns true when written, false when storage refused (full): the old copy
     // stays and nothing else is touched
     function saveContent(id, html, firstLine) {
@@ -446,6 +468,7 @@ export default (function () {
         searchText,
         isOwnKey,
         isReceived,
+        snapshotForBridge,
         setBridgeRecorder,
     }
 })();

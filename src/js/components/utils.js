@@ -136,6 +136,13 @@ export default (function() {
         return element.textContent.replace(/\xa0/g, ' ');
     }
 
+    // Template contents are inert: normalize bridge input without loading URLs.
+    function safeBridgeHtml(html) {
+        const template = document.createElement('template');
+        template.innerHTML = html;
+        return textToHtml(articleToText(template.content));
+    }
+
     // A document's name is its first line with text, as a label: a frontmatter block
     // at the top is skipped (its `title:` is the name if it has one); heading marks,
     // list markers and task boxes are dropped; it is cut at a word to NAME_LENGTH.
@@ -223,6 +230,7 @@ export default (function() {
         escapeHtml,
         textToHtml,
         plainHtml,
+        safeBridgeHtml,
         articleToText,
         htmlToText,
         firstLine,
