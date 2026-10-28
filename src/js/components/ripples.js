@@ -61,6 +61,10 @@ export default (function () {
     function frame(time) {
         request = 0;
         if (!on || document.hidden) return;
+        if (still.matches) {
+            refresh();
+            return;
+        }
         if (time - last >= 1000 / 20) {
             pointer.x += (pointer.targetX - pointer.x) * 0.12;
             pointer.y += (pointer.targetY - pointer.y) * 0.12;

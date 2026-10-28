@@ -14,7 +14,7 @@ function background(reduced = false) {
     const sandbox = {
         app: { body, shared: { active: false } }, performance: { now: () => 0 },
         window: { innerWidth: 1000, innerHeight: 800, devicePixelRatio: 1,
-            matchMedia: () => ({ matches: reduced, addEventListener() {} }),
+            matchMedia: () => ({ get matches() { return reduced; }, addEventListener() {} }),
             addEventListener: (name, fn) => { events[name] = fn; } },
         document: { hidden: false, addEventListener() {}, createElement: () => ({ setAttribute() {}, getContext: () => context }) },
         requestAnimationFrame: fn => { next = fn; return 1; }, cancelAnimationFrame() {},
@@ -23,7 +23,7 @@ function background(reduced = false) {
         .replace("import app from './app';", '').replace('export default', 'globalThis.effect =');
     vm.runInNewContext(source, sandbox);
     sandbox.effect.init(); sandbox.effect.set(true);
-    return { events, centres, frame: time => next?.(time) };
+    return { events, centres, reduce: () => { reduced = true; }, frame: time => next?.(time) };
 }
 
 test('el puntero desplaza suavemente los colores con el mismo tiempo de animación', () => {
@@ -40,5 +40,15 @@ test('reducir movimiento mantiene el fondo quieto al mover el puntero', () => {
     const before = JSON.stringify(scene.centres);
     scene.events.pointermove?.({ clientX: 900, clientY: 700, pointerType: 'mouse' });
     scene.frame(100);
+    assert.equal(JSON.stringify(scene.centres), before);
+});
+
+test('detiene el fondo si cambia la preferencia antes de llegar su evento', () => {
+    const scene = background();
+    scene.frame(100);
+    scene.reduce();
+    scene.frame(200);
+    const before = JSON.stringify(scene.centres);
+    scene.frame(300);
     assert.equal(JSON.stringify(scene.centres), before);
 });
