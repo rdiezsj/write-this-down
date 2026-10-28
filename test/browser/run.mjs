@@ -15,10 +15,10 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createServer } from 'node:net';
+import { resolveChrome } from './chrome.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const BASE = process.env.WTD_URL || 'http://localhost:3002';
-const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const freePort = () => new Promise((resolve) => {
@@ -27,6 +27,7 @@ const freePort = () => new Promise((resolve) => {
 
 // Chrome, a CDP socket, and the helpers every suite uses
 async function browser(options = {}) {
+    const executable = resolveChrome();
     const port = await freePort();
     const profile = mkdtempSync(join(tmpdir(), 'wtd-test-'));
     // Chrome headless puede anunciar hover:none aun con un viewport de escritorio.
@@ -35,15 +36,22 @@ async function browser(options = {}) {
         ? 'primaryPointerType=2,availablePointerTypes=2,primaryHoverType=0,availableHoverTypes=0'
         : 'primaryPointerType=4,availablePointerTypes=4,primaryHoverType=2,availableHoverTypes=2';
     const flags = [`--blink-settings=${pointer}`, '--headless=new', '--disable-gpu', '--no-first-run', '--hide-scrollbars', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, `--window-size=${options.width || 1280},${options.height || 800}`, ...(options.flags || []), 'about:blank'];
-    const chrome = spawn(CHROME, flags, { stdio: 'ignore' });
+    const chrome = spawn(executable, flags, { stdio: 'ignore' });
+    let spawnError = null;
+    chrome.once('error', error => { spawnError = error; });
     let target = null;
 
     for (let i = 0; i < 60 && !target; i++) {
+        if (spawnError) break;
         await sleep(250);
         try { target = (await (await fetch(`http://127.0.0.1:${port}/json`)).json()).find(t => t.type === 'page'); } catch (e) { /* not up yet */ }
     }
 
-    if (!target) { chrome.kill('SIGKILL'); throw new Error('Chrome did not start'); }
+    if (!target) {
+        chrome.kill('SIGKILL');
+        rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+        throw new Error(spawnError ? `Chrome no pudo arrancar: ${spawnError.message}` : 'Chrome did not start');
+    }
 
     const ws = new WebSocket(target.webSocketDebuggerUrl);
     await new Promise((resolve) => { ws.onopen = resolve; });
@@ -144,6 +152,7 @@ async function main() {
     const only = process.argv.slice(2);
     const files = readdirSync(here).filter(f => f.endsWith('.test.mjs') && (!only.length || only.some(name => f.includes(name)))).sort();
 
+    if (!files.length) throw new Error('Ninguna suite coincide con los filtros');
     try { execSync(`mkdir -p ${join(here, 'shots')}`); } catch (e) { /* exists */ }
 
     let failed = 0;
