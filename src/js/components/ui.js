@@ -125,6 +125,7 @@ export default (function () {
             is: { touch: isTouch, markdown: () => isMarkdownModeOn, focus: caret.focusOn, lines: caret.linesOn },
             setStatus, setValue, saveState, loadState,
             preserveSharedImages: id => rememberReceived(id, imagePermissions()),
+            imageRestricted: id => !!imagePermissions(id),
             inheritImageRestrictions: (source, id) => {
                 const permissions = imagePermissions(source);
                 if (permissions) rememberReceived(id, permissions);
@@ -557,7 +558,7 @@ export default (function () {
     }
 
     function imagePermissions(key = shared.active ? shared.fragment : editor.documentId()) {
-        let received = shared.active && key === shared.fragment;
+        let received = (shared.active && key === shared.fragment) || documents.isReceived(key);
         try { received = received || sessionStorage.getItem(keys.RECEIVED_PREFIX + key) === 'true'; } catch { /* sin almacenamiento de sesión */ }
         if (received && !receivedImages.has(key)) receivedImages.set(key, new Set());
         return receivedImages.get(key);

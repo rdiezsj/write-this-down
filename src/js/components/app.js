@@ -10,7 +10,7 @@ export default {
     // state the parts read; ui.js keeps the switches and answers through these
     is: { touch: false, markdown: () => false, focus: () => false, lines: () => false },
     // functions every part calls
-    preserveSharedImages: () => {}, inheritImageRestrictions: () => {}, setStatus: () => {}, setValue: () => {}, saveState: () => {}, loadState: () => {},
+    preserveSharedImages: () => {}, inheritImageRestrictions: () => {}, imageRestricted: () => false, setStatus: () => {}, setValue: () => {}, saveState: () => {}, loadState: () => {},
     openPicker: () => {}, closePicker: () => {}, caretMoved: () => {}, counterUpdate: () => {},
     openModal: () => {}, removeOverlay: () => {}, bindChoices: () => {}, selectChoice: () => {}, visibleChoices: () => [],
     sticky: () => {}, sayBeside: () => {}, updateEmptyState: () => {}, wrapLooseLines: () => {}, applySharedLook: () => {},

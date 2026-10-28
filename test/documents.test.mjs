@@ -128,3 +128,19 @@ test('restaurar la versión anterior prepara una operación antes de intercambia
     assert.deepEqual(events,[['active','OLDER A','A'],['applied']]);
     assert.equal(s.data[keys.DOC_PREFIX+'a'],'OLDER A');assert.equal(s.data[keys.DOC_PREFIX+'a'+keys.PREVIOUS_SUFFIX],'A');
 });
+
+test('una nota recibida conserva su procedencia restrictiva desde antes de prepararse',()=>{
+    const s=stores(),docs=s.make(),records=[];docs.init();
+    docs.setBridgeRecorder({prepare(note){records.push(note);return 'op';},applied:()=>true});
+    const note=docs.create('![imagen](https://ejemplo.invalid/a.png)',{received:true});
+    assert.equal(records[0].received,true);
+    assert.equal(docs.isReceived(note.id),true);
+    const afterRestart=s.make();afterRestart.init();assert.equal(afterRestart.isReceived(note.id),true);
+});
+
+test('restaurar una nota recibida conserva su restricción en sus metadatos',()=>{
+    const s=stores(),docs=s.make();docs.init();
+    assert.ok(docs.add({id:'recibida',updated:1,received:true},'texto'));
+    assert.equal(docs.isReceived('recibida'),true);
+    const restarted=s.make();restarted.init();assert.equal(restarted.isReceived('recibida'),true);
+});

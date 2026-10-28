@@ -191,10 +191,10 @@ export default (function() {
         return loadState();
     }
 
-    function createDocument(html, beforeLoad) {
+    function createDocument(html, beforeLoad, options) {
         if (!saveState()) return null;
 
-        const doc = documents.create(html || '');
+        const doc = documents.create(html || '', options);
 
         // storage is full: nothing was made, and the sticky message says why
         if (!doc) {

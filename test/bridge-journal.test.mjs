@@ -32,3 +32,22 @@ test('un recibo de conflicto conserva la revisión de la copia antes de retirar 
  assert.deepEqual(JSON.parse(storage.getItem(keys.BRIDGE_REV_PREFIX+'conflict-o1')),receipt.revision);
  assert.deepEqual(journal.pending(),[]);
 });
+test('una operación enviada conserva exactamente su contenido al reintentar',()=>{
+ const storage=store(),journal=createJournal(storage);journal.prepare(op);journal.applied('o1');
+ assert.equal(journal.sent('o1'),true);assert.deepEqual(createJournal(storage).pending(),[op]);
+ assert.equal(journal.prepare({...op,note:{...op.note,html:'cambiado'}}),false);
+});
+test('el recibo avanza la base de ediciones aún no enviadas a la copia de conflicto',()=>{
+ const storage=store(),journal=createJournal(storage),next={...op,opId:'o2',note:{...op.note,html:'continuación'}};
+ journal.prepare(op);journal.applied('o1');journal.sent('o1');journal.prepare(next);journal.applied('o2');
+ const receipt={opId:'o1',outcome:'conflict',conflictId:'conflict-o1',revision:{epoch:'e',sequence:3}};
+ assert.equal(journal.rebase(receipt),true);
+ const later=journal.pending().find(item=>item.opId==='o2');
+ assert.equal(later.docId,'conflict-o1');assert.equal(later.note.id,'conflict-o1');assert.deepEqual(later.base,receipt.revision);assert.equal(later.note.html,'continuación');
+});
+test('una operación ya enviada nunca vuelve a ser modificable',()=>{
+ const storage=store(),journal=createJournal(storage),next={...op,opId:'o2'};
+ journal.prepare(op);journal.applied('o1');journal.sent('o1');journal.prepare(next);journal.applied('o2');journal.sent('o2');
+ assert.equal(journal.applied('o2'),true);
+ assert.equal(journal.rebase({opId:'o1',outcome:'accepted',revision:{epoch:'e',sequence:2}}),false);
+});

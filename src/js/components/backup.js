@@ -38,6 +38,7 @@ export default (function () {
                 id: doc.id,
                 updated: doc.updated,
                 text: util.htmlToText(documents.getContent(doc.id)),
+                ...(documents.isReceived(doc.id) ? { received: true } : {}),
             })),
         };
     }

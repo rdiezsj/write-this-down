@@ -31,7 +31,9 @@ export default (function () {
     function setBridgeRecorder(recorder) { bridgeRecorder = recorder; }
     function prepareBridge(doc, html, state) {
         if (!bridgeRecorder) return null;
-        const note = { id: doc.id, updated: doc.updated || 0, state, received: false };
+        let received = doc.received === true;
+        try { received = received || sessionStorage.getItem(keys.RECEIVED_PREFIX + doc.id) === 'true'; } catch {}
+        const note = { id: doc.id, updated: doc.updated || 0, state, received };
         if (state !== 'removed') { note.html = html || ''; note.auto = doc.auto || ''; }
         if (state === 'trash') note.deleted = doc.deleted;
         try { return bridgeRecorder.prepare(note) || false; } catch { return false; }
@@ -200,7 +202,7 @@ export default (function () {
     // A document has no name of its own: `auto` is its first line (util.firstLine),
     // kept here so the list needs no text. Older entries may still carry a `title`
     // from when documents could be renamed; it is ignored.
-    function create(html) {
+    function create(html, options = {}) {
         refresh();
         if (!writable) return null;
         const doc = {
@@ -208,6 +210,7 @@ export default (function () {
             auto: util.firstLine(util.htmlToText(html || '')),
             updated: Date.now(),
         };
+        if (bridgeRecorder && options.received) doc.received = true;
 
         const token = prepareBridge(doc, html || '', 'active');
         if (token === false) return null;
@@ -237,6 +240,7 @@ export default (function () {
             auto: util.firstLine(util.htmlToText(html || '')),
             updated: doc.updated || Date.now(),
         };
+        if (doc.received === true) added.received = true;
 
         const token = prepareBridge(added, html || '', 'active');
         if (token === false) return null;
@@ -264,6 +268,13 @@ export default (function () {
 
     function getContent(id) {
         return localStorage[CONTENT_PREFIX + id] || '';
+    }
+
+    function isReceived(id) {
+        try { if (sessionStorage.getItem(keys.RECEIVED_PREFIX + id) === 'true') return true; } catch {}
+        const raw = localStorage[keys.META_PREFIX + id];
+        if (raw === undefined) return false;
+        try { return JSON.parse(raw)?.received === true; } catch { return true; }
     }
 
     // Returns true when written, false when storage refused (full): the old copy
@@ -434,6 +445,7 @@ export default (function () {
         titleOf,
         searchText,
         isOwnKey,
+        isReceived,
         setBridgeRecorder,
     }
 })();
