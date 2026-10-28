@@ -5,7 +5,7 @@
   "scripts": {
     "build": "NODE_ENV=production gulp default",
     "dev": "NODE_ENV=development gulp dev",
-    "test": "node --test test/share.test.mjs test/markdown.test.mjs test/names.test.mjs test/tidy.test.mjs test/seo.test.mjs test/pages.test.mjs test/licenses.test.mjs test/i18n.test.mjs test/background.test.mjs test/editor.test.mjs test/folder.test.mjs",
+    "test": "node --test test/share.test.mjs test/markdown.test.mjs test/names.test.mjs test/tidy.test.mjs test/seo.test.mjs test/pages.test.mjs test/licenses.test.mjs test/i18n.test.mjs test/background.test.mjs test/editor.test.mjs test/folder.test.mjs test/documents.test.mjs",
     "test:browser": "node test/browser/run.mjs"
   },
   "repository": {
@@ -27,11 +27,11 @@
     "markdown-it-task-lists": "^2.1.1"
   },
   "devDependencies": {
-    "browser-sync": "^2.26.7",
-    "del": "^5.0.0",
-    "gulp": "^4.0.2",
+    "browser-sync": "^3.0.4",
+    "del": "^8.0.1",
+    "gulp": "^5.0.1",
     "gulp-clean-css": "^4.2.0",
-    "gulp-sass": "^5.1.0",
+    "gulp-sass": "^6.0.1",
     "sass": "^1.77.0",
     "webpack": "^5.90.0",
     "webpack-stream": "^7.0.0"

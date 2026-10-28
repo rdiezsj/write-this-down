@@ -1,7 +1,7 @@
 // Comprueba que la PWA conserva los recursos al publicarse bajo una subruta.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import vm from 'node:vm';
 
 const read = path => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
@@ -54,4 +54,20 @@ test('las hojas, iconos y manifiesto del editor no escapan de la subruta', () =>
     for (const path of paths.filter(path => !path.startsWith('https://'))) {
         assert.ok(new URL(path, base).href.startsWith(base), path);
     }
+});
+
+
+test('la copia pública conserva exactamente los recursos binarios',()=>{
+    const root=new URL('../',import.meta.url);
+    if(!existsSync(new URL('dist/index.html',root)))return;
+    const scan=dir=>{
+        for(const entry of readdirSync(new URL(`public/${dir}`,root),{withFileTypes:true})) {
+            const name=dir+entry.name;
+            if(entry.isDirectory())scan(name+'/');
+            else if(/\.(?:woff2|png|ico|mp3|ogg|wav)$/.test(name)) {
+                assert.ok(readFileSync(new URL(`public/${name}`,root)).equals(readFileSync(new URL(`dist/${name}`,root))),`${name}: bytes modificados en el build`);
+            }
+        }
+    };
+    scan('');
 });

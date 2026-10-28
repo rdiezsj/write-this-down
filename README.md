@@ -25,6 +25,10 @@ Si falla el guardado, WTD mantiene el texto en pantalla y bloquea el cambio o la
 
 La copia a carpeta conserva los archivos preexistentes y las modificaciones externas. Ante un nombre ocupado escribe una copia con otro nombre; solo actualiza o elimina archivos propios cuyo contenido no haya cambiado. Los cambios externos no se importan automáticamente a las notas del navegador. Si borras los datos del navegador o detienes la conexión, WTD pierde su registro de archivos propios y los tratará como preexistentes al conectar de nuevo.
 
+Si el índice de documentos está dañado, WTD conserva el original en el navegador y reconstruye la lista con los datos disponibles. Si no hay espacio para conservar esa evidencia, permite consultar y exportar las notas y mantiene el guardado pausado hasta poder reparar el almacenamiento.
+
+Los enlaces compartidos admiten hasta 1 MiB de documento serializado en UTF-8 y 2 MiB de enlace. Los documentos mayores se pueden exportar como archivos. El límite se aplica también al abrir y descomprimir enlaces recibidos.
+
 ## Desarrollo local
 
 Requiere Node.js 24 y npm. Las pruebas de navegador requieren Google Chrome.

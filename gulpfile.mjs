@@ -4,7 +4,7 @@ import * as dartSass from 'sass';
 import cleanCss from 'gulp-clean-css';
 import webpackStream from 'webpack-stream';
 import browserSync from 'browser-sync';
-import del from 'del';
+import { deleteAsync } from 'del';
 import fs from 'fs';
 import { Transform } from 'stream';
 import { files as seoFiles } from './src/seo.mjs';
@@ -39,7 +39,7 @@ const paths = {
 };
 
 // Clean dist
-const clean = () => del([paths.dist]);
+const clean = () => deleteAsync([paths.dist]);
 
 // CSS
 function css() {
@@ -58,13 +58,13 @@ function js() {
 
 // Copy public to dist
 function copyPublic() {
-  return gulp.src(paths.public)
+  return gulp.src(paths.public, { encoding: false })
     .pipe(gulp.dest(paths.dist));
 }
 
 // Publicar los avisos de licencia y atribución junto a la aplicación.
 function copyNotices() {
-  return gulp.src(['LICENSE', 'ATTRIBUTION.md', 'CREDITS.md'])
+  return gulp.src(['LICENSE', 'ATTRIBUTION.md', 'CREDITS.md'], { encoding: false })
     .pipe(gulp.dest(paths.dist));
 }
 
