@@ -124,9 +124,10 @@ export default (function () {
             shared, picker: picker.state,
             is: { touch: isTouch, markdown: () => isMarkdownModeOn, focus: caret.focusOn, lines: caret.linesOn },
             setStatus, setValue, saveState, loadState,
-            preserveSharedImages: id => {
-                receivedImages.set(id, imagePermissions());
-                try { sessionStorage.setItem(keys.RECEIVED_PREFIX + id, 'true'); } catch { /* la vista actual conserva el bloqueo */ }
+            preserveSharedImages: id => rememberReceived(id, imagePermissions()),
+            inheritImageRestrictions: (source, id) => {
+                const permissions = imagePermissions(source);
+                if (permissions) rememberReceived(id, permissions);
             }, openPicker: picker.open, closePicker: picker.close,
             openModal, removeOverlay, bindChoices, selectChoice, visibleChoices,
             counterUpdate: () => counter.update(), counterSchedule: () => counter.schedule(), contentsSchedule: () => contents.schedule(),
@@ -550,9 +551,13 @@ export default (function () {
     const EMPTY_PREVIEW = '<div class="preview-welcome"><p>Here your text is rendered as you write it.</p>'
         + '<p><code># heading</code>, <code>**bold**</code>, <code>- list</code>, <code>[link](url)</code>.</p></div>';
 
-    function imagePermissions() {
-        const key = shared.active ? shared.fragment : documents.current()?.id;
-        let received = shared.active;
+    function rememberReceived(id, permissions) {
+        receivedImages.set(id, new Set(permissions));
+        try { sessionStorage.setItem(keys.RECEIVED_PREFIX + id, 'true'); } catch { /* la vista actual conserva el bloqueo */ }
+    }
+
+    function imagePermissions(key = shared.active ? shared.fragment : editor.documentId()) {
+        let received = shared.active && key === shared.fragment;
         try { received = received || sessionStorage.getItem(keys.RECEIVED_PREFIX + key) === 'true'; } catch { /* sin almacenamiento de sesión */ }
         if (received && !receivedImages.has(key)) receivedImages.set(key, new Set());
         return receivedImages.get(key);

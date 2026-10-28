@@ -191,7 +191,7 @@ export default (function() {
         return loadState();
     }
 
-    function createDocument(html) {
+    function createDocument(html, beforeLoad) {
         if (!saveState()) return null;
 
         const doc = documents.create(html || '');
@@ -206,6 +206,7 @@ export default (function() {
             return null;
         }
 
+        if (beforeLoad) beforeLoad(doc);
         documents.setCurrent(doc.id);
         loadState();
 
@@ -240,6 +241,7 @@ export default (function() {
         saveState: saveState,
         openDocument: openDocument,
         createDocument: createDocument,
+        documentId: () => editingId,
         removeDocument: removeDocument,
         onDocumentChange: onDocumentChange,
         lock: lock,

@@ -96,3 +96,16 @@ test('un tombstone recibido antes de CURRENT no bloquea los eventos posteriores'
     s.data[keys.CURRENT]='b';assert.doesNotThrow(()=>s.events.storage({key:keys.CURRENT}));
     assert.equal(s.article.innerHTML,'SAVED B');
 });
+
+test('la identidad del editor conserva el borrador de una nota borrada externamente',()=>{
+    const s=setup();s.edit();s.other().remove('a');s.events.storage({key:keys.META_PREFIX+'a'});
+    assert.equal(s.editor.documentId?.(),'a');
+    assert.equal(s.article.innerHTML,'UNSAVED A');
+});
+
+test('preparar una copia ocurre antes de su primer renderizado',()=>{
+    const s=setup();const order=[];
+    s.editor.onDocumentChange(()=>order.push('render'));
+    const doc=s.editor.createDocument('COPY',copy=>{assert.ok(copy.id);order.push('prepare');});
+    assert.ok(doc);assert.deepEqual(order,['prepare','render']);
+});

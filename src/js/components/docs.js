@@ -70,7 +70,7 @@ export default (function () {
 
     // A copy of the document, opened
     function duplicateDocument(doc) {
-        const copy = editor.createDocument(documents.getContent(doc.id));
+        const copy = editor.createDocument(documents.getContent(doc.id), copy => app.inheritImageRestrictions(doc.id, copy.id));
 
         app.closePicker(false);
 

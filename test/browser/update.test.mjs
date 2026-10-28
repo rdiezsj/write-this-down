@@ -19,6 +19,7 @@ export default async t=>{
         server=await serveBuild({directory:join(dir,'A'),basePath:path});
         await t.send('Page.navigate',{url:server.url+'/'});await t.sleep(1000);
         await t.ev(`localStorage.clear();localStorage.language='en'`);await t.reload(800);
+        await t.ev(`caches.open('wtd-/other-scope/-keep').then(c=>c.put('other-app',new Response('keep other app')))`);
         await t.ev(`navigator.serviceWorker.register('./sw.js').then(()=>navigator.serviceWorker.ready)`);
         for(let i=0;i<100&&!await t.ev(`!!navigator.serviceWorker.controller`);i++)await t.sleep(50);
         const out={controlled:await t.ev(`!!navigator.serviceWorker.controller`),oldBuild:await t.ev(`__fixtureBuild==='A'&&getComputedStyle(document.documentElement).getPropertyValue('--fixture-build').trim()==='A'`)};
@@ -38,7 +39,7 @@ export default async t=>{
         await t.ev(`window.__denyWrites=false;window.dispatchEvent(new Event('pagehide'))`);await t.sleep(300);
         out.saved=await t.ev(`localStorage[${JSON.stringify('wtd.doc.'+id)}].includes('pending draft')`);
         out.otherNote=await child.ev(`Object.keys(localStorage).some(k=>k.startsWith('wtd.doc.')&&localStorage[k].includes('new note in B'))`);
-        out.scoped=await child.ev(`caches.keys().then(keys=>keys.length===1&&keys[0].startsWith('wtd-'+new URL(navigator.serviceWorker.controller.scriptURL).pathname.replace(/sw.js$/,'')+'-'))`);
+        out.scoped=await child.ev(`caches.keys().then(async keys=>keys.filter(k=>k.startsWith('wtd-'+new URL(navigator.serviceWorker.controller.scriptURL).pathname.replace(/sw.js$/,'')+'-')).length===1&&keys.includes('wtd-/other-scope/-keep')&&await caches.open('wtd-/other-scope/-keep').then(c=>c.match('other-app')).then(r=>r&&r.text()).then(text=>text==='keep other app'))`);
         await child.send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
         await child.send('Page.reload');await t.sleep(1300);
         out.offline=await child.ev(`__fixtureBuild==='B'&&document.querySelector('article').isContentEditable`);

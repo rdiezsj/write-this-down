@@ -24,8 +24,10 @@ export default async t => {
     };
     const pixels = `(()=>{const c=document.querySelector('canvas.ripples');return c.getContext('2d').getImageData(0,0,c.width,c.height).data.reduce((sum,v,i)=>sum+(i%4===3?v:0),0)})()`;
     out.gradient = (await t.ev(pixels)) > 0;
+    // La respuesta CDP puede adelantarse al evento de media y a su repintado.
+    await t.ev(`window.__motionReady=new Promise(resolve=>{const query=matchMedia('(prefers-reduced-motion: reduce)');const done=()=>requestAnimationFrame(()=>requestAnimationFrame(resolve));if(query.matches)done();else query.addEventListener('change',done,{once:true})});true`);
     await t.send('Emulation.setEmulatedMedia', {features:[{name:'prefers-reduced-motion',value:'reduce'}]});
-    await t.sleep(150); const a = await t.ev(pixels); await t.sleep(200);
+    await t.ev('window.__motionReady'); const a = await t.ev(pixels); await t.sleep(200);
     out.reducedStill = a === await t.ev(pixels);
     await t.click('.language');
     out.spanish = await t.ev('document.documentElement.lang');

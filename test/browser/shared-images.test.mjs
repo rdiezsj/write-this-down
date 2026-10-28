@@ -1,5 +1,5 @@
 import share from '../../src/js/components/share.js';
-export const expect={blocked:true,oneOnly:true,rerenderSafe:true,importSafe:true,importReloadBlocked:true,space:true,exportIntact:true,reopenedBlocked:true,privateBlocked:true,translated:true,ownUnchanged:true};
+export const expect={blocked:true,oneOnly:true,rerenderSafe:true,importSafe:true,importReloadBlocked:true,duplicateBlocked:true,deletedDraftBlocked:true,space:true,exportIntact:true,reopenedBlocked:true,privateBlocked:true,translated:true,ownUnchanged:true};
 export default async t=>{
  await t.send('Network.setBlockedURLs',{urls:['https://image.test/*']});
  await t.open();
@@ -18,6 +18,13 @@ export default async t=>{
  out.space=requests().some(r=>r.url.endsWith('/b.png'));
  t.requests.length=0;await t.reload();
  out.importReloadBlocked=requests().length===0&&await t.ev(`document.querySelectorAll('.load-image').length===2`);
+ const importedId=await t.stored('wtd.current');
+ await t.ev(`document.querySelector('article').dispatchEvent(new Event('input',{bubbles:true}));const id=localStorage['wtd.current'];const meta=JSON.parse(localStorage['wtd.meta.'+id]);meta.deleted=Date.now();localStorage['wtd.meta.'+id]=JSON.stringify(meta);localStorage['wtd.doc.other']='<div>other note</div>';localStorage['wtd.meta.other']=JSON.stringify({id:'other',auto:'other note',updated:Date.now()});localStorage['wtd.current']='other';window.dispatchEvent(new StorageEvent('storage',{key:'wtd.meta.'+id}))`);
+ await t.click('.markdown');await t.click('.markdown');
+ out.deletedDraftBlocked=requests().length===0&&await t.ev(`document.querySelectorAll('.load-image').length===2`);
+ await t.ev(`{const id=${JSON.stringify(importedId)};const meta=JSON.parse(localStorage['wtd.meta.'+id]);delete meta.deleted;localStorage['wtd.meta.'+id]=JSON.stringify(meta);localStorage['wtd.current']=id;window.dispatchEvent(new Event('pagehide'))}`);await t.reload();t.requests.length=0;
+ await t.click('.documents');await t.key('d','KeyD',2);await t.sleep(300);
+ out.duplicateBlocked=requests().length===0&&await t.ev(`document.querySelectorAll('.load-image').length===2`);
  await t.ev(`window.__exports=[];URL.createObjectURL=b=>{window.__exports.push(b);return 'blob:test'};HTMLAnchorElement.prototype.click=function(){}`);
  await t.key('s','KeyS',2);out.exportIntact=(await t.ev(`window.__exports[0].text()`)).trim()===note;
  t.requests.length=0;await t.goto('/#'+fragment);await t.reload();

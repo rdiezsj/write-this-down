@@ -358,9 +358,8 @@ export default (function () {
 
         // created while the editor is still locked, so the shared text is not saved
         // over the reader's current document on the way
-        const imported = editor.createDocument(util.textToHtml(doc.text));
+        const imported = editor.createDocument(util.textToHtml(doc.text), copy => app.preserveSharedImages(copy.id));
         if (!imported) return;
-        app.preserveSharedImages(imported.id);
         leaveSharedView();
         editor.reload();
         history.replaceState(null, '', location.pathname + location.search);
