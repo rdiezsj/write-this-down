@@ -1,5 +1,7 @@
 // El inglés es la clave; este catálogo contiene únicamente textos de interfaz.
 export default {
+    'load external image': 'cargar imagen externa',
+    'connects to an external website': 'conecta con una web externa',
     'A private place to write.': 'Un lugar privado para escribir.',
     'You open the page and type.': 'Abre la página y escribe.',
     "It is a local app. Everything you write lives in this browser's own storage, and that is the only copy. There is no server, no account, and nothing is ever sent out.": 'Es una aplicación local. Todo lo que escribes se guarda en este navegador y esa es la única copia. No hay servidor ni cuentas; el texto solo sale cuando decides exportarlo o compartirlo.',

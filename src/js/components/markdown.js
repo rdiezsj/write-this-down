@@ -64,12 +64,17 @@ export default (function () {
     };
 
     // A picture by its address (![caption](https://…)) is fetched from that address
-    // when the preview shows it: the only request the page makes on the writer's
-    // behalf. It is fetched lazily and without a referrer, so the host learns
-    // nothing but that someone wanted the picture.
+    // when the preview shows it. Received images require consent: no active URL
+    // is emitted until that exact address has been authorised in this session.
     const image = md.renderer.rules.image;
 
     md.renderer.rules.image = (tokens, index, options, env, self) => {
+        const token = tokens[index];
+        const src = token.attrGet('src');
+        if (env.blockImages && !env.allowedImages.has(src)) {
+            const escape = md.utils.escapeHtml;
+            return `<span class="remote-image"><button type="button" class="load-image" data-image-src="${escape(src)}">load external image</button> <span>${escape(token.content)}</span><small>connects to an external website</small></span>`;
+        }
         tokens[index].attrSet('loading', 'lazy');
         tokens[index].attrSet('referrerpolicy', 'no-referrer');
 
@@ -83,11 +88,12 @@ export default (function () {
 
     // A frontmatter block (--- at the very top, --- again) is shown as a muted
     // key–value block instead of a rule and stray text
-    function render(text) {
+    function render(text, { blockImages = false, allowedImages = new Set() } = {}) {
+        const env = { blockImages, allowedImages };
         const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/.exec(text);
 
         if (!match) {
-            return md.render(text);
+            return md.render(text, env);
         }
 
         const escape = value => value.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -99,7 +105,7 @@ export default (function () {
                 : `<div><dd>${escape(line)}</dd></div>`;
         }).join('');
 
-        return `<dl class="frontmatter">${rows}</dl>${md.render(text.slice(match[0].length))}`;
+        return `<dl class="frontmatter">${rows}</dl>${md.render(text.slice(match[0].length), env)}`;
     }
 
     return {

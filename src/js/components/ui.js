@@ -113,6 +113,8 @@ export default (function () {
 
     // Contents: see contents.js; its panel is hidden with the rest of the interface while typing
     let contentsPanel;
+    // Consent belongs to this received document, never to a host or all notes.
+    const receivedImages = new Map();
 
 
     function init() {
@@ -121,7 +123,11 @@ export default (function () {
         Object.assign(app, {
             shared, picker: picker.state,
             is: { touch: isTouch, markdown: () => isMarkdownModeOn, focus: caret.focusOn, lines: caret.linesOn },
-            setStatus, setValue, saveState, loadState, openPicker: picker.open, closePicker: picker.close,
+            setStatus, setValue, saveState, loadState,
+            preserveSharedImages: id => {
+                receivedImages.set(id, imagePermissions());
+                try { sessionStorage.setItem(keys.RECEIVED_PREFIX + id, 'true'); } catch { /* la vista actual conserva el bloqueo */ }
+            }, openPicker: picker.open, closePicker: picker.close,
             openModal, removeOverlay, bindChoices, selectChoice, visibleChoices,
             counterUpdate: () => counter.update(), counterSchedule: () => counter.schedule(), contentsSchedule: () => contents.schedule(),
             fontScheme: () => fontScheme, formatKeys, countWords: (text) => counter.count(text),
@@ -544,21 +550,37 @@ export default (function () {
     const EMPTY_PREVIEW = '<div class="preview-welcome"><p>Here your text is rendered as you write it.</p>'
         + '<p><code># heading</code>, <code>**bold**</code>, <code>- list</code>, <code>[link](url)</code>.</p></div>';
 
+    function imagePermissions() {
+        const key = shared.active ? shared.fragment : documents.current()?.id;
+        let received = shared.active;
+        try { received = received || sessionStorage.getItem(keys.RECEIVED_PREFIX + key) === 'true'; } catch { /* sin almacenamiento de sesión */ }
+        if (received && !receivedImages.has(key)) receivedImages.set(key, new Set());
+        return receivedImages.get(key);
+    }
+
     function renderPreview() {
         const text = files.getEditorPlainText();
 
         previewTimer = null;
-        showcase.innerHTML = text.trim() ? markdown.render(text) : EMPTY_PREVIEW.replace('Here your text is rendered as you write it.', t('Here your text is rendered as you write it.'));
+        showcase.innerHTML = text.trim() ? markdown.render(text, { blockImages: !!imagePermissions(), allowedImages: imagePermissions() }) : EMPTY_PREVIEW.replace('Here your text is rendered as you write it.', t('Here your text is rendered as you write it.'));
         showcase.querySelectorAll('.code-block .copy').forEach(button => {
             button.textContent = t('copy');
             button.dataset.hint = t('copy this block');
         });
+        showcase.querySelectorAll('.load-image').forEach(button => { button.textContent = t('load external image'); });
+        showcase.querySelectorAll('.remote-image small').forEach(note => { note.textContent = t('connects to an external website'); });
         syncPreviewScroll();
     }
 
     // "copy" on a code block in the preview: the code as plain text to the clipboard;
     // a task's box ticks the task
     async function onShowcaseClick(event) {
+        const image = event.target.closest('.load-image');
+        if (image) {
+            imagePermissions()?.add(image.dataset.imageSrc);
+            renderPreview();
+            return;
+        }
         const checkbox = event.target.closest('.task-list-item-checkbox');
 
         if (checkbox) {

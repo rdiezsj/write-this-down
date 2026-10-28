@@ -33,3 +33,19 @@ test('referencias multilínea sin cerrar no bloquean el renderizado (GHSA-gfr2-r
     assert.equal(result.error, undefined, `El proceso de renderizado excedió el límite: ${result.error}`);
     assert.equal(result.status, 0, result.stderr);
 });
+
+test('las imágenes recibidas no tienen dirección activa hasta autorización', () => {
+    const text='---\ntitle: external\n---\n![cat](https://image.test/cat.png "title")';
+    const blocked=markdown.render(text,{blockImages:true});
+    assert.doesNotMatch(blocked, /<img|\ssrc=|srcset=/);
+    assert.match(blocked, /data-image-src="https:\/\/image.test\/cat.png"/);
+    const allowed=markdown.render(text,{blockImages:true,allowedImages:new Set(['https://image.test/cat.png'])});
+    assert.match(allowed, /<img src=/);
+    assert.match(allowed, /referrerpolicy="no-referrer"/);
+});
+
+test('los marcadores de imágenes escapan texto y rechazan protocolos ejecutables', () => {
+    const html=markdown.render('![<img onerror=alert(1)>](https://image.test/x.png) ![x](javascript:alert(1))',{blockImages:true});
+    assert.doesNotMatch(html, /<img|data-image-src="javascript:/);
+    assert.match(html, /&lt;img/);
+});

@@ -7,6 +7,8 @@ La interfaz permite elegir español o inglés desde la barra inferior o el menú
 Los documentos se guardan en el navegador mediante `localStorage`. No hay cuenta ni servidor de documentos. La aplicación no incluye telemetría. Exportar, crear un enlace compartido o copiar a una carpeta son acciones que decide la persona que escribe. Un enlace compartido contiene el texto en su fragmento (`#`); quien tenga el enlace podrá leerlo, salvo que esté bloqueado con una palabra semilla.
 
 
+Las imágenes de documentos recibidos por enlace requieren pulsar «cargar imagen externa»: su servidor puede conocer tu IP aunque no reciba el referente. El bloqueo se conserva al importar y durante la sesión de esa pestaña; al recargar se vuelve a pedir permiso. Las notas propias mantienen la carga habitual de imágenes en la vista previa.
+
 ## Funciones
 
 - Varios documentos, nombrados por su primera línea, con duplicado y papelera durante 30 días.

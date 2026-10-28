@@ -9,6 +9,9 @@ export default {
     DOC_PREFIX: 'wtd.doc.',           // + id: a document's HTML
     PREVIOUS_SUFFIX: '.prev',         // + after a document key: the copy kept when it shrank
 
+    // sessionStorage: provenance only; image permissions never persist
+    RECEIVED_PREFIX: 'wtd.received.', // + document id imported from a share link in this tab
+
     // localStorage: the settings, in the order the backup carries them
     SETTINGS: ['language', 'scheme', 'font-scheme', 'font-size', 'sound', 'focus-mode', 'preview', 'line-numbers', 'contents', 'spellcheck', 'caret-prefs', 'counter', 'ripples'],
     SCHEME: 'scheme',                 // read by the inline script in index.html too (a literal there)
