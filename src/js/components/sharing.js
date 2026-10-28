@@ -1,3 +1,4 @@
+import facts from '../../facts.mjs';
 import { t } from './i18n';
 import app from './app';
 import util from './utils';
@@ -91,7 +92,7 @@ export default (function () {
     }
 
     function linkFor(fragment) {
-        return `${location.origin}${location.pathname}#${fragment}`;
+        return `${location.protocol === 'chrome-extension:' ? facts.url : location.origin + location.pathname}#${fragment}`;
     }
 
     function sizeOf(length) {

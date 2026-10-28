@@ -7,7 +7,9 @@
     "dev": "NODE_ENV=development gulp dev",
     "test": "node --test test/csp.test.mjs test/chrome.test.mjs test/share.test.mjs test/markdown.test.mjs test/names.test.mjs test/tidy.test.mjs test/seo.test.mjs test/pages.test.mjs test/licenses.test.mjs test/i18n.test.mjs test/background.test.mjs test/editor.test.mjs test/folder.test.mjs test/documents.test.mjs",
     "test:browser": "node test/browser/run.mjs",
-    "test:browser:build": "node test/browser/check.mjs"
+    "test:browser:build": "node test/browser/check.mjs",
+    "build:extension": "npm run build && node scripts/build-extension.mjs",
+    "test:extension": "node --test test/extension.test.mjs && node test/extension/run.mjs"
   },
   "repository": {
     "type": "git",
