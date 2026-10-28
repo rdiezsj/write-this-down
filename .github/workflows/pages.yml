@@ -28,12 +28,26 @@ jobs:
           cache: npm
       - name: Instalar dependencias fijadas
         run: npm ci
-      - name: Ejecutar pruebas
-        run: npm test
       - name: Compilar aplicación
         run: npm run build
-      - name: Comprobar metadatos y licencias compilados
-        run: node --test test/seo.test.mjs test/licenses.test.mjs
+      - name: Ejecutar pruebas con artefactos compilados
+        run: npm test
+      - name: Comprobar Chrome
+        run: google-chrome --version
+      - name: Comprobar navegador en raíz y subruta
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p /tmp/wtd-browser-logs
+          npm run test:browser:build 2>&1 | tee /tmp/wtd-browser-logs/root.log
+          npm run test:browser:build -- --subpath identity interface-mobile zoom shared-images csp update 2>&1 | tee /tmp/wtd-browser-logs/subpath.log
+      - name: Conservar diagnóstico de navegador
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: browser-failure
+          path: /tmp/wtd-browser-logs
+          retention-days: 7
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
       - name: Guardar aplicación compilada

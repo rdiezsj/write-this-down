@@ -33,6 +33,8 @@ Los enlaces compartidos admiten hasta 1 MiB de documento serializado en UTF-8 y 
 
 ## Desarrollo local
 
+`npm run test:browser:build` sirve el build de producción en un puerto temporal y ejecuta las pruebas sin BrowserSync. Añade `-- --subpath` para comprobar `/write-this-down/`. Chrome se detecta automáticamente; puedes indicar otro ejecutable mediante `CHROME`.
+
 Requiere Node.js 24 y npm. Las pruebas de navegador requieren Google Chrome.
 
 ```bash
