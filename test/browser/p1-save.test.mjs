@@ -1,7 +1,7 @@
 export const expect = { blockedOpen:true, blockedCreate:true, sticky:true, exportContainsDraft:true, recovered:true };
 export default async t => {
     await t.open();
-    await t.ev(`localStorage['wtd.docs']=JSON.stringify([{id:'a',auto:'Saved A',updated:1},{id:'b',auto:'Saved B',updated:2}]);localStorage['wtd.current']='a';localStorage['wtd.doc.a']='<div>Saved A</div>';localStorage['wtd.doc.b']='<div>Saved B</div>'`);
+    await t.ev(`localStorage.clear();localStorage.language='en';localStorage['wtd.docs']=JSON.stringify([{id:'a',auto:'Saved A',updated:1},{id:'b',auto:'Saved B',updated:2}]);localStorage['wtd.current']='a';localStorage['wtd.doc.a']='<div>Saved A</div>';localStorage['wtd.doc.b']='<div>Saved B</div>'`);
     await t.reload();
     await t.ev(`window.__realStorage=localStorage;window.__failSave=true;Object.defineProperty(window,'localStorage',{configurable:true,value:new Proxy(window.__realStorage,{get:(s,k)=>typeof s[k]==='function'?s[k].bind(s):s[k],set:(s,k,v)=>{if(window.__failSave&&k==='wtd.doc.a')throw new DOMException('full','QuotaExceededError');s[k]=v;return true}})});document.querySelector('article').innerHTML='<div>UNSAVED A</div>';document.querySelector('article').dispatchEvent(new Event('input',{bubbles:true}))`);
     await t.sleep(400);

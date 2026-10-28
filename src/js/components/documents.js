@@ -2,7 +2,7 @@ import { t } from './i18n';
 import util from './utils';
 import keys from '../keys';
 
-// Document store. The list lives in localStorage['wtd.docs'],
+// Document store. The compatible list cache lives in localStorage['wtd.docs'],
 // each document's HTML in localStorage['wtd.doc.<id>'].
 export default (function () {
     const INDEX_KEY = keys.DOCS;
@@ -21,41 +21,108 @@ export default (function () {
     let docs = [];
     let currentId = null;
 
-    // The list as last read or written here. If storage holds something else, another
-    // tab (or a restore) changed it, and the copy in memory is stale: reload before writing.
-    let storedIndex = null;
+    // Per-document metadata is authoritative; the old shared index is a compatible cache.
+    let writable = true;
+    let recoveryNotice = null;
+    let temporary = null;
 
     function init() {
         load();
-
-        if (docs.length === 0) {
-            currentId = create('').id;
+        if (writable) {
+            docs.filter(doc => doc.deleted && doc.deleted < Date.now() - TRASH_DAYS * 86400000).forEach(doc => destroy(doc.id));
         }
-
-        // what has been in the trash long enough goes
-        docs.filter(doc => doc.deleted && doc.deleted < Date.now() - TRASH_DAYS * 86400000).forEach(doc => destroy(doc.id));
-
-        if (list().length === 0) {
-            create('');
+        if (!docs.some(doc => !doc.deleted)) {
+            const empty = create('');
+            if (!empty && docs.length === 0) {
+                if (!temporary) temporary = { id: newId(), auto: '', updated: Date.now() };
+                docs = [temporary];
+                writable = false;
+            }
         }
-
         if (!getById(currentId) || getById(currentId).deleted) {
-            currentId = list()[0].id;
+            currentId = docs.find(doc => !doc.deleted)?.id || docs[0]?.id;
         }
+        if (writable) saveIndex();
+    }
 
-        saveIndex();
+    function valid(doc) {
+        return doc && typeof doc === 'object' && typeof doc.id === 'string' && doc.id.length > 0
+            && !doc.id.endsWith(PREVIOUS_SUFFIX)
+            && ['updated', 'deleted'].every(key => doc[key] === undefined || Number.isFinite(doc[key]))
+            && (doc.auto === undefined || typeof doc.auto === 'string');
+    }
+
+    function preserve(raw) {
+        if (Object.keys(localStorage).some(key => key.startsWith(keys.INDEX_RECOVERY_PREFIX) && localStorage[key] === raw)) return true;
+        return write(keys.INDEX_RECOVERY_PREFIX + newId(), raw);
     }
 
     function load() {
-        storedIndex = localStorage[INDEX_KEY] || null;
-
+        writable = true;
+        const raw = localStorage[INDEX_KEY];
+        let index = [];
         try {
-            docs = JSON.parse(storedIndex || '[]');
-        } catch (e) {
-            docs = [];
+            index = raw === undefined || raw === null ? [] : JSON.parse(raw);
+            if (!Array.isArray(index) || !index.every(valid) || new Set(index.map(doc => doc.id)).size !== index.length) throw new Error('invalid index');
+        } catch (error) {
+            writable = preserve(raw);
+            recoveryNotice = { preserved: writable };
+            index = [];
         }
-
+        let seed = [];
+        const initial = localStorage[keys.LEGACY_INDEX];
+        if (initial === undefined || initial === null) {
+            if (writable && !write(keys.LEGACY_INDEX, JSON.stringify(index))) {
+                writable = false;
+                recoveryNotice = { preserved: false };
+            }
+        } else {
+            try {
+                seed = JSON.parse(initial);
+                if (!Array.isArray(seed) || !seed.every(valid)) throw new Error('invalid seed');
+            } catch (error) {
+                const preserved = preserve(initial);
+                writable = writable && preserved;
+                recoveryNotice = { preserved: writable };
+                seed = [];
+            }
+        }
+        // Bootstrap snapshots never overwrite authoritative metadata that another tab wrote.
+        const entries = new Map([...seed, ...index].map(doc => [doc.id, doc]));
+        const removed = new Set();
+        for (const key of Object.keys(localStorage).filter(key => key.startsWith(keys.META_PREFIX))) {
+            const id = key.slice(keys.META_PREFIX.length);
+            try {
+                const doc = JSON.parse(localStorage[key]);
+                if (!valid(doc) || doc.id !== id) throw new Error('invalid metadata');
+                if (doc.removed === true) { entries.delete(id); removed.add(id); }
+                else entries.set(id, doc);
+            } catch (error) {
+                const preserved = preserve(localStorage[key]);
+                writable = writable && preserved;
+                recoveryNotice = { preserved: writable };
+            }
+        }
+        for (const key of Object.keys(localStorage)) {
+            if (!key.startsWith(CONTENT_PREFIX) || key.endsWith(PREVIOUS_SUFFIX)) continue;
+            const id = key.slice(CONTENT_PREFIX.length);
+            if (!id || entries.has(id) || removed.has(id)) continue;
+            entries.set(id, { id, auto: util.firstLine(util.htmlToText(localStorage[key])), updated: 0 });
+            recoveryNotice = { preserved: writable };
+        }
+        docs = [...entries.values()];
+        if (writable && recoveryNotice && !recoveryNotice.preserved) recoveryNotice = { preserved: true };
         currentId = localStorage[CURRENT_KEY] || null;
+    }
+
+    function refresh() {
+        const selected = currentId;
+        load();
+        if (getById(selected) && !getById(selected).deleted) currentId = selected;
+    }
+
+    function writeMeta(doc) {
+        return writable && write(keys.META_PREFIX + doc.id, JSON.stringify(doc));
     }
 
     // One write; false when storage refuses it (full). Every write of the store
@@ -70,12 +137,10 @@ export default (function () {
     }
 
     function saveIndex() {
-        storedIndex = JSON.stringify(docs);
-        return write(INDEX_KEY, storedIndex) && write(CURRENT_KEY, currentId);
-    }
-
-    function isStale() {
-        return (localStorage[INDEX_KEY] || null) !== storedIndex;
+        refresh();
+        if (!writable) return false;
+        // A stale cache can never remove a separately committed record.
+        return write(INDEX_KEY, JSON.stringify(docs)) && write(CURRENT_KEY, currentId);
     }
 
     function newId() {
@@ -88,19 +153,29 @@ export default (function () {
 
     // The documents, newest first; what is in the trash is not among them
     function list() {
-        return docs.filter(doc => !doc.deleted).sort((a, b) => b.updated - a.updated);
+        refresh();
+        const active = docs.filter(doc => !doc.deleted).sort((a, b) => b.updated - a.updated);
+        return active.length ? active : [current()];
     }
 
     // The trash, last deleted first
     function trash() {
+        refresh();
         return docs.filter(doc => doc.deleted).sort((a, b) => b.deleted - a.deleted);
     }
 
     function current() {
-        return getById(currentId);
+        const selected = getById(currentId);
+        if (selected && !selected.deleted) return selected;
+        const active = docs.find(doc => !doc.deleted);
+        if (active) { currentId = active.id; return active; }
+        // A remote deletion (or a full, damaged store) may leave no active document.
+        if (!temporary) temporary = { id: newId(), auto: '', updated: Date.now() };
+        return temporary;
     }
 
     function setCurrent(id) {
+        refresh();
         if (getById(id) && !getById(id).deleted) {
             currentId = id;
             saveIndex();
@@ -111,6 +186,8 @@ export default (function () {
     // kept here so the list needs no text. Older entries may still carry a `title`
     // from when documents could be renamed; it is ignored.
     function create(html) {
+        refresh();
+        if (!writable) return null;
         const doc = {
             id: newId(),
             auto: util.firstLine(util.htmlToText(html || '')),
@@ -120,16 +197,19 @@ export default (function () {
         docs.unshift(doc);
 
         // a full store: nothing is left half-made, and null says so
-        if (!write(CONTENT_PREFIX + doc.id, html || '') || !saveIndex()) {
-            forget(doc.id);
+        if (!write(CONTENT_PREFIX + doc.id, html || '') || !writeMeta(doc)) {
+            localStorage.removeItem(CONTENT_PREFIX + doc.id);
             return null;
         }
 
+        saveIndex();
         return doc;
     }
 
     // Add a document that already has an id (from a backup). An id that is already here is left alone: null says so.
     function add(doc, html) {
+        refresh();
+        if (!writable || !valid(doc)) return null;
         if (!doc.id || getById(doc.id)) {
             return null;
         }
@@ -142,16 +222,18 @@ export default (function () {
 
         docs.push(added);
 
-        if (!write(CONTENT_PREFIX + added.id, html || '') || !saveIndex()) {
-            forget(added.id);
+        if (!write(CONTENT_PREFIX + added.id, html || '') || !writeMeta(added)) {
+            localStorage.removeItem(CONTENT_PREFIX + added.id);
             return null;
         }
 
+        saveIndex();
         return added;
     }
 
     // True when nothing has been written yet: at most one document, and it is empty
     function isBlank() {
+        refresh();
         return docs.length === 0 || (docs.length === 1 && isEmpty(docs[0].id));
     }
 
@@ -166,18 +248,14 @@ export default (function () {
     // Returns true when written, false when storage refused (full): the old copy
     // stays and nothing else is touched
     function saveContent(id, html, firstLine) {
-        if (isStale()) {
-            const editing = currentId;
-            load();
-            // Reload the index without switching away from the editor's pending text.
-            if (getById(editing) && !getById(editing).deleted) currentId = editing;
-        }
+        refresh();
+        if (!writable) return false;
 
-        const doc = getById(id);
+        const doc = getById(id) || (temporary && temporary.id === id ? temporary : null);
         const before = localStorage[CONTENT_PREFIX + id];
 
         if (!doc || doc.deleted) return false;
-        if (before === html) return true;
+        if (before === html && doc.auto === firstLine) return true;
 
         try {
             // most of the text gone in one save: keep what was there, in case
@@ -188,6 +266,7 @@ export default (function () {
             localStorage[CONTENT_PREFIX + id] = html;
             doc.updated = Date.now();
             doc.auto = firstLine;
+            if (!writeMeta(doc)) return false;
             saveIndex();
         } catch (e) {
             return false;
@@ -202,6 +281,8 @@ export default (function () {
 
     // Swap the document with its kept copy, so a restore can itself be undone
     function restorePrevious(id) {
+        refresh();
+        if (!writable) return false;
         const previous = localStorage[CONTENT_PREFIX + id + PREVIOUS_SUFFIX];
         const current = localStorage[CONTENT_PREFIX + id];
 
@@ -218,50 +299,48 @@ export default (function () {
     // To the trash: the document and its text stay, out of the list. A document
     // with no text has nothing to keep and goes at once.
     function remove(id) {
+        refresh();
+        if (!writable) return false;
         const doc = getById(id);
-
-        if (!doc) {
-            return;
-        }
-
+        if (!doc || doc.deleted) return false;
+        // Prepare the replacement first: a full store must not leave the editor without a note.
+        if (docs.filter(item => !item.deleted).length === 1 && !create('')) return false;
         if (isEmpty(id)) {
-            forget(id);
-        } else {
-            doc.deleted = Date.now();
-        }
-
-        if (list().length === 0) {
-            create('');
-        }
-
-        if (currentId === id) {
-            currentId = list()[0].id;
-        }
-
+            if (!forget(id)) return false;
+        } else if (!writeMeta({ ...doc, deleted: Date.now() })) return false;
+        refresh();
+        if (currentId === id) currentId = current().id;
         saveIndex();
+        return true;
     }
 
     // Out of the trash, to the top of the list
     function restore(id) {
+        refresh();
+        if (!writable) return false;
         const doc = getById(id);
-
-        if (doc && doc.deleted) {
-            delete doc.deleted;
-            doc.updated = Date.now();
-            saveIndex();
-        }
+        if (!doc || !doc.deleted) return false;
+        const restored = { ...doc, updated: Date.now() };
+        delete restored.deleted;
+        if (!writeMeta(restored)) return false;
+        saveIndex();
+        return true;
     }
 
-    // Gone for good, with its text
+    // Gone for good; keep a tombstone so an obsolete cache cannot resurrect it.
     function destroy(id) {
-        forget(id);
+        refresh();
+        if (!writable || !getById(id) || !forget(id)) return false;
         saveIndex();
+        return true;
     }
 
     function forget(id) {
+        if (!writeMeta({ id, removed: true })) return false;
         docs = docs.filter(doc => doc.id !== id);
         localStorage.removeItem(CONTENT_PREFIX + id);
         localStorage.removeItem(CONTENT_PREFIX + id + PREVIOUS_SUFFIX);
+        return true;
     }
 
     // A document's text as something to search in: tags out, the few entities the
@@ -281,12 +360,13 @@ export default (function () {
     }
 
     function isOwnKey(key) {
-        return key === INDEX_KEY || key === CURRENT_KEY || (key && key.indexOf(CONTENT_PREFIX) === 0);
+        return key === INDEX_KEY || key === CURRENT_KEY || (key && (key.startsWith(CONTENT_PREFIX) || key.startsWith(keys.META_PREFIX)));
     }
 
     return {
         init,
         load,
+        recovery: () => recoveryNotice,
         list,
         trash,
         TRASH_DAYS,

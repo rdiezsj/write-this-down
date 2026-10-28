@@ -1,4 +1,4 @@
-import { deflateSync, inflateSync, strToU8, strFromU8 } from 'fflate';
+import { deflateSync, Inflate, strToU8, strFromU8 } from 'fflate';
 
 // Sharing by link: the document travels inside the part of the address after #,
 // which a browser never sends to a server.
@@ -10,6 +10,9 @@ import { deflateSync, inflateSync, strToU8, strFromU8 } from 'fflate';
 // Pure functions, no DOM.
 export default (function () {
     const VERSION = 1;
+    const MAX_BYTES = 1024 * 1024;       // serialized UTF-8 document
+    const MAX_LINK = 2 * 1024 * 1024;    // characters, before base64 decoding
+    const INFLATE_CHUNK = 128;           // bounds work/output before each size check
     const SALT_BYTES = 16;
     const NONCE_BYTES = 12;
     const PBKDF2_ITERATIONS = 600000;
@@ -44,6 +47,7 @@ export default (function () {
 
     function pack(doc) {
         const packed = { text: doc.text || '' };
+        if (packed.text.length > MAX_BYTES) throw new RangeError('document exceeds the 1 MiB sharing limit');
 
         LOOK.forEach((key) => {
             if (typeof doc[key] === 'string' && doc[key]) {
@@ -51,11 +55,28 @@ export default (function () {
             }
         });
 
-        return deflateSync(strToU8(JSON.stringify(packed)), { level: 9 });
+        const json = JSON.stringify(packed);
+        if (json.length > MAX_BYTES) throw new RangeError('document exceeds the 1 MiB sharing limit');
+        const bytes = strToU8(json);
+        if (bytes.length > MAX_BYTES) throw new RangeError('document exceeds the 1 MiB sharing limit');
+        return deflateSync(bytes, { level: 9 });
     }
 
     function unpack(bytes) {
-        const doc = JSON.parse(strFromU8(inflateSync(bytes)));
+        const chunks = [];
+        let length = 0;
+        const inflater = new Inflate(chunk => {
+            length += chunk.length;
+            if (length > MAX_BYTES) throw new RangeError('document exceeds the 1 MiB sharing limit');
+            chunks.push(chunk);
+        });
+        for (let i = 0; i < bytes.length; i += INFLATE_CHUNK) {
+            inflater.push(bytes.subarray(i, i + INFLATE_CHUNK), i + INFLATE_CHUNK >= bytes.length);
+        }
+        const output = new Uint8Array(length);
+        let offset = 0;
+        for (const chunk of chunks) { output.set(chunk, offset); offset += chunk.length; }
+        const doc = JSON.parse(strFromU8(output));
 
         if (!doc || typeof doc.text !== 'string') {
             throw new Error('not a document');
@@ -74,6 +95,7 @@ export default (function () {
 
     // What a fragment is: none, public, private, incomplete, or from a newer WTD
     function inspect(hash) {
+        if (/^#?s=/.test(hash || '') && hash.length > MAX_LINK) return { kind: 'too-large' };
         const match = /^#?s=(\d+)(e?)\.([A-Za-z0-9_-]*)$/.exec(hash || '');
 
         if (!match) {
@@ -128,10 +150,11 @@ export default (function () {
     }
 
     async function encrypt(doc, seed) {
+        const packed = pack(doc);
         const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES));
         const nonce = crypto.getRandomValues(new Uint8Array(NONCE_BYTES));
         const key = await deriveKey(seed, salt);
-        const cipher = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce }, key, pack(doc)));
+        const cipher = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce }, key, packed));
         const bytes = new Uint8Array(salt.length + nonce.length + cipher.length);
 
         bytes.set(salt, 0);
@@ -151,6 +174,7 @@ export default (function () {
 
         try {
             const bytes = fromBase64Url(share.data);
+            if (bytes.length < SALT_BYTES + NONCE_BYTES + 16) return null;
             const salt = bytes.subarray(0, SALT_BYTES);
             const nonce = bytes.subarray(SALT_BYTES, SALT_BYTES + NONCE_BYTES);
             const cipher = bytes.subarray(SALT_BYTES + NONCE_BYTES);

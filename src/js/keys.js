@@ -2,6 +2,9 @@
 export default {
     // localStorage: the documents
     DOCS: 'wtd.docs',                 // the list: [{ id, auto, updated, deleted }]; `auto` is the first line
+    LEGACY_INDEX: 'wtd.index.seed',   // initial index snapshot; mutations use per-document metadata
+    META_PREFIX: 'wtd.meta.',        // + id: independent metadata, including deletion tombstones
+    INDEX_RECOVERY_PREFIX: 'wtd.recovery.index.', // original damaged indexes, kept locally
     CURRENT: 'wtd.current',           // the open document's id
     DOC_PREFIX: 'wtd.doc.',           // + id: a document's HTML
     PREVIOUS_SUFFIX: '.prev',         // + after a document key: the copy kept when it shrank

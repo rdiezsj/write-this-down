@@ -216,7 +216,10 @@ export default (function() {
         const wasCurrent = id === documents.current().id;
 
         if (!saveState()) return false;
-        documents.remove(id);
+        if (!documents.remove(id)) {
+            if (fullListener) fullListener(true);
+            return false;
+        }
 
         if (wasCurrent) {
             loadState();

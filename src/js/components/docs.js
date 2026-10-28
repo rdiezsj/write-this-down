@@ -124,7 +124,10 @@ export default (function () {
     }
 
     function restoreDocument(doc) {
-        documents.restore(doc.id);
+        if (!documents.restore(doc.id)) {
+            app.setStatus('could not update the document · free space and try again', 4000);
+            return;
+        }
         app.closePicker(false);
         openDocument(doc.id);
         folder.writeAll();
@@ -133,7 +136,10 @@ export default (function () {
 
     function destroyDocument(doc) {
         if (window.confirm(t(`Delete "${documents.titleOf(doc)}" for good?`))) {
-            documents.destroy(doc.id);
+            if (!documents.destroy(doc.id)) {
+                app.setStatus('could not update the document · free space and try again', 4000);
+                return;
+            }
         }
 
         if (documents.trash().length) {
@@ -147,8 +153,8 @@ export default (function () {
         const count = documents.trash().length;
 
         if (window.confirm(t(`Empty the trash? ${count} ${count === 1 ? 'document' : 'documents'}, for good.`))) {
-            documents.trash().forEach(doc => documents.destroy(doc.id));
-            app.setStatus('trash emptied', 3000);
+            const removed = documents.trash().every(doc => documents.destroy(doc.id));
+            app.setStatus(removed ? 'trash emptied' : 'could not update the document · free space and try again', 3000);
         }
     }
 

@@ -48,7 +48,12 @@ export default (function () {
 
         // said before the choice when this text makes a link some messengers would cut
         const long = shareModal.querySelector('.share-long');
-        const length = linkFor(share.encode(sharedDocument())).length;
+        let length;
+        try { length = linkFor(share.encode(sharedDocument())).length; }
+        catch (error) {
+            app.sayBeside(shareElement, 'document too large to share · export it instead');
+            return;
+        }
 
         long.hidden = length <= LONG_LINK;
         long.textContent = t(long.hidden ? '' : `This text makes a link of about ${sizeOf(length)} characters; some messengers cut links this long. It still opens in a browser.`);
@@ -125,7 +130,12 @@ export default (function () {
 
         switch (choice) {
             case 'public': {
-                const link = linkFor(share.encode(sharedDocument()));
+                let link;
+                try { link = linkFor(share.encode(sharedDocument())); }
+                catch (error) {
+                    app.setStatus('document too large to share · export it instead');
+                    return;
+                }
 
                 showReady(link, '', await deliverLink(link));
                 break;
@@ -154,7 +164,7 @@ export default (function () {
                 try {
                     link = linkFor(await share.encrypt(sharedDocument(), seed));
                 } catch (e) {
-                    hint.textContent = t('locking needs https');   // crypto.subtle exists in secure contexts only
+                    hint.textContent = t(e instanceof RangeError ? 'document too large to share · export it instead' : 'locking needs https');   // crypto.subtle exists in secure contexts only
                     return;
                 }
 
@@ -249,7 +259,9 @@ export default (function () {
         app.article.contentEditable = 'false';
         app.article.innerHTML = '';
 
-        if (info.kind === 'public') {
+        if (info.kind === 'too-large') {
+            showSharedProblem('this link is too large');
+        } else if (info.kind === 'public') {
             const doc = share.decode(app.shared.fragment);
 
             if (doc) {

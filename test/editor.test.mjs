@@ -13,7 +13,8 @@ function setup() {
     }});
     localStorage.removeItem = key => { delete data[key]; };
     const util = { supportsHtmlStorage:()=>true, plainHtml:s=>s, firstLine:s=>s, htmlToText:s=>s, firstLineOf:e=>e.innerHTML };
-    const documents = component('documents', {localStorage, util, keys, t:s=>s});
+    const makeDocuments=()=>component('documents', {localStorage, util, keys, t:s=>s});
+    const documents=makeDocuments();
     const events = {};
     const bind = (name,fn) => { events[name] = fn; };
     const article = { innerHTML:'', addEventListener:bind,
@@ -23,7 +24,7 @@ function setup() {
     editor.init();
     const full = []; editor.onStorageFull(value=>full.push(value));
     const edit = () => { article.innerHTML='UNSAVED A'; events.input(); reject=true; };
-    return {editor,documents,article,data,events,full,edit,allow:()=>{reject=false;}};
+    return {editor,documents,article,data,events,full,edit,allow:()=>{reject=false;},other:()=>{const store=makeDocuments();store.init();return store;}};
 }
 
 test('abrir otra nota no descarta el texto si falla el guardado; permite reintentar', () => {
@@ -71,7 +72,7 @@ test('salir solicita confirmación únicamente mientras hay texto sin guardar', 
 test('una nota eliminada en otra pestaña no redirige el borrador a otra nota', () => {
     const s=setup();s.edit();
     s.data[keys.CURRENT]='b';
-    s.data[keys.DOCS]=JSON.stringify([{id:'a',deleted:2,updated:1},{id:'b',updated:2}]);
+    s.other().remove('a');
     s.events.storage({key:keys.DOCS});
     s.allow();assert.equal(s.editor.saveState(),false);
     assert.equal(s.data[keys.DOC_PREFIX+'b'],'SAVED B');
@@ -80,10 +81,18 @@ test('una nota eliminada en otra pestaña no redirige el borrador a otra nota', 
 
 test('restaurar versión anterior no afecta a otra nota tras un borrado externo', () => {
     const s=setup();s.edit();s.data[keys.CURRENT]='b';
-    s.data[keys.DOCS]=JSON.stringify([{id:'a',deleted:2,updated:1},{id:'b',updated:2}]);
+    s.other().remove('a');
     s.data[keys.DOC_PREFIX+'b'+keys.PREVIOUS_SUFFIX]='OLDER B';
     s.events.storage({key:keys.DOCS});
     assert.equal(s.editor.restorePrevious(),false);
     assert.equal(s.data[keys.DOC_PREFIX+'b'],'SAVED B');
     assert.equal(s.article.innerHTML,'UNSAVED A');
+});
+
+
+test('un tombstone recibido antes de CURRENT no bloquea los eventos posteriores',()=>{
+    const s=setup();s.data[keys.META_PREFIX+'a']=JSON.stringify({id:'a',removed:true});
+    assert.doesNotThrow(()=>s.events.storage({key:keys.META_PREFIX+'a'}));
+    s.data[keys.CURRENT]='b';assert.doesNotThrow(()=>s.events.storage({key:keys.CURRENT}));
+    assert.equal(s.article.innerHTML,'SAVED B');
 });
