@@ -15,6 +15,11 @@ test('el paquete de Opera contiene panel, iconos y recursos locales',()=>{
     for(const icon of Object.values(manifest.sidebar_action.default_icon))assert.ok(existsSync('dist/opera/'+icon),icon);
     assert.deepEqual(manifest.permissions||[],[]);
     assert.equal(manifest.host_permissions,undefined);
+    assert.deepEqual(manifest.content_scripts.map(s=>s.matches),[['https://rdiezsj.github.io/write-this-down/*']]);
+    assert.equal(manifest.background.type,'module');
+    assert.ok(existsSync('dist/opera/background.js'));
+    assert.ok(existsSync('dist/opera/content.js'));
+    assert.ok(existsSync('dist/opera/src/bridge/database.js'));
     const html=readFileSync('dist/opera/index.html','utf8');
     const scripts=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
     assert.ok(scripts.length>0);

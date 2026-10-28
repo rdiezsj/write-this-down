@@ -19,3 +19,9 @@ html=html.replace(theme[0],'<script src="theme.js"></script>');
 html=html.replace(/\s*<link rel="manifest"[^>]*>/i,'');
 await writeFile(index,html);
 await cp('extension/opera/manifest.json',join(target,'manifest.json'));
+
+await cp('extension/opera/background.js',join(target,'background.js'));
+await cp('extension/opera/content.js',join(target,'content.js'));
+await cp('src/bridge',join(target,'src/bridge'),{recursive:true});
+await mkdir(join(target,'src/js'),{recursive:true});
+await cp('src/js/keys.js',join(target,'src/js/keys.js'));

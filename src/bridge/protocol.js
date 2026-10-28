@@ -39,3 +39,31 @@ export function joinMessage(chunks) {
     for (const chunk of chunks) { bytes.set(chunk.bytes,offset);offset+=chunk.bytes.length; }
     return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
 }
+
+// One assembler belongs to one Port; abandoning the Port drops incomplete data.
+export function createAssembler() {
+    const partial=new Map();
+    function push(requestId,chunk) {
+        if(!id(requestId) || !isObject(chunk) || !Number.isSafeInteger(chunk.index) ||
+            !Number.isSafeInteger(chunk.total) || chunk.total<1 || chunk.index<0 || chunk.index>=chunk.total ||
+            !Array.isArray(chunk.bytes) || !chunk.bytes.length || chunk.bytes.length>MAX_CHUNK ||
+            chunk.bytes.some(byte=>!Number.isInteger(byte) || byte<0 || byte>255)) {
+            partial.delete(requestId);
+            throw new Error('Fragmento inválido');
+        }
+        let parts=partial.get(requestId);
+        if(!parts) {
+            if(chunk.index!==0 || partial.size>=16) throw new Error('Transferencia inválida');
+            parts=[];partial.set(requestId,parts);
+        }
+        if(chunk.index!==parts.length || (parts.length && chunk.total!==parts[0].total) ||
+            (chunk.index<chunk.total-1 && chunk.bytes.length!==MAX_CHUNK)) {
+            partial.delete(requestId);throw new Error('Fragmentos fuera de orden');
+        }
+        parts.push(chunk);
+        if(parts.length!==chunk.total) return null;
+        partial.delete(requestId);
+        return joinMessage(parts);
+    }
+    return {push};
+}

@@ -3,10 +3,31 @@
   "name": "Write this down!",
   "version": "1.1.0",
   "description": "Un editor de notas Markdown privado y local.",
-  "icons": { "16": "favicon-16x16.png", "32": "favicon-32x32.png", "192": "android-chrome-192x192.png" },
+  "icons": {
+    "16": "favicon-16x16.png",
+    "32": "favicon-32x32.png",
+    "192": "android-chrome-192x192.png"
+  },
   "sidebar_action": {
     "default_title": "Write this down!",
-    "default_icon": { "16": "favicon-16x16.png", "32": "favicon-32x32.png" },
+    "default_icon": {
+      "16": "favicon-16x16.png",
+      "32": "favicon-32x32.png"
+    },
     "default_panel": "index.html"
-  }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://rdiezsj.github.io/write-this-down/*"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ]
 }

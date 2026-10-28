@@ -17,3 +17,18 @@ test('reconstruye mensajes grandes con Unicode y detecta fragmentos ausentes',()
  assert.throws(()=>joinMessage([chunks[1],chunks[0],...chunks.slice(2)]));
  assert.throws(()=>joinMessage([chunks[0],chunks[0],...chunks.slice(2)]));
 });
+test('el ensamblador conserva fragmentos correlacionados y rechaza duplicados',async()=>{
+ const {createAssembler}=await import('../src/bridge/protocol.js');const assembler=createAssembler();
+ const chunks=splitMessage({text:'á🐈'.repeat(30000)});
+ assert.equal(assembler.push('r',chunks[0]),null);
+ assert.throws(()=>assembler.push('r',chunks[0]));
+ const fresh=createAssembler();let result;
+ for(const chunk of chunks)result=fresh.push('r',chunk);
+ assert.equal(result.text,'á🐈'.repeat(30000));
+});
+test('un fragmento inválido descarta la transferencia incompleta antes del reintento',async()=>{
+ const {createAssembler}=await import('../src/bridge/protocol.js'),assembler=createAssembler();
+ const chunks=splitMessage({text:'x'.repeat(70000)});assert.equal(assembler.push('r',chunks[0]),null);
+ assert.throws(()=>assembler.push('r',{...chunks[1],bytes:[256]}));
+ assert.equal(assembler.push('r',chunks[0]),null);assert.equal(assembler.push('r',chunks[1]).text.length,70000);
+});

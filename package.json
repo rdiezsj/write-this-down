@@ -5,12 +5,12 @@
   "scripts": {
     "build": "NODE_ENV=production gulp default",
     "dev": "NODE_ENV=development gulp dev",
-    "test": "node --test test/csp.test.mjs test/chrome.test.mjs test/share.test.mjs test/markdown.test.mjs test/names.test.mjs test/tidy.test.mjs test/seo.test.mjs test/pages.test.mjs test/licenses.test.mjs test/i18n.test.mjs test/background.test.mjs test/editor.test.mjs test/folder.test.mjs test/documents.test.mjs test/bridge-protocol.test.mjs test/bridge-reconcile.test.mjs test/bridge-journal.test.mjs",
+    "test": "node --test test/csp.test.mjs test/chrome.test.mjs test/share.test.mjs test/markdown.test.mjs test/names.test.mjs test/tidy.test.mjs test/seo.test.mjs test/pages.test.mjs test/licenses.test.mjs test/i18n.test.mjs test/background.test.mjs test/editor.test.mjs test/folder.test.mjs test/documents.test.mjs test/bridge-protocol.test.mjs test/bridge-reconcile.test.mjs test/bridge-journal.test.mjs test/bridge-transport.test.mjs",
     "test:browser": "node test/browser/run.mjs",
     "test:browser:build": "node test/browser/check.mjs",
     "build:extension": "npm run build && node scripts/build-extension.mjs",
-    "test:extension": "node --test test/extension.test.mjs && node test/extension/run.mjs",
-    "test:bridge": "node --test test/bridge-protocol.test.mjs test/bridge-reconcile.test.mjs test/bridge-database.test.mjs test/bridge-journal.test.mjs"
+    "test:extension": "node --test test/extension.test.mjs test/bridge-content.test.mjs && node test/extension/run.mjs",
+    "test:bridge": "node --test test/bridge-protocol.test.mjs test/bridge-reconcile.test.mjs test/bridge-database.test.mjs test/bridge-journal.test.mjs test/bridge-transport.test.mjs"
   },
   "repository": {
     "type": "git",

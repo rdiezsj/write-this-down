@@ -23,10 +23,12 @@ async function openPanel(id){
  await send('Network.enable');await send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
  const nav=await send('Page.navigate',{url:`chrome-extension://${id}/index.html`});assert.equal(nav.errorText,undefined);
  await delay(1000);
- return {send,ev:async expression=>(await send('Runtime.evaluate',{expression,returnByValue:true})).result.value};
+ return {send,ev:async expression=>(await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true})).result.value};
 }
+const handshake=`new Promise(resolve=>{const port=chrome.runtime.connect({name:'wtd-bridge-v1'});const timer=setTimeout(()=>{port.disconnect();resolve(null)},5000);port.onDisconnect.addListener(()=>{clearTimeout(timer);resolve(null)});port.onMessage.addListener(frame=>{clearTimeout(timer);const result=JSON.parse(new TextDecoder().decode(new Uint8Array(frame.chunk.bytes)));port.disconnect();resolve(result)});const message={protocol:1,requestId:'probe',method:'hello'};const bytes=Array.from(new TextEncoder().encode(JSON.stringify(message)));port.postMessage({type:'chunk',requestId:'probe',chunk:{index:0,total:1,bytes}})})`;
 try{
  const id=await launch();let tab=await openPanel(id);
+ const first=await tab.ev(handshake);assert.equal(first?.ok,true);assert.ok(first.result.epoch);
  assert.equal(await tab.ev("document.querySelector('article.content')?.isContentEditable===true"),true);
  assert.equal(await tab.ev("(()=>{const e=document.querySelector('article.content');e.innerHTML='<div>nota offline</div>';e.dispatchEvent(new Event('input',{bubbles:true}));return e.textContent})()"),'nota offline');
  await delay(1200);
@@ -39,6 +41,7 @@ try{
  ws.close();await stop();
  const id2=await launch();assert.equal(id2,id);tab=await openPanel(id2);
  assert.equal(await tab.ev("document.querySelector('article.content')?.textContent"),'nota offline');
- const result={offline_first_open:true,offline_write:true,restart_persisted:true,public_link:true,profile:'aislado y eliminado'};
+ const second=await tab.ev(handshake);assert.equal(second?.ok,true);assert.equal(second.result.epoch,first.result.epoch);
+ const result={offline_first_open:true,offline_write:true,restart_persisted:true,public_link:true,bridge_worker:true,profile:'aislado y eliminado'};
  console.log(JSON.stringify(result));
 }finally{ws?.close();await stop();await rm(profile,{recursive:true,force:true,maxRetries:10,retryDelay:500});}
