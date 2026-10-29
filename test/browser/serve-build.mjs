@@ -4,7 +4,7 @@ import {resolve,sep,extname} from 'node:path';
 
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webmanifest':'application/manifest+json','.svg':'image/svg+xml','.png':'image/png','.ico':'image/x-icon','.woff2':'font/woff2','.mp3':'audio/mpeg'};
 // Solo para pruebas locales/CI: sirve un artefacto, nunca el repositorio o notas.
-export async function serveBuild({directory='dist',basePath='/',port=0}={}) {
+export async function serveBuild({directory='dist',basePath='/',port=0,cacheControl='no-store'}={}) {
     let root=resolve(directory);
     const server=createServer(async(req,res)=>{
         try {
@@ -14,7 +14,7 @@ export async function serveBuild({directory='dist',basePath='/',port=0}={}) {
             const file=resolve(root,relative||'index.html');
             if(file!==root&&!file.startsWith(root+sep)) {res.writeHead(403).end();return;}
             const bytes=await readFile(file);
-            res.writeHead(200,{'Content-Type':types[extname(file)]||'text/plain','Cache-Control':'no-store'}).end(bytes);
+            res.writeHead(200,{'Content-Type':types[extname(file)]||'text/plain','Cache-Control':cacheControl}).end(bytes);
         } catch {res.writeHead(404).end();}
     });
     await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});

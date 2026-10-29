@@ -21,6 +21,7 @@ test('el service worker precarga y protege los recursos de su ámbito', () => {
     const scope = 'https://example.test/write-this-down/';
     const context = {
         URL,
+        Request,
         self: {
             registration: { scope },
             location: { origin: 'https://example.test' },
@@ -40,7 +41,8 @@ test('el service worker precarga y protege los recursos de su ámbito', () => {
         let done;
         handlers.install({ waitUntil: promise => { done = promise; } });
         await done;
-        assert.deepEqual(added, [scope, `${scope}js/bundle.js`]);
+        assert.deepEqual(added.map(request => request.url), [scope, `${scope}js/bundle.js`]);
+        assert.ok(added.every(request => request.cache === 'reload'), 'la precarga debe evitar la caché HTTP anterior');
         handlers.activate({ waitUntil: promise => { done = promise; } });
         await done;
         assert.deepEqual(deleted, ['wtd-/write-this-down/-old']);

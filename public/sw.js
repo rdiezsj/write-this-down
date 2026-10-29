@@ -8,7 +8,9 @@ const SHELL = __ASSETS__.map(path => new URL(path, self.registration.scope).href
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE)
-      .then((cache) => cache.addAll(SHELL))
+      // A new worker must not seed its cache with still-fresh HTTP entries
+      // from the previous deployment.
+      .then((cache) => cache.addAll(SHELL.map(path => new Request(path, { cache: 'reload' }))))
       .then(() => self.skipWaiting())
   );
 });

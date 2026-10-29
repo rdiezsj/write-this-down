@@ -16,7 +16,7 @@ export default async t=>{
             const sw=join(root,'sw.js');writeFileSync(sw,readFileSync(sw,'utf8').replace(/const VERSION = '[^']+';/,`const VERSION = '${stamp}-${build}';`));
         }
         const path=new URL(t.base).pathname.replace(/\/$/,'')+'/';
-        server=await serveBuild({directory:join(dir,'A'),basePath:path});
+        server=await serveBuild({directory:join(dir,'A'),basePath:path,cacheControl:'public, max-age=600'});
         await t.send('Page.navigate',{url:server.url+'/'});await t.sleep(1000);
         await t.ev(`localStorage.clear();localStorage.language='en'`);await t.reload(800);
         await t.ev(`caches.open('wtd-/other-scope/-keep').then(c=>c.put('other-app',new Response('keep other app')))`);
