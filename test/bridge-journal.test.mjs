@@ -51,3 +51,18 @@ test('una operación ya enviada nunca vuelve a ser modificable',()=>{
  assert.equal(journal.applied('o2'),true);
  assert.equal(journal.rebase({opId:'o1',outcome:'accepted',revision:{epoch:'e',sequence:2}}),false);
 });
+
+test('el orden de envío no depende del orden de enumeración de localStorage',()=>{
+ const storage=store(),journal=createJournal(storage),next={...op,opId:'o2',note:{...op.note,html:'segunda'}};
+ journal.prepare(op);journal.applied('o1');journal.prepare(next);journal.applied('o2');
+ storage.key=n=>[...storage.data.keys()].reverse()[n]??null;
+ assert.deepEqual(journal.pending().map(item=>item.opId),['o1','o2']);
+ journal.sent('o1');assert.equal(journal.rebase({opId:'o1',outcome:'accepted',revision:{epoch:'e',sequence:1}}),true);
+ assert.equal(journal.pending()[1].base.sequence,1);
+});
+test('no rebasa una edición de otra pestaña como si fuera sucesora del mismo autor',()=>{
+ const storage=store(),journal=createJournal(storage),other={...op,opId:'o2',clientId:'otra-pestaña'};
+ journal.prepare(op);journal.applied('o1');journal.sent('o1');journal.prepare(other);journal.applied('o2');
+ assert.equal(journal.rebase({opId:'o1',outcome:'accepted',revision:{epoch:'e',sequence:2}}),true);
+ assert.equal(journal.pending().find(item=>item.opId==='o2').base,null);
+});

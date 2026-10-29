@@ -20,7 +20,10 @@ export default {
 
     // IndexedDB: the folder copy's handle
     BRIDGE_CURSOR: 'wtd.bridge.cursor', // acknowledged canonical feed position
+    BRIDGE_SNAPSHOT: 'wtd.bridge.snapshot', // recoverable library before first connection
+    BRIDGE_INBOUND_PREFIX: 'wtd.bridge.inbound.', // received changes and previous local values
     BRIDGE_OP_PREFIX: 'wtd.bridge.op.', // durable local operations
+    BRIDGE_ORDER: 'wtd.bridge.order', // local queue order, independent of Storage enumeration
     BRIDGE_REV_PREFIX: 'wtd.bridge.rev.', // latest acknowledged revision by document
     BRIDGE_DB: 'wtd.bridge',            // extension's local bridge coordinator
     DB: 'wtd',

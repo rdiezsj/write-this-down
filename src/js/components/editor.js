@@ -7,6 +7,7 @@ export default (function() {
     // Editor elements
     let contentField;
     let editingId = null;
+    let editingBase = null;
 
     let hasStorage = false;
 
@@ -104,7 +105,7 @@ export default (function() {
             return true;
         }
 
-        const written = documents.saveContent(editingId, html(), util.firstLineOf(contentField));
+        const written = documents.saveContent(editingId, html(), util.firstLineOf(contentField), editingBase);
 
         // storage is full: the text stays on screen and is tried again on the next change
         dirty = !written;
@@ -148,6 +149,7 @@ export default (function() {
         }
 
         editingId = documents.current().id;
+        editingBase = documents.bridgeRevision(editingId);
         contentField.innerHTML = util.plainHtml(documents.getContent(editingId));
         dirty = false;
         notifyChange();
@@ -179,6 +181,16 @@ export default (function() {
         if (documents.current().id !== id || util.plainHtml(documents.getContent(id)) !== html()) {
             loadState();
         }
+    }
+
+    function receiveBridge(apply) {
+        if (locked || !saveState() || !apply()) return false;
+        documents.load();
+        if (documents.current().id !== editingId || util.safeBridgeHtml(documents.getContent(editingId)) !== util.safeBridgeHtml(html())) {
+            return loadState();
+        }
+        editingBase = documents.bridgeRevision(editingId);
+        return true;
     }
 
     function openDocument(id) {
@@ -250,6 +262,7 @@ export default (function() {
         onStorageFull: onStorageFull,
         onSave: onSave,
         restorePrevious: restorePrevious,
+        receiveBridge,
     }
 
 })();

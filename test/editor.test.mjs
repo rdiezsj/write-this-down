@@ -12,7 +12,7 @@ function setup() {
         target[key] = value; return true;
     }});
     localStorage.removeItem = key => { delete data[key]; };
-    const util = { supportsHtmlStorage:()=>true, plainHtml:s=>s, firstLine:s=>s, htmlToText:s=>s, firstLineOf:e=>e.innerHTML };
+    const util = { supportsHtmlStorage:()=>true, plainHtml:s=>s, safeBridgeHtml:s=>s, firstLine:s=>s, htmlToText:s=>s, firstLineOf:e=>e.innerHTML };
     const makeDocuments=()=>component('documents', {localStorage, util, keys, t:s=>s});
     const documents=makeDocuments();
     const events = {};
@@ -108,4 +108,26 @@ test('preparar una copia ocurre antes de su primer renderizado',()=>{
     s.editor.onDocumentChange(()=>order.push('render'));
     const doc=s.editor.createDocument('COPY',copy=>{assert.ok(copy.id);order.push('prepare');});
     assert.ok(doc);assert.deepEqual(order,['prepare','render']);
+});
+
+test('el puente no aplica una actualización si no puede guardar el borrador',()=>{
+ const s=setup();s.edit();let applied=false;
+ assert.equal(s.editor.receiveBridge(()=>{applied=true;return true;}),false);
+ assert.equal(applied,false);assert.equal(s.article.innerHTML,'UNSAVED A');s.allow();s.editor.saveState();
+});
+test('el puente actualiza el artículo solo si cambia su contenido',()=>{
+ const s=setup();let renders=0;s.editor.onDocumentChange(()=>renders++);
+ assert.equal(s.editor.receiveBridge(()=>true),true);assert.equal(renders,0);
+ assert.equal(s.editor.receiveBridge(()=>{s.data[keys.DOC_PREFIX+'a']='REMOTE';return true;}),true);
+ assert.equal(s.article.innerHTML,'REMOTE');assert.equal(renders,1);
+});
+
+test('una edición conserva la revisión con la que se abrió aunque otra pestaña avance',()=>{
+ const s=setup();let revision={epoch:'e',sequence:1},base;
+ s.documents.bridgeRevision=()=>revision;
+ s.editor.reload();
+ const save=s.documents.saveContent;
+ s.documents.saveContent=(id,html,line,seen)=>{base=seen;return save(id,html,line);};
+ revision={epoch:'e',sequence:2};s.article.innerHTML='LOCAL';s.events.input();s.editor.saveState();
+ assert.equal(base.sequence,1);
 });

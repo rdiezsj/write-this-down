@@ -13,7 +13,7 @@ function stores(index=JSON.stringify([{id:'a',auto:'A',updated:1}])) {
         obj[key]=value;return true;
     }});
     storage.removeItem=k=>{delete data[k];};
-    const make=()=>component('documents',{localStorage:storage,keys,util:{firstLine:s=>s,htmlToText:s=>s},t:s=>s});
+    const make=()=>component('documents',{localStorage:storage,keys,util:{firstLine:s=>s,htmlToText:s=>s,safeBridgeHtml:s=>s},t:s=>s});
     return {data,make,fail:v=>{fail=v;},interleave:fn=>{hookKey=keys.DOCS;hook=fn;},interleaveSeed:fn=>{hookKey=keys.LEGACY_INDEX||keys.META_PREFIX+'a';hook=fn;}};
 }
 
@@ -164,4 +164,28 @@ test('la instantánea del puente no omite datos cuando la recuperación está en
 test('la instantánea se detiene ante metadatos dañados aunque se haya conservado su evidencia',()=>{
  const s=stores(),docs=s.make();docs.init();s.data[keys.META_PREFIX+'otra']='CORRUPTO';
  assert.equal(docs.snapshotForBridge(),null);assert.equal(s.data[keys.META_PREFIX+'otra'],'CORRUPTO');
+});
+
+test('aplicar un cambio del puente conserva el original y no vuelve a emitirlo',()=>{
+ const s=stores(),docs=s.make();docs.init();let emitted=false;
+ docs.setBridgeRecorder({prepare(){emitted=true;return false;},applied:()=>true});
+ const receipt={opId:'remote',outcome:'accepted',revision:{epoch:'e',sequence:1},note:{id:'a',html:'REMOTE',auto:'REMOTE',updated:2,state:'active',received:true}};
+ assert.equal(docs.applyBridge(receipt),true);assert.equal(docs.getContent('a'),'REMOTE');assert.equal(emitted,false);
+ assert.match(s.data[keys.BRIDGE_INBOUND_PREFIX+'remote'],/SAVED|OLDER A|"A"/);
+ assert.equal(docs.applyBridge({...receipt,note:{...receipt.note,html:'STALE'}}),true);assert.equal(docs.getContent('a'),'REMOTE');
+});
+test('si no cabe la copia de recuperación del puente, no modifica el texto',()=>{
+ const s=stores(),docs=s.make();docs.init();s.fail(k=>k.startsWith(keys.BRIDGE_INBOUND_PREFIX));
+ assert.equal(docs.applyBridge({opId:'remote',revision:{epoch:'e',sequence:1},note:{id:'a',html:'REMOTE',auto:'REMOTE',updated:2,state:'active',received:true}}),false);
+ assert.equal(docs.getContent('a'),'A');
+});
+
+test('una recepción interrumpida conserva ambas versiones y se puede reintentar',()=>{
+ const s=stores(),docs=s.make();docs.init();s.fail(k=>k===keys.META_PREFIX+'a');
+ const receipt={opId:'interrupted',revision:{epoch:'e',sequence:1},note:{id:'a',html:'NUEVA',auto:'NUEVA',updated:2,state:'active',received:true}};
+ assert.equal(docs.applyBridge(receipt),false);
+ const recovery=JSON.parse(s.data[keys.BRIDGE_INBOUND_PREFIX+'interrupted']);
+ assert.equal(recovery.before.content,'A');assert.equal(recovery.receipt.note.html,'NUEVA');assert.equal(s.data[keys.BRIDGE_REV_PREFIX+'a'],undefined);
+ s.fail(false);assert.equal(docs.applyBridge(receipt),true);assert.equal(docs.getContent('a'),'NUEVA');
+ assert.equal(s.data[keys.DOC_PREFIX+'a'+keys.PREVIOUS_SUFFIX],'OLDER A');
 });

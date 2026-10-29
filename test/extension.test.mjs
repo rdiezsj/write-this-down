@@ -16,6 +16,7 @@ test('el paquete de Opera contiene panel, iconos y recursos locales',()=>{
     assert.deepEqual(manifest.permissions||[],[]);
     assert.equal(manifest.host_permissions,undefined);
     assert.deepEqual(manifest.content_scripts.map(s=>s.matches),[['https://rdiezsj.github.io/write-this-down/*']]);
+    assert.equal(manifest.content_scripts[0].run_at,'document_start');
     assert.equal(manifest.background.type,'module');
     assert.ok(existsSync('dist/opera/background.js'));
     assert.ok(existsSync('dist/opera/content.js'));

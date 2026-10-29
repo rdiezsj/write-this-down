@@ -4,11 +4,13 @@ import {validateOperation} from '../../bridge/protocol.js';
 // A prepared record contains the entire intended text before any local mutation.
 export function createJournal(storage) {
     const keyFor = id => keys.BRIDGE_OP_PREFIX + id;
+    let lastOrder=0;
     function read(id) {
         const raw=storage.getItem(keyFor(id));
         if(raw === null) return null;
         const record=JSON.parse(raw);
-        if(!record || !['prepared','applied','sent'].includes(record.state) || !validateOperation(record.operation) || record.operation.opId!==id)
+        if(!record || !['prepared','applied','sent'].includes(record.state) || !validateOperation(record.operation) || record.operation.opId!==id ||
+            !Number.isSafeInteger(record.order) || record.order<1)
             throw new Error('Journal dañado');
         return record;
     }
@@ -17,7 +19,11 @@ export function createJournal(storage) {
         try {
             const existing=read(operation.opId);
             if(existing) return JSON.stringify(existing.operation)===JSON.stringify(operation);
-            storage.setItem(keyFor(operation.opId),JSON.stringify({state:'prepared',operation}));
+            const order=Math.max(lastOrder,Number(storage.getItem(keys.BRIDGE_ORDER)||0))+1;
+            if(!Number.isSafeInteger(order) || order<1) return false;
+            storage.setItem(keys.BRIDGE_ORDER,String(order));
+            storage.setItem(keyFor(operation.opId),JSON.stringify({state:'prepared',order,operation}));
+            lastOrder=order;
             return true;
         } catch {return false;}
     }
@@ -31,7 +37,7 @@ export function createJournal(storage) {
         } catch {return false;}
     }
     function recover() {
-        const pending=[],drafts=[];
+        const pending=[],drafts=[],records=[];
         let paused=false;
         for(let i=0;i<storage.length;i++) {
             const key=storage.key(i);
@@ -39,9 +45,11 @@ export function createJournal(storage) {
             try {
                 const record=read(key.slice(keys.BRIDGE_OP_PREFIX.length));
                 if(!record) {paused=true;continue;}
-                (record.state==='prepared'?drafts:pending).push(record.operation);
+                records.push(record);
             } catch {paused=true;}
         }
+        records.sort((a,b)=>a.order-b.order || a.operation.opId.localeCompare(b.operation.opId));
+        for(const record of records) (record.state==='prepared'?drafts:pending).push(record.operation);
         return {pending,drafts,paused};
     }
     function pending() {
@@ -64,13 +72,13 @@ export function createJournal(storage) {
                 !Number.isSafeInteger(receipt.revision.sequence) || receipt.revision.sequence<1 ||
                 typeof receipt.revision.epoch!=='string' || !receipt.revision.epoch) return false;
             if(receipt.outcome==='conflict' && receipt.conflictId!==`conflict-${receipt.opId}`) return false;
+            const recovered=recover();
+            if(recovered.paused || recovered.drafts.length) return false;
             let after=false;
-            for(let i=0;i<storage.length;i++) {
-                const key=storage.key(i);
-                if(!key?.startsWith(keys.BRIDGE_OP_PREFIX)) continue;
-                const record=read(key.slice(keys.BRIDGE_OP_PREFIX.length));
-                if(record.operation.opId===receipt.opId) {after=true;continue;}
-                if(!after || record.operation.docId!==source.operation.docId ||
+            for(const item of recovered.pending) {
+                const key=keyFor(item.opId),record=read(item.opId);
+                if(item.opId===receipt.opId) {after=true;continue;}
+                if(!after || record.operation.clientId!==source.operation.clientId || record.operation.docId!==source.operation.docId ||
                     JSON.stringify(record.operation.base)!==JSON.stringify(source.operation.base)) continue;
                 if(record.state!=='applied') return false;
                 const docId=receipt.outcome==='conflict'?receipt.conflictId:record.operation.docId;

@@ -14,10 +14,10 @@ Se conserva el copyright de Nazir Dashtiev sobre el código original. Su incorpo
 
 ## Modificaciones de Write This Down
 
-Modificaciones realizadas el **27 y 28 de octubre de 2026** por el proyecto Write This Down:
+Modificaciones realizadas el **27 a 29 de octubre de 2026** por el proyecto Write This Down:
 
 - Identidad independiente de WTD en interfaz, metadatos, enlaces, almacenamiento y copias; retirada del traslado entre dominios del proyecto original.
-- Empaquetado local de la aplicación como extensión para el panel lateral de Opera.
+- Empaquetado local de la aplicación como extensión para el panel lateral de Opera y conexión del editor con la web mediante un puente dentro del mismo perfil, con cola duradera y copias locales recuperables.
 - Interfaz bilingüe español/inglés, título completo y fondo propio de degradados sin caracteres, con movimiento reducido respetado.
 - Sustitución de los iconos originales por el diseño propio «Líneas y cursor».
 - Sustitución de la fuente monoespaciada original por IBM Plex Mono, con archivos y avisos OFL de IBM sin modificar.

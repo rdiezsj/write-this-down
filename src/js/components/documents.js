@@ -29,14 +29,14 @@ export default (function () {
 
     // The recorder is installed only when the local bridge is enabled.
     function setBridgeRecorder(recorder) { bridgeRecorder = recorder; }
-    function prepareBridge(doc, html, state) {
+    function prepareBridge(doc, html, state, base) {
         if (!bridgeRecorder) return null;
         let received = doc.received === true;
         try { received = received || sessionStorage.getItem(keys.RECEIVED_PREFIX + doc.id) === 'true'; } catch {}
         const note = { id: doc.id, updated: doc.updated || 0, state, received };
         if (state !== 'removed') { note.html = html || ''; note.auto = doc.auto || ''; }
         if (state === 'trash') note.deleted = doc.deleted;
-        try { return bridgeRecorder.prepare(note) || false; } catch { return false; }
+        try { return bridgeRecorder.prepare(note, base) || false; } catch { return false; }
     }
     function finishBridge(token) {
         if (token === null) return true;
@@ -299,9 +299,44 @@ export default (function () {
         return notes;
     }
 
+    function applyBridge(receipt) {
+        refresh();
+        if (!writable) return false;
+        const { note, revision, opId } = receipt;
+        if (!valid(note) || !revision || typeof opId !== 'string' || !opId ||
+            typeof revision.epoch !== 'string' || !Number.isSafeInteger(revision.sequence) || revision.sequence < 1 ||
+            !['active', 'trash', 'removed'].includes(note.state) ||
+            (note.state !== 'removed' && typeof note.html !== 'string') ||
+            (note.state === 'trash' && !Number.isFinite(note.deleted))) return false;
+        try {
+            const revisionKey = keys.BRIDGE_REV_PREFIX + note.id;
+            const previous = localStorage[revisionKey];
+            if (previous !== undefined) {
+                const known = JSON.parse(previous);
+                if (known.epoch !== revision.epoch) return false;
+                if (known.sequence >= revision.sequence) return true;
+            }
+            const recoveryKey = keys.BRIDGE_INBOUND_PREFIX + opId;
+            if (localStorage[recoveryKey] === undefined && !write(recoveryKey, JSON.stringify({receipt,
+                before: {content: localStorage[CONTENT_PREFIX + note.id], metadata: localStorage[keys.META_PREFIX + note.id]}}))) return false;
+            const metadata = {id: note.id, updated: note.updated, received: !!(note.received || isReceived(note.id))};
+            if (note.state === 'removed') metadata.removed = true;
+            else {
+                const html = util.safeBridgeHtml(note.html);
+                metadata.auto = util.firstLine(util.htmlToText(html));
+                if (note.state === 'trash') metadata.deleted = note.deleted;
+                if (!write(CONTENT_PREFIX + note.id, html)) return false;
+            }
+            // Tombstones hide the note without discarding the recoverable local text.
+            if (!writeMeta(metadata) || !write(revisionKey, JSON.stringify(revision))) return false;
+            saveIndex();
+            return true;
+        } catch { return false; }
+    }
+
     // Returns true when written, false when storage refused (full): the old copy
     // stays and nothing else is touched
-    function saveContent(id, html, firstLine) {
+    function saveContent(id, html, firstLine, base) {
         refresh();
         if (!writable) return false;
 
@@ -312,7 +347,7 @@ export default (function () {
         if (before === html && doc.auto === firstLine) return true;
 
         const updated = Date.now();
-        const token = prepareBridge({ ...doc, updated, auto: firstLine }, html, 'active');
+        const token = prepareBridge({ ...doc, updated, auto: firstLine }, html, 'active', base);
         if (token === false) return false;
 
         try {
@@ -469,6 +504,10 @@ export default (function () {
         isOwnKey,
         isReceived,
         snapshotForBridge,
+        applyBridge,
+        bridgeRevision(id) {
+            try { return JSON.parse(localStorage[keys.BRIDGE_REV_PREFIX + id] || 'null'); } catch { return null; }
+        },
         setBridgeRecorder,
     }
 })();

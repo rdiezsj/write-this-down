@@ -1,5 +1,6 @@
 import editor from  './components/editor';
 import ui from './components/ui';
+import bridge from './components/bridge';
 
 editor.init();
 
@@ -11,6 +12,8 @@ try {
     document.body.style.display = 'block';
     document.querySelector('.status-message').textContent = 'something went wrong while starting · the text is safe; reload, or use "export everything"';
 }
+
+try { bridge.start(); } catch (error) { console.error('WTD: local bridge unavailable', error); }
 
 // Ask the browser to keep this site's storage out of eviction (Chrome, Firefox)
 if (navigator.storage && navigator.storage.persist) {
