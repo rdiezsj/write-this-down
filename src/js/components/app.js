@@ -13,7 +13,7 @@ export default {
     preserveSharedImages: () => {}, inheritImageRestrictions: () => {}, imageRestricted: () => false, setStatus: () => {}, setValue: () => {}, saveState: () => {}, loadState: () => {},
     openPicker: () => {}, closePicker: () => {}, caretMoved: () => {}, counterUpdate: () => {},
     openModal: () => {}, removeOverlay: () => {}, bindChoices: () => {}, selectChoice: () => {}, visibleChoices: () => [],
-    sticky: () => {}, sayBeside: () => {}, updateEmptyState: () => {}, wrapLooseLines: () => {}, applySharedLook: () => {},
+    bridgeNotice: () => {}, refreshStatus: () => {}, sticky: () => {}, sayBeside: () => {}, updateEmptyState: () => {}, wrapLooseLines: () => {}, applySharedLook: () => {},
     caretRect: () => null, filterPicker: () => {}, setPickerIndex: () => {}, scrollPickerSelection: () => {},
     look: () => ({}), fontScheme: () => '', formatKeys: (keys) => keys, counterSchedule: () => {}, contentsSchedule: () => {},
     documentsElement: null, countWords: () => ({ words: 0, characters: 0 }),

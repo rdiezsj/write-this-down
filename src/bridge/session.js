@@ -5,7 +5,7 @@ import {bootstrapLibrary} from './bootstrap.js';
 import {recoverBridgeLibrary} from './recovery.js';
 
 // One session joins the existing editor to the local coordinator.
-export function createBridgeSession({storage,documents,editor,transport,onPending=()=>{}}) {
+export function createBridgeSession({storage,documents,editor,transport,onPending=()=>{},onStatus=()=>{}}) {
     const journal=createJournal(storage);
     const clientId=crypto.randomUUID();
     let stopped=false,enabled=false;
@@ -20,7 +20,7 @@ export function createBridgeSession({storage,documents,editor,transport,onPendin
             const opId=crypto.randomUUID();
             return journal.prepare({protocol:1,opId,clientId,docId:note.id,base,note},documents.bridgeBefore?.(note.id))?opId:false;
         },
-        applied(token) {const saved=journal.applied(token);if(saved)onPending();return saved;},
+        applied(token) {const saved=journal.applied(token);if(saved){client.refresh();onPending();}return saved;},
         pending:(id,html)=>journal.recover().pending.some(op=>op.docId===id && op.note.html===html),
     };
     function enable() {documents.setBridgeRecorder(recorder);enabled=true;}
@@ -31,7 +31,7 @@ export function createBridgeSession({storage,documents,editor,transport,onPendin
         if(!bootstrapLibrary({epoch,previous,storage,documents,journal,clientId})) return false;
         enable();return true;
     }
-    const client=createBridgeClient({storage,journal,transport,
+    const client=createBridgeClient({storage,journal,transport,onStatus,
         beforeSync:()=>recoverBridgeLibrary({storage,documents,journal}),
         onFirstConnect:epoch=>connectLibrary(epoch),
         onEpochChange:(epoch,previous)=>connectLibrary(epoch,previous),
@@ -61,13 +61,14 @@ export function createBridgeSession({storage,documents,editor,transport,onPendin
         },
     });
     return {
-        async sync() {
+        async sync(manualRetry=false) {
             if(stopped) return false;
-            const result=await client.sync();
+            const result=await client.sync(manualRetry);
             if(!enabled && storage.getItem(keys.BRIDGE_CURSOR)!==null) enable();
             return result;
         },
         status:()=>client.status(),
+        refresh:()=>client.refresh(),
         stop(){stopped=true;if(enabled)documents.setBridgeRecorder(null);transport.close?.();},
     };
 }

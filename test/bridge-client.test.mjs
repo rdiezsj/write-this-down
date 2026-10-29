@@ -39,3 +39,46 @@ test('un recibo de otro documento no confirma la operación ni altera la copia l
  const client=createBridgeClient({journal,transport,applyRemote:async()=>{applied=true;return true;},storage});
  assert.equal(await client.sync(),false);assert.equal(applied,false);assert.equal(journal.pending().length,1);
 });
+
+test('publica estados pendientes y confirmados, y permite reintentar un fallo sin perder la cola',async()=>{
+ const storage=store(),journal=createJournal(storage),events=[];let fail=true;
+ const receipt={opId:'one',outcome:'accepted',revision:{epoch:'e',sequence:1},note:operation.note};
+ const transport={async request(method){if(fail)throw Error('ausente');return method==='hello'?{epoch:'e',cursor:0}:method==='pull'?[]:receipt;}};
+ const client=createBridgeClient({storage,journal,transport,applyRemote:async()=>true,onStatus:s=>events.push(s)});
+ assert.equal(await client.sync(),false);assert.equal(client.status().retry,true);assert.equal(client.status().active,false);
+ fail=false;assert.equal(await client.sync(),true);assert.equal(client.status().state,'connected');
+ journal.prepare(operation);journal.applied(operation.opId);client.refresh();
+ assert.equal(events.at(-1).state,'pending');assert.equal(events.at(-1).pending,1);
+ assert.equal(await client.sync(),true);assert.equal(events.at(-1).state,'connected');assert.equal(events.at(-1).pending,0);assert.equal(events.at(-1).retry,false);
+});
+test('un journal preparado o corrupto se muestra pausado y nunca conectado',async()=>{
+ const storage=store(),journal=createJournal(storage),events=[];journal.prepare(operation);
+ const client=createBridgeClient({storage,journal,transport:{request(){throw Error('no debe enviar');}},applyRemote:async()=>true,onStatus:s=>events.push(s)});
+ assert.equal(await client.sync(),false);assert.equal(client.status().state,'pending');assert.equal(client.status().pending,1);assert.equal(client.status().retry,true);
+ storage.setItem('wtd.bridge.op.one','dañado');client.refresh();assert.equal(client.status().state,'pending');assert.equal(client.status().retry,true);
+});
+test('solo anuncia conflictos materializados y no repite el aviso al releer el feed',async()=>{
+ const storage=store(),journal=createJournal(storage),events=[];journal.prepare(operation);journal.applied('one');
+ const receipt={opId:'one',outcome:'conflict',revision:{epoch:'e',sequence:1},note:operation.note,conflictId:'conflict-one',conflict:{...operation.note,id:'conflict-one'}};
+ let allow=false;const transport={async request(method){return method==='hello'?{epoch:'e',cursor:1}:method==='pull'?[{cursor:1,receipt}]:receipt;}};
+ const client=createBridgeClient({storage,journal,transport,applyRemote:async()=>allow,onStatus:s=>events.push(s)});
+ assert.equal(await client.sync(),false);assert.equal(client.status().conflicts,0);allow=true;
+ assert.equal(await client.sync(),true);assert.equal(client.status().conflicts,1);
+ assert.equal(events.at(-1).conflicts,1);
+});
+test('las comprobaciones periódicas sin cambios no repiten anuncios de conexión',async()=>{
+ const storage=store(),journal=createJournal(storage),events=[];
+ const client=createBridgeClient({storage,journal,transport:{async request(method){return method==='hello'?{epoch:'e',cursor:0}:[];}},applyRemote:async()=>true,onStatus:s=>events.push(s)});
+ await client.sync();events.length=0;await client.sync();assert.equal(events.length,0);
+});
+test('un fallo persistente no repite anuncios en reintentos automáticos; el manual sí muestra progreso',async()=>{
+ for(const localFailure of [false,true]){
+  const storage=store(),journal=createJournal(storage),events=[];
+  storage.setItem('wtd.bridge.cursor',JSON.stringify({epoch:'e',cursor:0}));
+  const client=createBridgeClient({storage,journal,onStatus:s=>events.push(s),beforeSync:async()=>!localFailure,
+   transport:{async request(){throw Error('ausente');}},applyRemote:async()=>true});
+  await client.sync();assert.equal(client.status().retry,true);events.length=0;
+  await client.sync();assert.equal(events.length,0);
+  await client.sync(true);assert.equal(events[0].state,'syncing');assert.equal(events[0].retry,false);assert.equal(events.at(-1).retry,true);
+ }
+});

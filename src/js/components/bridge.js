@@ -34,26 +34,29 @@ function channel() {
     };
 }
 
-let begin=null;
+let begin=null,session=null,retrySync=null;
+const listeners=new Set();
+function publish(status) {for(const listener of listeners)listener(status);}
 export default {
     prepare() {
         if(begin || !navigator.locks || window.top!==window) return;
         let timer=null,stopped=false;
         const transport=createPageTransport(channel());
-        const session=createBridgeSession({storage:localStorage,documents,editor,transport,onPending:schedule});
+        session=createBridgeSession({storage:localStorage,documents,editor,transport,onPending:schedule,onStatus:publish});
         function schedule() {if(!stopped){clearTimeout(timer);timer=setTimeout(sync,400);}}
-        async function sync() {
+        async function sync(manualRetry=false) {
             if(stopped) return;
             try {
-                await navigator.locks.request('wtd.bridge.sync',{ifAvailable:true},lock=>lock?session.sync():false);
+                await navigator.locks.request('wtd.bridge.sync',{ifAvailable:true},lock=>lock?session.sync(manualRetry):false);
             } catch { /* The editor retains its local copy and durable pending operations. */ }
             if(!stopped && localStorage.getItem(keys.BRIDGE_CURSOR)!==null) {
                 clearTimeout(timer);timer=setTimeout(sync,2000);
             }
         }
+        retrySync=()=>{clearTimeout(timer);return sync(true);};
         begin=()=>{
             window.addEventListener('focus',schedule);
-            window.addEventListener('storage',schedule);
+            window.addEventListener('storage',()=>{session.refresh();schedule();});
             document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedule();});
             // A bfcache return resumes the same session and pending operations.
             window.addEventListener('pagehide',()=>{stopped=true;clearTimeout(timer);});
@@ -62,4 +65,6 @@ export default {
         };
     },
     start() {this.prepare();begin?.();},
+    onStatus(listener) {listeners.add(listener);listener(session?.status() || {state:'disconnected',pending:0,retry:false,active:false,conflicts:0});return ()=>listeners.delete(listener);},
+    retry() {return retrySync?.();},
 };

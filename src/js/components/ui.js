@@ -21,6 +21,7 @@ import paste from './paste';
 import tidy from './tidy';
 import tables from './tables';
 import app from './app';
+import bridgeUi from './bridge-ui';
 import keys from '../keys';
 
 // ui functions
@@ -82,6 +83,7 @@ export default (function () {
     // Status line: a hint for what is under the pointer, or a short message
     let statusHint = '';
     let statusNotice = '';
+    let statusNoticeIsBridge = false;
     let statusSticky = '';     // shown while nothing else is, e.g. for a locked shared document
     let statusTimer = null;
     let statusSaid;
@@ -123,7 +125,8 @@ export default (function () {
         Object.assign(app, {
             shared, picker: picker.state,
             is: { touch: isTouch, markdown: () => isMarkdownModeOn, focus: caret.focusOn, lines: caret.linesOn },
-            setStatus, setValue, saveState, loadState,
+            setStatus, setValue, saveState, loadState, refreshStatus: renderStatus,
+            bridgeNotice: message => { if (!statusSticky && !documents.recovery() && !shared.active) setStatus(message, 4000, true); },
             preserveSharedImages: id => rememberReceived(id, imagePermissions()),
             imageRestricted: id => !!imagePermissions(id),
             inheritImageRestrictions: (source, id) => {
@@ -142,6 +145,7 @@ export default (function () {
         });
 
         bindElements();
+        bridgeUi.init();
 
         // A share link shows its document instead of the reader's own
         try {
@@ -448,8 +452,9 @@ export default (function () {
     }
 
     // A short message, e.g. after a command run from the keyboard
-    function setStatus(text, duration) {
+    function setStatus(text, duration, fromBridge = false) {
         statusNotice = text;
+        statusNoticeIsBridge = fromBridge;
         statusElement.classList.remove('hidden');
         clearTimeout(statusTimer);
         statusTimer = setTimeout(() => {
@@ -483,9 +488,10 @@ export default (function () {
         const recovery = documents.recovery();
         const recovered = recovery ? (recovery.preserved ? 'notes recovered · export a backup'
             : 'storage could not be repaired · saving is paused; export a backup') : '';
-        const sticky = statusSticky || recovered;
-        statusMessage.textContent = t(statusNotice || statusHint || sticky);
-        statusSaid.textContent = t(statusNotice || sticky);
+        const sticky = statusSticky || recovered || (!shared.active ? bridgeUi.message() : '');
+        const notice = statusNoticeIsBridge && (statusSticky || recovered || shared.active) ? '' : statusNotice;
+        statusMessage.textContent = t(notice || statusHint || sticky);
+        statusSaid.textContent = t(notice || sticky);
     }
 
     // The caret follows the font: block with mono, thin with sans and serif,
@@ -969,6 +975,7 @@ export default (function () {
             add('documents', 'export everything as .md (zip)', files.exportEverythingZip, { hint: 'download every document as a file' });
             add('documents', 'export everything as .json', files.exportEverything, { hint: 'download every document and setting' });
             add('documents', 'backup…', files.openBackup, { hint: 'a copy that outlives this browser' });
+            items.push(...bridgeUi.items());
 
             if (documents.trash().length) {
                 items.push({ group: 'documents', ...docs.trashItem() });

@@ -1,5 +1,14 @@
 // El inglés es la clave; este catálogo contiene únicamente textos de interfaz.
 export default {
+    'local bridge connected': 'puente local conectado',
+    'connecting local bridge': 'conectando puente local',
+    'changes pending': 'cambios pendientes',
+    'conflict preserved': 'conflicto conservado',
+    'local bridge unavailable · notes remain in this browser': 'puente local no disponible · las notas siguen en este navegador',
+    'local bridge paused · export a backup or free space, then retry': 'puente local pausado · exporta una copia o libera espacio y reintenta',
+    'retry local bridge': 'reintentar puente local',
+    'Local bridge status; retry when unavailable or paused': 'Estado del puente local; reintentar si no está disponible o está pausado',
+
     'conflict copy': 'copia de conflicto',
     'recovered copy': 'copia recuperada',
     'load external image': 'cargar imagen externa',

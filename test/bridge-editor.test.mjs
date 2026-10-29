@@ -28,6 +28,7 @@ test('el editor real intercambia notas entre web y panel en Opera',{timeout:1200
   const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++serial;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}));});
   const ev=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error(r.exceptionDetails.exception?.description||r.exceptionDetails.text);return r.result.value;};
   await send('Runtime.enable');
+  await ev("localStorage.language='en';true");await send('Page.reload');await sleep(1000);
   const wait=async expression=>{for(let i=0;i<160;i++){if(await ev(expression))return;await sleep(200);}throw Error('No se recibió el cambio: '+expression+' '+JSON.stringify({errors,local:await ev("({keys:Object.keys(localStorage),status:document.querySelector('.status-message')?.textContent,body:!!document.querySelector('article.content')})")}));};
   await wait("!!localStorage.getItem('wtd.bridge.cursor')");
   const extensionId=[...createHash('sha256').update(ext).digest().subarray(0,16)].map(x=>String.fromCharCode(97+(x>>4),97+(x&15))).join('');
@@ -56,9 +57,11 @@ test('el editor real intercambia notas entre web y panel en Opera',{timeout:1200
    assert.equal(await panelEval("document.querySelector('article.content')?.textContent"),'NOTA DESDE WEB');
    await panelEval("document.querySelector('article.content').innerHTML='EDITADA DESDE PANEL';document.querySelector('article.content').dispatchEvent(new InputEvent('input',{bubbles:true}));true");
    await wait("document.querySelector('article.content').textContent==='EDITADA DESDE PANEL'");
+   await wait("document.querySelector('.status-message').textContent==='local bridge connected'");
    // Freeze the web bridge while both editors produce independent intentions.
    await ev("window.__originalPost=window.postMessage.bind(window);window.__holdBridge=true;window.postMessage=(data,...args)=>{if(window.__holdBridge&&data?.direction==='request'&&data?.channel==='wtd-bridge-v1')return;window.__originalPost(data,...args)};window.dispatchEvent(new Event('pagehide'));document.querySelector('article.content').innerHTML='DIVERGENCIA WEB';document.querySelector('article.content').dispatchEvent(new InputEvent('input',{bubbles:true}));true");
    await sleep(600);
+   assert.equal(await ev("document.querySelector('.status-message').textContent"),'changes pending');
    await panelEval("document.querySelector('article.content').innerHTML='DIVERGENCIA PANEL';document.querySelector('article.content').dispatchEvent(new InputEvent('input',{bubbles:true}));true");
    await sleep(600);
    for(let i=0;i<80;i++){await sleep(200);if(await panelEval("!Object.keys(localStorage).some(k=>k.startsWith('wtd.bridge.op.'))"))break;}
@@ -67,6 +70,14 @@ test('el editor real intercambia notas entre web y panel en Opera',{timeout:1200
    await wait("localStorage.getItem('wtd.current').startsWith('conflict-')&&!Object.keys(localStorage).some(k=>k.startsWith('wtd.bridge.op.'))");
    assert.equal(await ev("document.querySelector('article.content').textContent"),'DIVERGENCIA WEB');
    await wait("Object.keys(localStorage).some(k=>k.startsWith('wtd.doc.')&&localStorage[k]==='DIVERGENCIA PANEL')");
+   assert.equal(await ev("document.querySelector('.status-said').textContent"),'conflict preserved');
+   // A subsequent storage refusal must outrank the still-visible conflict notice.
+   await ev("window.__setItem=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k.startsWith('wtd.bridge.op.'))throw new DOMException('full','QuotaExceededError');return window.__setItem.call(this,k,v)};document.querySelector('article.content').innerHTML='DIVERGENCIA WEB SIN GUARDAR';document.querySelector('article.content').dispatchEvent(new InputEvent('input',{bubbles:true}));true");
+   await sleep(600);
+   assert.equal(await ev("document.querySelector('.status-message').textContent.includes('could not save this text')"),true);
+   await ev("Storage.prototype.setItem=window.__setItem;document.querySelector('article.content').innerHTML='DIVERGENCIA WEB';document.querySelector('article.content').dispatchEvent(new InputEvent('input',{bubbles:true}));true");
+   await sleep(600);
+
    await ev("document.querySelector('.documents').click();true");
    assert.equal(await ev("[...document.querySelectorAll('.picker-item .hint')].some(el=>/conflict|conflicto/.test(el.textContent))"),true);
    await ev("document.querySelector('.documents').click();true");
@@ -75,6 +86,26 @@ test('el editor real intercambia notas entre web y panel en Opera',{timeout:1200
    await send('Page.reload');await sleep(1000);
    await wait("document.querySelector('article.content')?.textContent==='BORRADOR RECUPERADO'&&!Object.keys(localStorage).some(k=>k.startsWith('wtd.bridge.op.'))");
    await wait("Object.keys(localStorage).some(k=>k.startsWith('wtd.doc.previous-')&&localStorage[k]==='DIVERGENCIA WEB')");
+   // A transport failure keeps the local editor usable and offers an immediate retry.
+   await ev("window.__savedPost=window.postMessage;window.postMessage=(data,...args)=>{if(data?.direction==='request')throw Error('test disconnect');window.__savedPost(data,...args)};window.dispatchEvent(new Event('focus'));true");
+   await wait("document.querySelector('.status-message').textContent.includes('local bridge unavailable')");
+   await ev("document.querySelector('.palette').click();true");
+   assert.equal(await ev("[...document.querySelectorAll('.picker-item .label')].some(el=>el.textContent==='retry local bridge')"),true);
+   await ev("window.postMessage=window.__savedPost;[...document.querySelectorAll('.picker-item')].find(el=>el.querySelector('.label').textContent==='retry local bridge').click();true");
+   await wait("document.querySelector('.status-message').textContent==='local bridge connected'");
+   assert.equal(await ev("document.querySelector('article.content').textContent"),'BORRADOR RECUPERADO');
+   await ev("document.querySelector('.language').click();true");
+   assert.equal(await ev("document.querySelector('.status-message').textContent"),'puente local conectado');
+   await ev("document.querySelector('.palette').click();true");
+   assert.equal(await ev("[...document.querySelectorAll('.picker-item .label')].some(el=>el.textContent==='puente local conectado')"),true);
+   await ev("document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));document.querySelector('.language').click();true");
+   // A bridge notice must not hide a local save failure.
+   await ev("window.__storage=localStorage;Object.defineProperty(window,'localStorage',{configurable:true,value:new Proxy(window.__storage,{get:(s,k)=>typeof s[k]==='function'?s[k].bind(s):s[k],set:(s,k,v)=>{if(k==='wtd.doc.'+s['wtd.current'])throw new DOMException('full','QuotaExceededError');s[k]=v;return true}})});document.querySelector('article.content').innerHTML='BORRADOR SIN GUARDAR';document.querySelector('article.content').dispatchEvent(new InputEvent('input',{bubbles:true}));true");
+   await wait("document.querySelector('.status-message').textContent.includes('could not save this text')");
+   await ev("window.postMessage=(data,...args)=>{if(data?.direction==='request')throw Error('test disconnect');window.__savedPost(data,...args)};window.dispatchEvent(new Event('focus'));true");
+   await sleep(800);
+   assert.equal(await ev("document.querySelector('.status-message').textContent.includes('could not save this text')"),true);
+   assert.equal(await ev("document.querySelector('article.content').textContent"),'BORRADOR SIN GUARDAR');
   }finally{panel.close();}
 
  }finally{ws?.close();if(proc){const done=new Promise(r=>proc.once('exit',r));proc.kill('SIGTERM');await Promise.race([done,new Promise(r=>setTimeout(r,3000))]);if(proc.exitCode===null)proc.kill('SIGKILL');}server.close();await rm(root,{recursive:true,force:true,maxRetries:10,retryDelay:500});}
