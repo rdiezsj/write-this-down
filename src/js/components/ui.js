@@ -1043,11 +1043,14 @@ export default (function () {
         });
 
         if (!shared.active) {
-            add('appearance', `cursor ${caret.isBlock() ? 'thin' : 'block'}`, caret.toggleCursor, { key: key('Mod Shift K') });
+            ['block', 'thin'].forEach((value) => {
+                const current = caret.isBlock() === (value === 'block');
+                add('appearance', `cursor ${value}`, () => { if (!current) caret.toggleCursor(); }, { current, key: current ? key('Mod Shift K') : '' });
+            });
             keySounds.SETS.forEach((name) => {
                 add('appearance', `sound ${name}`, () => keySounds.change(name), { current: name === keySounds.current(), key: name === keySounds.current() ? key('Mod Shift Y') : '' });
             });
-            add('appearance', `background ${isRipplesOn ? 'off' : 'on'}`, onRipplesClick, { hint: 'the animation on an empty page' });
+            add('appearance', `background ${isRipplesOn ? 'off' : 'on'}`, onRipplesClick, { label: t(isRipplesOn ? 'disable background' : 'enable background'), hint: 'the animation on an empty page' });
         }
 
         if (!isTouch) {

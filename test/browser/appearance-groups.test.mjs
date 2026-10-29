@@ -1,4 +1,4 @@
-export const expect = { groups: 'language,size,theme,font,cursor,sound,background', filtered: 'theme', spanish: 'idioma,tamaño,tema,fuente,cursor,sonido,fondo', selected: true };
+export const expect = { groups: 'language,size,theme,font,cursor,sound,background', filtered: 'theme', spanish: 'idioma,tamaño,tema,fuente,cursor,sonido,fondo', selected: true, labels: true, cursorCurrent: true, cursorChanged: true, cursorKept: true };
 
 export default async t => {
     await t.open();
@@ -12,5 +12,12 @@ export default async t => {
     await t.click('.language');
     await t.click('.palette');
     out.spanish = await headings();
+    out.labels = await t.ev(`document.querySelector('.picker-list').textContent.includes('sin sonido') && document.querySelector('.picker-list').textContent.includes('degradado animado en notas vacías')`);
+    out.cursorCurrent = await t.ev(`document.querySelectorAll('.picker-item.current .label').length > 0 && [...document.querySelectorAll('.picker-item.current .label')].some(e => e.textContent === 'cursor bloque')`);
+    await t.filter('cursor fino'); await t.click('.picker-item');
+    await t.click('.palette'); await t.filter('cursor');
+    out.cursorChanged = await t.ev(`document.querySelector('.picker-item.current .label').textContent === 'cursor fino'`);
+    await t.click('.picker-item.current'); await t.click('.palette'); await t.filter('cursor');
+    out.cursorKept = await t.ev(`document.querySelector('.picker-item.current .label').textContent === 'cursor fino'`);
     return out;
 };

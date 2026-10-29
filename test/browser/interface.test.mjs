@@ -56,9 +56,9 @@ export default async t => {
     await t.ev(`window.__saved=[];const make=URL.createObjectURL.bind(URL);URL.createObjectURL=b=>{window.__saved.push(b);return make(b)};HTMLAnchorElement.prototype.click=function(){}`);
     await t.click('.backup'); await t.click('.backup-modal [data-choice="export"]');
     out.backupLanguage = await t.ev(`window.__saved[0].text().then(s=>JSON.parse(s).settings.language)`);
-    await t.click('.new-doc'); await t.click('.palette'); await t.filter('background off'); await t.click('.picker-item');
+    await t.click('.new-doc'); await t.click('.palette'); await t.filter('disable background'); await t.click('.picker-item');
     out.backgroundOff = await t.ev(`localStorage['ripples']==='false'`) && (await t.ev(pixels)) === 0;
-    await t.click('.palette'); await t.filter('background on'); await t.click('.picker-item');
+    await t.click('.palette'); await t.filter('enable background'); await t.click('.picker-item');
     await t.click('.palette'); await t.filter('theme light'); await t.click('.picker-item');
     await t.ev(`document.querySelector('.language').click()`);
     await t.sleep(200); await t.shot('wtd-es-background');
