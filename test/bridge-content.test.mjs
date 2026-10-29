@@ -7,17 +7,17 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 
 // A test-only copy substitutes the local origin; the production package keeps its strict HTTPS origin.
-test('content script y worker intercambian operaciones solo en la ruta autorizada',{timeout:60000},async()=>{
+test('content script y worker intercambian operaciones solo en el origen autorizado',{timeout:60000},async()=>{
  const root=await mkdtemp(join(tmpdir(),'wtd-bridge-content-')),ext=join(root,'extension'),profile=join(root,'profile');
- const server=createServer((req,res)=>res.writeHead(200,{'Content-Type':'text/html'}).end('<!doctype html><title>prueba sintética</title>'));
+ const server=createServer((req,res)=>res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'}).end('<!doctype html><title>prueba sintética</title>'));
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin=`http://127.0.0.1:${server.address().port}`;
  let proc,ws;
  try{
   await cp('dist/opera',ext,{recursive:true});
   const manifest=JSON.parse(await readFile(join(ext,'manifest.json'),'utf8'));manifest.content_scripts[0].matches=['http://127.0.0.1/*'];
   await writeFile(join(ext,'manifest.json'),JSON.stringify(manifest));
-  const content=join(ext,'content.js');await writeFile(content,(await readFile(content,'utf8')).replace("location.origin==='https://rdiezsj.github.io'",`location.origin===${JSON.stringify(origin)}`));
-  const transport=join(ext,'src/bridge/transport.js');await writeFile(transport,(await readFile(transport,'utf8')).replace("url.protocol==='https:' && url.hostname==='rdiezsj.github.io' && url.port===''",`url.origin===${JSON.stringify(origin)}`));
+  const content=join(ext,'content.js');await writeFile(content,(await readFile(content,'utf8')).replace("location.origin==='https://writethisdown.eu'",`location.origin===${JSON.stringify(origin)}`));
+  const transport=join(ext,'src/bridge/transport.js');await writeFile(transport,(await readFile(transport,'utf8')).replace("url.origin==='https://writethisdown.eu'",`url.origin===${JSON.stringify(origin)}`));
   proc=spawn('opera',['--headless=new',`--user-data-dir=${profile}`,'--remote-debugging-port=0',`--disable-extensions-except=${ext}`,`--load-extension=${ext}`,'--no-first-run',origin+'/write-this-down/'],{stdio:['ignore','ignore','pipe']});let stderr='';proc.stderr.on('data',chunk=>stderr+=chunk);
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));for(let i=0;i<80&&!stderr.includes('DevTools listening on');i++)await sleep(200);
   const port=stderr.match(/DevTools listening on ws:\/\/127\.0\.0\.1:(\d+)\//)?.[1];assert.ok(port);
@@ -33,7 +33,8 @@ test('content script y worker intercambian operaciones solo en la ruta autorizad
   const pulled=await run({protocol:1,requestId:'read',method:'pull',cursor:0});assert.equal(pulled?.result[0].receipt.note.html,'texto sintético');
   const large={...operation,opId:'large',docId:'large',note:{...operation.note,id:'large',html:'ñ🙂'.repeat(200000),auto:'larga'}};
   const big=await run({protocol:1,requestId:'big',method:'apply',operation:large});assert.equal(big?.result.note.html,large.note.html);
-  await send('Page.navigate',{url:origin+'/write-this-down-otro/'});await sleep(800);
+  const outside=await send('Page.navigate',{url:origin.replace('127.0.0.1','localhost')+'/write-this-down/'});assert.equal(outside.errorText,undefined);await sleep(800);
+  assert.equal(await ev('document.title'),'prueba sintética');
   assert.equal(await run({protocol:1,requestId:'outside',method:'hello'}),null);
  }finally{ws?.close();if(proc){const done=new Promise(r=>proc.once('exit',r));proc.kill('SIGTERM');await Promise.race([done,new Promise(r=>setTimeout(r,3000))]);if(proc.exitCode===null)proc.kill('SIGKILL');}server.close();await rm(root,{recursive:true,force:true,maxRetries:10,retryDelay:500});}
 });

@@ -17,8 +17,8 @@ test('el editor real intercambia notas entre web y panel en Opera',{timeout:1200
   await cp('dist/opera',ext,{recursive:true});
   const manifest=JSON.parse(await readFile(join(ext,'manifest.json'),'utf8'));manifest.content_scripts[0].matches=['http://127.0.0.1/*'];
   await writeFile(join(ext,'manifest.json'),JSON.stringify(manifest));
-  const content=join(ext,'content.js');await writeFile(content,(await readFile(content,'utf8')).replace("location.origin==='https://rdiezsj.github.io'",`location.origin===${JSON.stringify(origin)}`));
-  const transport=join(ext,'src/bridge/transport.js');await writeFile(transport,(await readFile(transport,'utf8')).replace("url.protocol==='https:' && url.hostname==='rdiezsj.github.io' && url.port===''",`url.origin===${JSON.stringify(origin)}`));
+  const content=join(ext,'content.js');await writeFile(content,(await readFile(content,'utf8')).replace("location.origin==='https://writethisdown.eu'",`location.origin===${JSON.stringify(origin)}`));
+  const transport=join(ext,'src/bridge/transport.js');await writeFile(transport,(await readFile(transport,'utf8')).replace("url.origin==='https://writethisdown.eu'",`url.origin===${JSON.stringify(origin)}`));
   proc=spawn('opera',['--headless=new',`--user-data-dir=${profile}`,'--remote-debugging-port=0',`--disable-extensions-except=${ext}`,`--load-extension=${ext}`,'--no-first-run',origin+'/write-this-down/'],{stdio:['ignore','ignore','pipe']});let stderr='';proc.stderr.on('data',chunk=>stderr+=chunk);
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));for(let i=0;i<80&&!stderr.includes('DevTools listening on');i++)await sleep(200);
   const port=stderr.match(/DevTools listening on ws:\/\/127\.0\.0\.1:(\d+)\//)?.[1];assert.ok(port);

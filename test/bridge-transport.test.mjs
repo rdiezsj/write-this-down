@@ -5,12 +5,12 @@ const id='abcdefghijklmnopabcdefghijklmnop';
 test('solo admite el panel y la página WTD principal del mismo perfil',()=>{
  assert.equal(senderAllowed({id,url:`chrome-extension://${id}/index.html`},id),true);
  assert.equal(senderAllowed({id,url:`chrome-extension://${id}/index.html`,tab:{id:4}},id),true);
- assert.equal(senderAllowed({id,url:'https://rdiezsj.github.io/write-this-down/',tab:{id:1},frameId:0},id),true);
+ assert.equal(senderAllowed({id,url:'https://writethisdown.eu/',tab:{id:1},frameId:0},id),true);
  for(const sender of [
-  {id,url:'https://rdiezsj.github.io/write-this-down-otro/',tab:{id:1},frameId:0},
-  {id,url:'https://rdiezsj.github.io/otro/',tab:{id:1},frameId:0},
-  {id,url:'https://rdiezsj.github.io/write-this-down/',tab:{id:1},frameId:1},
-  {id:'otra',url:'https://rdiezsj.github.io/write-this-down/',tab:{id:1},frameId:0},
+  {id,url:'https://other.example/',tab:{id:1},frameId:0},
+  {id,url:'https://example.test/',tab:{id:1},frameId:0},
+  {id,url:'https://writethisdown.eu/',tab:{id:1},frameId:1},
+  {id:'otra',url:'https://writethisdown.eu/',tab:{id:1},frameId:0},
   {id,url:`chrome-extension://${id}/otra.html`},
  ]) assert.equal(senderAllowed(sender,id),false);
 });

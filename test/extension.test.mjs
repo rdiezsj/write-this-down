@@ -16,7 +16,7 @@ test('el paquete de Opera contiene panel, iconos y recursos locales',()=>{
     for(const icon of Object.values(manifest.sidebar_action.default_icon))assert.ok(existsSync('dist/opera/'+icon),icon);
     assert.deepEqual(manifest.permissions||[],[]);
     assert.equal(manifest.host_permissions,undefined);
-    assert.deepEqual(manifest.content_scripts.map(s=>s.matches),[['https://writethisdown.eu/*','https://rdiezsj.github.io/write-this-down/*']]);
+    assert.deepEqual(manifest.content_scripts.map(s=>s.matches),[['https://writethisdown.eu/*']]);
     assert.equal(manifest.content_scripts[0].run_at,'document_start');
     assert.equal(manifest.version,pkg.version);
     assert.equal(existsSync('dist/opera/CNAME'),false);
@@ -32,12 +32,11 @@ test('el paquete de Opera contiene panel, iconos y recursos locales',()=>{
 });
 
 
-test('el script de contenido se limita al dominio nuevo y a la ruta anterior',()=>{
+test('el script de contenido se limita al dominio productivo',()=>{
     const source=readFileSync('extension/opera/content.js','utf8');
     for(const [url,allowed] of [
         ['https://writethisdown.eu/',true],
-        ['https://rdiezsj.github.io/write-this-down/',true],
-        ['https://rdiezsj.github.io/otro/',false],
+        ['https://other.example/',false],
         ['http://writethisdown.eu/',false],
         ['https://writethisdown.eu:8443/',false],
         ['https://writethisdown.eu.ejemplo.com/',false],
