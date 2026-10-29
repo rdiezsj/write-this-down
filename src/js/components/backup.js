@@ -2,6 +2,7 @@ import { zipSync, strToU8 } from 'fflate';
 import documents from './documents';
 import util from './utils';
 import keys from '../keys';
+import { validateOperation } from '../../bridge/protocol';
 
 // Everything in one piece: every document and every setting. Used by "export
 // everything" and by "import a backup".
@@ -28,6 +29,28 @@ export default (function () {
 
         const current = documents.current();
         const recovery = documents.bridgeRecoveryArchive?.() || {};
+        const notes = documents.list().map(doc => ({
+            id: doc.id,
+            updated: doc.updated,
+            text: util.htmlToText(documents.getContent(doc.id)),
+            ...(documents.isReceived(doc.id) ? { received: true } : {}),
+        }));
+        const texts = new Set(notes.map(doc => doc.text));
+
+        // Another tab may have replaced the visible cache while this writer's
+        // intention is still pending. Export it as an additive note too, so a
+        // restore never needs to replay old operations over the target library.
+        for (const [key, raw] of Object.entries(recovery)) {
+            if (!key.startsWith(keys.BRIDGE_OP_PREFIX)) continue;
+            try {
+                const { operation } = JSON.parse(raw);
+                if (!validateOperation(operation) || operation.note.state === 'removed') continue;
+                const text = util.htmlToText(operation.note.html);
+                if (!text.trim() || texts.has(text)) continue;
+                notes.push({ id: `recovered-${operation.opId}`, updated: operation.note.updated, text, received: true });
+                texts.add(text);
+            } catch { /* Keep malformed originals in recovery without replaying them. */ }
+        }
 
         return {
             format: FORMAT,
@@ -36,12 +59,7 @@ export default (function () {
             current: current ? current.id : null,
             settings,
             ...(Object.keys(recovery).length ? {recovery} : {}),
-            documents: documents.list().map(doc => ({
-                id: doc.id,
-                updated: doc.updated,
-                text: util.htmlToText(documents.getContent(doc.id)),
-                ...(documents.isReceived(doc.id) ? { received: true } : {}),
-            })),
+            documents: notes,
         };
     }
 

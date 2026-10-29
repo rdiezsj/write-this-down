@@ -6,6 +6,7 @@ export const expect = { host: 'wtd.test', themeChanged: true, menuUsed: true, sl
 export default async (t) => {
     const host = new URL(t.base);
     host.hostname = 'wtd.test';
+    host.pathname = host.pathname.replace(/\/?$/, '/');
     await t.send('Page.navigate', { url: host.href }); await t.sleep(1200);
     await t.ev('localStorage.clear(); sessionStorage.clear()');
     await t.reload();

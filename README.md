@@ -4,7 +4,7 @@ Editor de texto privado y minimalista. Write This Down es un proyecto independie
 
 La interfaz permite elegir español o inglés desde la barra inferior o el menú. La elección se guarda en el navegador y no traduce el contenido de las notas.
 
-Los documentos se guardan en el navegador mediante `localStorage`. No hay cuenta ni servidor de documentos. La aplicación no incluye telemetría. Exportar, crear un enlace compartido o copiar a una carpeta son acciones que decide la persona que escribe. Un enlace compartido contiene el texto en su fragmento (`#`); quien tenga el enlace podrá leerlo, salvo que esté bloqueado con una palabra semilla.
+Los documentos se guardan en el almacenamiento del navegador. No hay cuenta ni servidor de documentos. La aplicación no incluye telemetría. Exportar, crear un enlace compartido o copiar a una carpeta son acciones que decide la persona que escribe. Un enlace compartido contiene el texto en su fragmento (`#`); quien tenga el enlace podrá leerlo, salvo que esté bloqueado con una palabra semilla.
 
 
 Las imágenes de documentos recibidos por enlace requieren pulsar «cargar imagen externa»: su servidor puede conocer tu IP aunque no reciba el referente. El bloqueo se conserva al importar o duplicar la nota y durante la sesión de esa pestaña; al recargar se vuelve a pedir permiso. Las notas propias mantienen la carga habitual de imágenes en la vista previa.
@@ -30,6 +30,25 @@ La copia a carpeta conserva los archivos preexistentes y las modificaciones exte
 Si el índice de documentos está dañado, WTD conserva el original en el navegador y reconstruye la lista con los datos disponibles. Si no hay espacio para conservar esa evidencia, permite consultar y exportar las notas y mantiene el guardado pausado hasta poder reparar el almacenamiento.
 
 Los enlaces compartidos admiten hasta 1 MiB de documento serializado en UTF-8 y 2 MiB de enlace. Los documentos mayores se pueden exportar como archivos. El límite se aplica también al abrir y descomprimir enlaces recibidos.
+
+## Panel lateral de Opera
+
+La extensión abre el editor desde la barra lateral de Opera. Sus recursos están incluidos en el paquete y puede abrirse sin conexión desde el primer uso.
+
+Para generar el paquete desde el código, con Node.js 24:
+
+```bash
+npm ci
+npm run build:extension
+```
+
+En Opera, abre `opera://extensions`, activa el modo de desarrollador y usa «Cargar extensión descomprimida» para seleccionar la carpeta `dist/opera/`. Si recibes un ZIP, extráelo y selecciona la carpeta que contiene `manifest.json`. Conserva esa carpeta para que Opera pueda seguir cargándola. El icono de WTD abre el panel lateral.
+
+El panel y la web de [Write This Down](https://rdiezsj.github.io/write-this-down/) comparten notas y papelera dentro del mismo perfil de Opera cuando ambas versiones incluyen el puente local. Cada superficie conserva su nota seleccionada: para abrir una nota recibida, búscala en la lista de documentos. Los ajustes, permisos de carpeta y autorizaciones de imágenes permanecen separados.
+
+El estado indica si el puente está conectado, tiene cambios pendientes o está en pausa. Ante un error, el menú permite reintentar. Si dos ediciones entran en conflicto, WTD conserva las versiones y señala la copia de conflicto en la lista de documentos. Las copias de seguridad incluyen también como notas recuperables las ediciones pendientes que difieran de las notas visibles. La extensión solo se comunica con la ruta de WTD en su sitio web.
+
+En Chrome, la aplicación instalada y la pestaña web del mismo origen y perfil comparten el almacenamiento del navegador. Las bibliotecas de Opera y Chrome, o de perfiles distintos, permanecen separadas: usa la exportación y restauración de una copia de seguridad para trasladarlas. Exporta una copia antes de desinstalar la extensión o borrar los datos del navegador.
 
 ## Desarrollo local
 
