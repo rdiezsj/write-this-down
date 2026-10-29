@@ -24,9 +24,38 @@
 	// the menu is the long one: higher up and taller, so its groups can be read
 	&[data-kind="commands"] {
 		top: 10vh;
+		width: min(calc(640px * var(--scale, 1)), calc(100vw - 32px));
 
 		.picker-list {
 			max-height: min(74vh, 720px);
+			padding: 8px 12px;
+		}
+
+		.picker-heading {
+			display: flex;
+			align-items: center;
+			gap: 1ch;
+			padding: 18px 8px 7px;
+			text-transform: uppercase;
+
+			&:first-child { padding-top: 5px; }
+			&::after {
+				content: '';
+				flex: 1;
+				border-top: 1px solid var(--line);
+			}
+		}
+
+		.picker-item {
+			position: relative;
+			padding: 6px 8px 6px 24px;
+			gap: 1.5ch;
+
+			&.selected::before {
+				content: '▸';
+				position: absolute;
+				left: 8px;
+			}
 		}
 	}
 

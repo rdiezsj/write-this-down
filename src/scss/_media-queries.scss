@@ -81,6 +81,10 @@
 		}
 	}
 
+	.picker[data-kind="commands"] .picker-item.selected::before {
+		content: none;
+	}
+
 	// key hints are for keyboards
 	.picker-foot {
 		display: none;
@@ -170,6 +174,20 @@
 
 	.picker-item {
 		padding: 11px 14px;
+	}
+
+	.picker[data-kind="commands"] {
+		width: auto;
+
+		.picker-item {
+			flex-wrap: wrap;
+			padding: 11px 8px 11px 24px;
+
+			.hint {
+				flex-basis: 100%;
+				white-space: normal;
+			}
+		}
 	}
 
 	.choice {
