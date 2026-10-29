@@ -116,8 +116,25 @@
     display: none;
 }
 
-@media (max-width: 360px) {
-    .status, .status-right { gap: 1ch; }
+@media (max-width: 480px) {
+    .status { gap: 1ch; }
+    .status-right { gap: calc(1ch + 12px); }
     .language span { display: none; }
     .language::after { display: inline; }
+}
+
+// Un punto fijo evita que el estado del puente ocupe el ancho del panel.
+.status .bridge-indicator {
+    flex: 0 0 auto;
+    align-self: center;
+    width: 0.55em;
+    height: 0.55em;
+    border: 1px solid #888;
+    border-radius: 50%;
+    background: #000;
+    pointer-events: auto;
+
+    &[data-state="connected"] { background: #fff; }
+    &[hidden] { display: none; }
+    &:focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; }
 }

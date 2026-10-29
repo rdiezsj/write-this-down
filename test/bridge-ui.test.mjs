@@ -31,3 +31,12 @@ test('consultar el estado del menú usa el aviso protegido y conserva la priorid
  ui.init();receive({state:'connected',pending:0,retry:false,active:true,conflicts:0});ui.items()[0].run();
  assert.deepEqual(calls,['local bridge connected']);
 });
+
+test('el punto solo es blanco tras conectar sin cambios pendientes ni reintentos',()=>{
+ const {ui,update}=setup();assert.equal(ui.indicator(),null);
+ update({state:'connected'});assert.equal(ui.indicator(),'connected');
+ update({state:'connected',pending:1});assert.equal(ui.indicator(),'disconnected');
+ update({state:'connected',retry:true});assert.equal(ui.indicator(),'disconnected');
+ update({state:'pending'});assert.equal(ui.indicator(),'disconnected');
+ update({state:'disconnected'});assert.equal(ui.indicator(),'disconnected');
+});

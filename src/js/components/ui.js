@@ -27,7 +27,7 @@ import keys from '../keys';
 // ui functions
 export default (function () {
     // Base elements
-    let body, article, showcase, commandsElement, statusElement, statusTitle, statusMessage, statistic, overlay, descriptionModal, helpModal;
+    let body, article, showcase, commandsElement, statusElement, statusTitle, statusMessage, bridgeIndicator, statistic, overlay, descriptionModal, helpModal;
 
     // Commands (the column of words on the right)
     let screenSizeElement, colorLayoutElement, changeFontElement, sfxMuteElement, markdownElement;
@@ -318,6 +318,7 @@ export default (function () {
         statusElement = document.querySelector('.status');
         statusTitle = statusElement.querySelector('.status-title');
         statusMessage = statusElement.querySelector('.status-message');
+        bridgeIndicator = statusElement.querySelector('.bridge-indicator');
         statusSaid = statusElement.querySelector('.status-said');
 
         // Command: all commands (the word in the status line)
@@ -488,10 +489,15 @@ export default (function () {
         const recovery = documents.recovery();
         const recovered = recovery ? (recovery.preserved ? 'notes recovered · export a backup'
             : 'storage could not be repaired · saving is paused; export a backup') : '';
-        const sticky = statusSticky || recovered || (!shared.active ? bridgeUi.message() : '');
+        const bridgeMessage = !shared.active ? bridgeUi.message() : '';
+        const sticky = statusSticky || recovered;
+        bridgeIndicator.hidden = !bridgeMessage;
+        bridgeIndicator.dataset.state = bridgeUi.indicator() || '';
+        bridgeIndicator.title = t(bridgeMessage);
+        bridgeIndicator.setAttribute('aria-label', t(bridgeMessage));
         const notice = statusNoticeIsBridge && (statusSticky || recovered || shared.active) ? '' : statusNotice;
         statusMessage.textContent = t(notice || statusHint || sticky);
-        statusSaid.textContent = t(notice || sticky);
+        statusSaid.textContent = t(notice || sticky || bridgeMessage);
     }
 
     // The caret follows the font: block with mono, thin with sans and serif,

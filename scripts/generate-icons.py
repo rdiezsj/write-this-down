@@ -43,3 +43,16 @@ for name, size in [
 
 master.save(PUBLIC / 'favicon.ico', sizes=[(16, 16), (32, 32), (48, 48), (64, 64)])
 print('Generados seis PNG y favicon.ico desde el SVG de WTD.')
+
+# El borde azul identifica el acceso lateral sin cambiar los iconos de la web.
+sidebar = PUBLIC.parent / 'extension' / 'opera'
+svg = Rsvg.Handle.new_from_file(str(sidebar / 'sidebar.svg'))
+context.set_source_rgb(1, 1, 1)
+context.paint()
+svg.render_document(context, viewport)
+buffer = BytesIO()
+surface.write_to_png(buffer)
+buffer.seek(0)
+icon = Image.open(buffer).convert('RGB')
+for size in (16, 32):
+    icon.resize((size, size), Image.Resampling.LANCZOS).save(sidebar / f'sidebar-{size}.png')

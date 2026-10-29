@@ -25,3 +25,5 @@ await cp('extension/opera/content.js',join(target,'content.js'));
 await cp('src/bridge',join(target,'src/bridge'),{recursive:true});
 await mkdir(join(target,'src/js'),{recursive:true});
 await cp('src/js/keys.js',join(target,'src/js/keys.js'));
+
+for(const size of [16,32]) await cp(`extension/opera/sidebar-${size}.png`,join(target,`sidebar-${size}.png`));

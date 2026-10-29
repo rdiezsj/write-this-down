@@ -39,3 +39,5 @@ Modificaciones realizadas el **27 a 29 de octubre de 2026** por el proyecto Writ
 Las fuentes, sonidos, lista de palabras y bibliotecas conservan sus licencias y avisos de copyright. [CREDITS.md](CREDITS.md) identifica cada recurso y enlaza sus fuentes. Los avisos tipográficos completos se mantienen en `public/fonts/LICENSE.txt`.
 
 Conserva esta atribución, `LICENSE` y los avisos de terceros al redistribuir el proyecto. Este documento registra el origen y las modificaciones; las condiciones de licencia están en los textos correspondientes.
+
+- Indicador compacto de conexión local y borde azul del icono lateral de Opera, con etiquetas accesibles y detalle en el menú.

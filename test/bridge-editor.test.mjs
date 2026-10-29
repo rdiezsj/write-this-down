@@ -57,11 +57,17 @@ test('el editor real intercambia notas entre web y panel en Opera',{timeout:1200
    assert.equal(await panelEval("document.querySelector('article.content')?.textContent"),'NOTA DESDE WEB');
    await panelEval("document.querySelector('article.content').innerHTML='EDITADA DESDE PANEL';document.querySelector('article.content').dispatchEvent(new InputEvent('input',{bubbles:true}));true");
    await wait("document.querySelector('article.content').textContent==='EDITADA DESDE PANEL'");
-   await wait("document.querySelector('.status-message').textContent==='local bridge connected'");
+   await wait("document.querySelector('.bridge-indicator').dataset.state==='connected'");
+   await panelSend('Emulation.setDeviceMetricsOverride',{width:400,height:900,deviceScaleFactor:1,mobile:false});
+   await sleep(200);
+   const layout=await panelEval(`(()=>{const dot=document.querySelector('.bridge-indicator'),els=[document.querySelector('.status-left'),dot,document.querySelector('.language'),document.querySelector('.palette')],r=els.map(el=>el.getBoundingClientRect());return {visible:!dot.hidden,color:getComputedStyle(dot).backgroundColor,boxes:r.map(x=>({left:x.left,right:x.right})),message:document.querySelector('.status-message').textContent}})()`);
+   assert.equal(layout.visible,true);assert.equal(layout.color,'rgb(255, 255, 255)');assert.equal(layout.message,'');
+   assert.ok(layout.boxes.every((box,i)=>box.left>=0&&box.right<=400&&(!i||layout.boxes[i-1].right<=box.left)),JSON.stringify(layout));
    // Freeze the web bridge while both editors produce independent intentions.
    await ev("window.__originalPost=window.postMessage.bind(window);window.__holdBridge=true;window.postMessage=(data,...args)=>{if(window.__holdBridge&&data?.direction==='request'&&data?.channel==='wtd-bridge-v1')return;window.__originalPost(data,...args)};window.dispatchEvent(new Event('pagehide'));document.querySelector('article.content').innerHTML='DIVERGENCIA WEB';document.querySelector('article.content').dispatchEvent(new InputEvent('input',{bubbles:true}));true");
    await sleep(600);
-   assert.equal(await ev("document.querySelector('.status-message').textContent"),'changes pending');
+   assert.equal(await ev("document.querySelector('.bridge-indicator').title"),'changes pending');
+   assert.equal(await ev("getComputedStyle(document.querySelector('.bridge-indicator')).backgroundColor"),'rgb(0, 0, 0)');
    await panelEval("document.querySelector('article.content').innerHTML='DIVERGENCIA PANEL';document.querySelector('article.content').dispatchEvent(new InputEvent('input',{bubbles:true}));true");
    await sleep(600);
    for(let i=0;i<80;i++){await sleep(200);if(await panelEval("!Object.keys(localStorage).some(k=>k.startsWith('wtd.bridge.op.'))"))break;}
@@ -88,14 +94,15 @@ test('el editor real intercambia notas entre web y panel en Opera',{timeout:1200
    await wait("Object.keys(localStorage).some(k=>k.startsWith('wtd.doc.previous-')&&localStorage[k]==='DIVERGENCIA WEB')");
    // A transport failure keeps the local editor usable and offers an immediate retry.
    await ev("window.__savedPost=window.postMessage;window.postMessage=(data,...args)=>{if(data?.direction==='request')throw Error('test disconnect');window.__savedPost(data,...args)};window.dispatchEvent(new Event('focus'));true");
-   await wait("document.querySelector('.status-message').textContent.includes('local bridge unavailable')");
+   await wait("document.querySelector('.bridge-indicator').title.includes('local bridge unavailable')");
    await ev("document.querySelector('.palette').click();true");
    assert.equal(await ev("[...document.querySelectorAll('.picker-item .label')].some(el=>el.textContent==='retry local bridge')"),true);
    await ev("window.postMessage=window.__savedPost;[...document.querySelectorAll('.picker-item')].find(el=>el.querySelector('.label').textContent==='retry local bridge').click();true");
-   await wait("document.querySelector('.status-message').textContent==='local bridge connected'");
+   await wait("document.querySelector('.bridge-indicator').dataset.state==='connected'");
    assert.equal(await ev("document.querySelector('article.content').textContent"),'BORRADOR RECUPERADO');
    await ev("document.querySelector('.language').click();true");
-   assert.equal(await ev("document.querySelector('.status-message').textContent"),'puente local conectado');
+   assert.equal(await ev("document.querySelector('.bridge-indicator').title"),'puente local conectado');
+   assert.equal(await ev("document.querySelector('.status-message').textContent"),'');
    await ev("document.querySelector('.palette').click();true");
    assert.equal(await ev("[...document.querySelectorAll('.picker-item .label')].some(el=>el.textContent==='puente local conectado')"),true);
    await ev("document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));document.querySelector('.language').click();true");

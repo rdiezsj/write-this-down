@@ -22,6 +22,10 @@ export default {
         });
     },
     message,
+    indicator() {
+        if(!visible()) return null;
+        return current.state==='connected' && !current.pending && !current.retry ? 'connected' : 'disconnected';
+    },
     items() {
         if(!visible()) return [];
         const items=[{group:'documents',label:t(message()),run:()=>app.bridgeNotice(message())}];
