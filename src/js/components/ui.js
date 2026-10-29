@@ -961,7 +961,7 @@ export default (function () {
     function commandItems() {
         const key = isTouch ? () => '' : formatKeys;
         const items = [];
-        const add = (group, label, run, more) => items.push({ group, label: group === 'open' ? label : t(label), run, ...more });
+        const add = (group, label, run, more) => items.push({ group, label: group === 'open' ? label : t(label), run, ...more, ...(group === 'appearance' ? { subgroup: label.split(' ')[0] } : {}) });
 
         if (shared.active) {
             if (shared.doc) {

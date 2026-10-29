@@ -140,6 +140,7 @@ export default (function () {
         }
 
         let group = null;
+        let subgroup = null;
 
         picker.list.innerHTML = picker.shown.map((item, index) => {
             const names = Object.keys(item.actions || {});
@@ -154,6 +155,12 @@ export default (function () {
             if (item.group && item.group !== group) {
                 group = item.group;
                 heading = `<li class="picker-heading">${t(group)}</li>`;
+                subgroup = null;
+            }
+
+            if (item.subgroup && item.subgroup !== subgroup) {
+                subgroup = item.subgroup;
+                heading += `<li class="picker-subheading">${util.escapeHtml(t(subgroup))}</li>`;
             }
 
             return `${heading}<li class="${classes}" data-index="${index}" role="option"><span class="label">${util.escapeHtml(item.label)}</span>${actions}${hint}${key}</li>`;
