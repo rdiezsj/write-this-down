@@ -36,7 +36,8 @@ export default (function () {
         const current = documents.current();
         const items = documents.list().map(doc => ({
             label: documents.titleOf(doc),
-            hint: new Date(doc.updated).toLocaleDateString(currentLanguage()),
+            hint: (doc.conflictOf || doc.id.startsWith('conflict-') ? t('conflict copy') + ' · ' :
+                doc.recoveredFrom ? t('recovered copy') + ' · ' : '') + new Date(doc.updated).toLocaleDateString(currentLanguage()),
             text: documents.searchText(doc),
             current: current && doc.id === current.id,
             run: () => openDocument(doc.id),

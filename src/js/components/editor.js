@@ -173,23 +173,33 @@ export default (function() {
         }
 
         if (!saveState()) return;
+        if (documents.hasBridgePending(editingId, html())) return;
 
         const id = documents.current().id;
 
-        documents.load();
+        documents.load(true);
 
         if (documents.current().id !== id || util.plainHtml(documents.getContent(id)) !== html()) {
             loadState();
+        } else {
+            editingBase = documents.bridgeRevision(editingId);
         }
     }
 
-    function receiveBridge(apply) {
+    function receiveBridge(apply, redirect) {
         if (locked || !saveState() || !apply()) return false;
-        documents.load();
+        const target = typeof redirect === 'function' ? redirect() : redirect;
+        let moved = false;
+        if (target && editingId === target.from) {
+            documents.setCurrent(target.to);
+            if (documents.current().id === target.to) { editingId = target.to; moved = true; }
+        }
+        documents.load(true);
         if (documents.current().id !== editingId || util.safeBridgeHtml(documents.getContent(editingId)) !== util.safeBridgeHtml(html())) {
             return loadState();
         }
         editingBase = documents.bridgeRevision(editingId);
+        if (moved) notifyChange();
         return true;
     }
 

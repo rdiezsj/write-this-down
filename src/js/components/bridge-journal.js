@@ -14,7 +14,7 @@ export function createJournal(storage) {
             throw new Error('Journal dañado');
         return record;
     }
-    function prepare(operation) {
+    function prepare(operation, before) {
         if(!validateOperation(operation)) return false;
         try {
             const existing=read(operation.opId);
@@ -22,7 +22,7 @@ export function createJournal(storage) {
             const order=Math.max(lastOrder,Number(storage.getItem(keys.BRIDGE_ORDER)||0))+1;
             if(!Number.isSafeInteger(order) || order<1) return false;
             storage.setItem(keys.BRIDGE_ORDER,String(order));
-            storage.setItem(keyFor(operation.opId),JSON.stringify({state:'prepared',order,operation}));
+            storage.setItem(keyFor(operation.opId),JSON.stringify({state:'prepared',order,operation,...(before?{before}: {})}));
             lastOrder=order;
             return true;
         } catch {return false;}
@@ -81,7 +81,9 @@ export function createJournal(storage) {
                 if(!after || record.operation.clientId!==source.operation.clientId || record.operation.docId!==source.operation.docId ||
                     JSON.stringify(record.operation.base)!==JSON.stringify(source.operation.base)) continue;
                 if(record.state!=='applied') return false;
-                const docId=receipt.outcome==='conflict'?receipt.conflictId:record.operation.docId;
+                // A stale deletion owns the canonical tombstone; the copy belongs to the edited text.
+                const copied=receipt.authorDocId?receipt.authorDocId===receipt.conflictId:source.operation.note.state==='active';
+                const docId=receipt.outcome==='conflict' && copied?receipt.conflictId:record.operation.docId;
                 const operation={...record.operation,docId,base:receipt.revision,note:{...record.operation.note,id:docId}};
                 storage.setItem(key,JSON.stringify({...record,operation}));
             }
@@ -110,5 +112,8 @@ export function createJournal(storage) {
             return true;
         } catch {return false;}
     }
-    return {prepare,applied,pending,sent,rebase,ack,recover};
+    function retirePrepared(id) {
+        try {if(read(id)?.state!=='prepared')return false;storage.removeItem(keyFor(id));return true;}catch{return false;}
+    }
+    return {prepare,applied,pending,sent,rebase,ack,recover,retirePrepared};
 }

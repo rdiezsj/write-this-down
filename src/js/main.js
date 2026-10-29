@@ -2,6 +2,8 @@ import editor from  './components/editor';
 import ui from './components/ui';
 import bridge from './components/bridge';
 
+// Register the durable recorder before startup can expire old trash or create a note.
+try { bridge.prepare(); } catch (error) { console.error('WTD: local bridge recovery unavailable', error); }
 editor.init();
 
 // The text must remain available even if the interface cannot start.

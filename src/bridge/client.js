@@ -2,7 +2,7 @@ import keys from '../js/keys.js';
 import {validateOperation} from './protocol.js';
 
 // Synchronizes only after the caller has durably materialized each received note.
-export function createBridgeClient({journal,transport,applyRemote,storage,onFirstConnect=async()=>true}) {
+export function createBridgeClient({journal,transport,applyRemote,storage,onFirstConnect=async()=>true,onEpochChange=async()=>false,beforeSync=async()=>true}) {
     let running=null, state='disconnected';
     function position() {
         const raw=storage.getItem(keys.BRIDGE_CURSOR);
@@ -19,17 +19,22 @@ export function createBridgeClient({journal,transport,applyRemote,storage,onFirs
             receipt.revision?.epoch===epoch && Number.isSafeInteger(receipt.revision.sequence) && receipt.revision.sequence>0 &&
             validNote(receipt.note) && (!expectedDocId || receipt.note.id===expectedDocId) &&
             (receipt.outcome!=='conflict' || (receipt.conflictId===`conflict-${opId}` &&
+                (receipt.authorDocId===undefined || [receipt.note.id,receipt.conflictId].includes(receipt.authorDocId)) &&
                 receipt.conflict?.id===receipt.conflictId && validNote(receipt.conflict)));
     }
     async function run() {
         try {
+            if(!await beforeSync()) {state='pending';return false;}
             const initial=journal.recover();
             if(initial.paused || initial.drafts.length) {state='pending';return false;}
             const hello=await transport.request('hello');
             if(!hello || typeof hello.epoch!=='string' || !hello.epoch || !Number.isSafeInteger(hello.cursor) || hello.cursor<0)
                 throw new Error('Respuesta inicial inválida');
             let current=position();
-            if(current && current.epoch!==hello.epoch) {state='pending';return false;}
+            if(current && current.epoch!==hello.epoch) {
+                if(!await onEpochChange(hello.epoch,current)) {state='pending';return false;}
+                current=null;
+            }
             if(!current) {
                 if(!await onFirstConnect(hello.epoch)) {state='pending';return false;}
                 current={epoch:hello.epoch,cursor:0};

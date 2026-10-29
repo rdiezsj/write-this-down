@@ -171,7 +171,7 @@ test('aplicar un cambio del puente conserva el original y no vuelve a emitirlo',
  docs.setBridgeRecorder({prepare(){emitted=true;return false;},applied:()=>true});
  const receipt={opId:'remote',outcome:'accepted',revision:{epoch:'e',sequence:1},note:{id:'a',html:'REMOTE',auto:'REMOTE',updated:2,state:'active',received:true}};
  assert.equal(docs.applyBridge(receipt),true);assert.equal(docs.getContent('a'),'REMOTE');assert.equal(emitted,false);
- assert.match(s.data[keys.BRIDGE_INBOUND_PREFIX+'remote'],/SAVED|OLDER A|"A"/);
+ assert.equal(s.data[keys.BRIDGE_INBOUND_PREFIX+'remote'],undefined);
  assert.equal(docs.applyBridge({...receipt,note:{...receipt.note,html:'STALE'}}),true);assert.equal(docs.getContent('a'),'REMOTE');
 });
 test('si no cabe la copia de recuperación del puente, no modifica el texto',()=>{
@@ -188,4 +188,13 @@ test('una recepción interrumpida conserva ambas versiones y se puede reintentar
  assert.equal(recovery.before.content,'A');assert.equal(recovery.receipt.note.html,'NUEVA');assert.equal(s.data[keys.BRIDGE_REV_PREFIX+'a'],undefined);
  s.fail(false);assert.equal(docs.applyBridge(receipt),true);assert.equal(docs.getContent('a'),'NUEVA');
  assert.equal(s.data[keys.DOC_PREFIX+'a'+keys.PREVIOUS_SUFFIX],'OLDER A');
+});
+
+test('confirmar el mismo texto local no necesita duplicarlo en un journal de recepción',()=>{
+ const s=stores(),docs=s.make();docs.init();assert.equal(docs.saveContent('a','A','A'),true);
+ // Force authoritative metadata even when the initial text was already identical.
+ s.data[keys.META_PREFIX+'a']=JSON.stringify({id:'a',auto:'A',updated:1});
+ s.fail(k=>k.startsWith(keys.BRIDGE_INBOUND_PREFIX));
+ const receipt={opId:'own',revision:{epoch:'e',sequence:1},note:{id:'a',html:'A',auto:'A',updated:1,state:'active',received:false}};
+ assert.equal(docs.applyBridge(receipt),true);assert.equal(docs.getContent('a'),'A');
 });

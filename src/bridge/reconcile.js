@@ -20,11 +20,8 @@ export function resolveOperation(current, operation, epoch) {
         note = incoming;
         conflict = existing;
     }
-    if (isDeleted(existing) && isDeleted(incoming)) {
-        return existing.state === 'trash' && incoming.state === 'removed'
-            ? {outcome:'accepted',note:incoming} : {outcome:'unchanged',note:existing};
-    }
+    if (isDeleted(existing) && isDeleted(incoming) && incoming.state === 'removed') {note=incoming;conflict=existing;}
     conflict = {...conflict,id:`conflict-${operation.opId}`,state:'active',received:!!(existing.received || incoming.received)};
     delete conflict.deleted;
-    return {outcome:'conflict',note,conflict};
+    return {outcome:'conflict',note,conflict,authorDocId:note===incoming?incoming.id:conflict.id};
 }

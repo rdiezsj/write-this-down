@@ -37,5 +37,18 @@ test('un tombstone obsoleto prevalece sobre la papelera sin resucitar notas',()=
     const removed={id:'a',state:'removed',updated:2,received:false};
     const result=resolveOperation({note:trash,revision:{epoch:'epoch-a',sequence:2}},operation(removed),'epoch-a');
     assert.equal(result.note.state,'removed');
-    assert.equal(result.outcome,'accepted');
+    assert.equal(result.outcome,'conflict');assert.equal(result.conflict.html,'papelera');
+});
+
+test('dos papeleras divergentes conservan los dos textos con el ID original en papelera',()=>{
+ const existing={...active('papelera A'),state:'trash',deleted:2};
+ const incoming={...active('papelera B'),state:'trash',deleted:3};
+ const result=resolveOperation({note:existing,revision},operation(incoming,null),'epoch-a');
+ assert.equal(result.note.state,'trash');assert.equal(result.conflict.html,'papelera B');assert.equal(result.authorDocId,result.conflict.id);
+});
+test('un tombstone recibe una papelera antigua sin descartar su texto ni resucitar el ID',()=>{
+ const existing={id:'a',state:'removed',updated:2,received:false};
+ const incoming={...active('texto en papelera'),state:'trash',deleted:3};
+ const result=resolveOperation({note:existing,revision},operation(incoming,null),'epoch-a');
+ assert.equal(result.note.state,'removed');assert.equal(result.conflict.html,'texto en papelera');
 });

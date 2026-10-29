@@ -27,6 +27,7 @@ export default (function () {
         });
 
         const current = documents.current();
+        const recovery = documents.bridgeRecoveryArchive?.() || {};
 
         return {
             format: FORMAT,
@@ -34,6 +35,7 @@ export default (function () {
             exported: new Date().toISOString(),
             current: current ? current.id : null,
             settings,
+            ...(Object.keys(recovery).length ? {recovery} : {}),
             documents: documents.list().map(doc => ({
                 id: doc.id,
                 updated: doc.updated,

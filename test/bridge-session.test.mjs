@@ -34,8 +34,8 @@ test('un snapshot anterior sin cursor no sustituye una edición hecha después d
  const s=setup(),old={...s.notes.get('a')};
  s.storage.setItem(keys.BRIDGE_SNAPSHOT,JSON.stringify({epoch:'epoch',operations:[{protocol:1,opId:'initial',clientId:'old-tab',docId:'a',base:null,note:old}]}));
  s.notes.set('a',{...old,html:'BORRADOR POSTERIOR'});
- assert.equal(await s.session.sync(),false);assert.equal(s.operations.length,0);
- assert.equal(s.notes.get('a').html,'BORRADOR POSTERIOR');assert.equal(s.storage.getItem(keys.BRIDGE_CURSOR),null);
+ assert.equal(await s.session.sync(),true);assert.equal(s.operations.at(-1).note.html,'BORRADOR POSTERIOR');
+ assert.equal(s.notes.get('a').html,'BORRADOR POSTERIOR');assert.equal(JSON.parse(s.storage.getItem(keys.BRIDGE_CURSOR)).epoch,'epoch');
 });
 
 test('varias ediciones pendientes conservan el último texto con Storage enumerado al revés',async()=>{

@@ -34,9 +34,10 @@ function channel() {
     };
 }
 
+let begin=null;
 export default {
-    start() {
-        if(!navigator.locks || window.top!==window) return;
+    prepare() {
+        if(begin || !navigator.locks || window.top!==window) return;
         let timer=null,stopped=false;
         const transport=createPageTransport(channel());
         const session=createBridgeSession({storage:localStorage,documents,editor,transport,onPending:schedule});
@@ -50,12 +51,15 @@ export default {
                 clearTimeout(timer);timer=setTimeout(sync,2000);
             }
         }
-        window.addEventListener('focus',schedule);
-        window.addEventListener('storage',schedule);
-        document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedule();});
-        // A bfcache return resumes the same session and pending operations.
-        window.addEventListener('pagehide',()=>{stopped=true;clearTimeout(timer);});
-        window.addEventListener('pageshow',()=>{stopped=false;schedule();});
-        schedule();
+        begin=()=>{
+            window.addEventListener('focus',schedule);
+            window.addEventListener('storage',schedule);
+            document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedule();});
+            // A bfcache return resumes the same session and pending operations.
+            window.addEventListener('pagehide',()=>{stopped=true;clearTimeout(timer);});
+            window.addEventListener('pageshow',()=>{stopped=false;schedule();});
+            schedule();
+        };
     },
+    start() {this.prepare();begin?.();},
 };

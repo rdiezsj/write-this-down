@@ -1,6 +1,7 @@
 import { t } from './i18n';
 import util from './utils';
 import keys from '../keys';
+import {bridgeRecoveryNotes} from '../../bridge/recovery';
 
 // Document store. The compatible list cache lives in localStorage['wtd.docs'],
 // each document's HTML in localStorage['wtd.doc.<id>'].
@@ -26,6 +27,7 @@ export default (function () {
     let recoveryNotice = null;
     let temporary = null;
     let bridgeRecorder = null;
+    let recoveryViews = new Map();
 
     // The recorder is installed only when the local bridge is enabled.
     function setBridgeRecorder(recorder) { bridgeRecorder = recorder; }
@@ -74,7 +76,8 @@ export default (function () {
         return write(keys.INDEX_RECOVERY_PREFIX + newId(), raw);
     }
 
-    function load() {
+    function load(keepSelection = false) {
+        const selected = currentId;
         writable = true;
         const raw = localStorage[INDEX_KEY];
         let index = [];
@@ -127,9 +130,15 @@ export default (function () {
             entries.set(id, { id, auto: util.firstLine(util.htmlToText(localStorage[key])), updated: 0 });
             recoveryNotice = { preserved: writable };
         }
+        recoveryViews = new Map(bridgeRecoveryNotes(localStorage).filter(item => !entries.has(item.note.id)).map(item => [item.note.id, item]));
+        for (const {note, from} of recoveryViews.values()) entries.set(note.id, {id:note.id, auto:util.firstLine(util.htmlToText(util.safeBridgeHtml(note.html))),
+            updated:note.updated, received:true, recoveredFrom:from, virtual:true});
         docs = [...entries.values()];
         if (writable && recoveryNotice && !recoveryNotice.preserved) recoveryNotice = { preserved: true };
         currentId = localStorage[CURRENT_KEY] || null;
+        const draft = [...recoveryViews.values()].find(item => item.kind === 'draft' && item.from === currentId);
+        if (draft) currentId = draft.note.id;
+        if (keepSelection && entries.has(selected) && !entries.get(selected).deleted) currentId = selected;
     }
 
     function refresh() {
@@ -157,7 +166,7 @@ export default (function () {
         refresh();
         if (!writable) return false;
         // A stale cache can never remove a separately committed record.
-        return write(INDEX_KEY, JSON.stringify(docs)) && write(CURRENT_KEY, currentId);
+        return write(INDEX_KEY, JSON.stringify(docs.filter(doc => !doc.virtual))) && write(CURRENT_KEY, currentId);
     }
 
     function newId() {
@@ -231,7 +240,7 @@ export default (function () {
     function add(doc, html) {
         refresh();
         if (!writable || !valid(doc)) return null;
-        if (!doc.id || getById(doc.id)) {
+        if (!doc.id || getById(doc.id) || localStorage[keys.META_PREFIX + doc.id] !== undefined) {
             return null;
         }
 
@@ -267,10 +276,12 @@ export default (function () {
     }
 
     function getContent(id) {
+        if (recoveryViews.has(id)) return util.safeBridgeHtml(recoveryViews.get(id).note.html);
         return localStorage[CONTENT_PREFIX + id] || '';
     }
 
     function isReceived(id) {
+        if (recoveryViews.has(id)) return true;
         try { if (sessionStorage.getItem(keys.RECEIVED_PREFIX + id) === 'true') return true; } catch {}
         const raw = localStorage[keys.META_PREFIX + id];
         if (raw === undefined) return false;
@@ -280,7 +291,7 @@ export default (function () {
     function snapshotForBridge() {
         refresh();
         if (!writable) return null;
-        const notes = docs.filter(doc => !temporary || doc.id !== temporary.id).map(doc => {
+        const notes = docs.filter(doc => !doc.virtual && (!temporary || doc.id !== temporary.id)).map(doc => {
             const note = { id: doc.id, html: getContent(doc.id), auto: doc.auto || '', updated: doc.updated || 0,
                 state: doc.deleted ? 'trash' : 'active', received: isReceived(doc.id) };
             if (doc.deleted) note.deleted = doc.deleted;
@@ -299,39 +310,106 @@ export default (function () {
         return notes;
     }
 
-    function applyBridge(receipt) {
+    function applyBridge(receipt, { preserve = [], focus = null } = {}) {
         refresh();
         if (!writable) return false;
-        const { note, revision, opId } = receipt;
-        if (!valid(note) || !revision || typeof opId !== 'string' || !opId ||
-            typeof revision.epoch !== 'string' || !Number.isSafeInteger(revision.sequence) || revision.sequence < 1 ||
-            !['active', 'trash', 'removed'].includes(note.state) ||
-            (note.state !== 'removed' && typeof note.html !== 'string') ||
-            (note.state === 'trash' && !Number.isFinite(note.deleted))) return false;
+        const { revision, opId } = receipt;
+        const notes = receipt.conflict ? [receipt.conflict, receipt.note] : [receipt.note];
+        if (!revision || typeof opId !== 'string' || !opId || typeof revision.epoch !== 'string' ||
+            !Number.isSafeInteger(revision.sequence) || revision.sequence < 1 || notes.some(note =>
+                !valid(note) || !['active', 'trash', 'removed'].includes(note.state) ||
+                (note.state !== 'removed' && typeof note.html !== 'string') ||
+                (note.state === 'trash' && !Number.isFinite(note.deleted)))) return false;
         try {
-            const revisionKey = keys.BRIDGE_REV_PREFIX + note.id;
-            const previous = localStorage[revisionKey];
-            if (previous !== undefined) {
-                const known = JSON.parse(previous);
-                if (known.epoch !== revision.epoch) return false;
-                if (known.sequence >= revision.sequence) return true;
+            const changes = [], confirmations = [];
+            for (const note of notes) {
+                if (preserve.includes(note.id)) continue;
+                const raw = localStorage[keys.BRIDGE_REV_PREFIX + note.id];
+                if (raw !== undefined) {
+                    const known = JSON.parse(raw);
+                    if (known.epoch !== revision.epoch) return false;
+                    if (known.sequence >= revision.sequence) continue;
+                }
+                if (matchesBridgeNote(note) && (!note.received || isReceived(note.id)) && note.id !== receipt.conflictId) confirmations.push(note);
+                else changes.push(note);
             }
             const recoveryKey = keys.BRIDGE_INBOUND_PREFIX + opId;
-            if (localStorage[recoveryKey] === undefined && !write(recoveryKey, JSON.stringify({receipt,
-                before: {content: localStorage[CONTENT_PREFIX + note.id], metadata: localStorage[keys.META_PREFIX + note.id]}}))) return false;
-            const metadata = {id: note.id, updated: note.updated, received: !!(note.received || isReceived(note.id))};
-            if (note.state === 'removed') metadata.removed = true;
-            else {
-                const html = util.safeBridgeHtml(note.html);
-                metadata.auto = util.firstLine(util.htmlToText(html));
-                if (note.state === 'trash') metadata.deleted = note.deleted;
-                if (!write(CONTENT_PREFIX + note.id, html)) return false;
+            if (changes.length) {
+                const previous = localStorage[recoveryKey] === undefined ? null : JSON.parse(localStorage[recoveryKey]);
+                const entries = changes.map(note => ({note, before:
+                    previous?.entries?.find(entry => entry.note.id === note.id)?.before ||
+                    (previous?.receipt?.note.id === note.id ? previous.before : null) ||
+                    {content: localStorage[CONTENT_PREFIX + note.id], metadata: localStorage[keys.META_PREFIX + note.id]}}));
+                const record = {receipt, entries, before: entries[0].before, focus};
+                if (!write(recoveryKey, JSON.stringify(record))) return false;
+                for (const note of changes) {
+                    const metadata = {id: note.id, updated: note.updated, received: !!(note.received || isReceived(note.id))};
+                    const prior = JSON.parse(localStorage[keys.META_PREFIX + note.id] || 'null');
+                    if (prior?.recoveredFrom) metadata.recoveredFrom = prior.recoveredFrom;
+                    if (prior?.conflictOf) metadata.conflictOf = prior.conflictOf;
+                    if (note.id === receipt.conflictId) metadata.conflictOf = receipt.note.id;
+                    if (note.state === 'removed') metadata.removed = true;
+                    else {
+                        const html = util.safeBridgeHtml(note.html);
+                        metadata.auto = util.firstLine(util.htmlToText(html));
+                        if (note.state === 'trash') metadata.deleted = note.deleted;
+                        if (!write(CONTENT_PREFIX + note.id, html)) return false;
+                    }
+                    if (!writeMeta(metadata)) return false;
+                }
+                if (focus && localStorage[CURRENT_KEY] === focus.from && notes.some(note => note.id === focus.to && note.state === 'active')) {
+                    if (!write(CURRENT_KEY, focus.to)) return false;
+                    currentId = focus.to;
+                }
+                for (const note of changes) {
+                    if (!write(keys.BRIDGE_REV_PREFIX + note.id, JSON.stringify(revision))) return false;
+                }
+                saveIndex();
             }
-            // Tombstones hide the note without discarding the recoverable local text.
-            if (!writeMeta(metadata) || !write(revisionKey, JSON.stringify(revision))) return false;
-            saveIndex();
+            for (const note of confirmations) if (!write(keys.BRIDGE_REV_PREFIX + note.id, JSON.stringify(revision))) return false;
+            // Successful materialization no longer needs a duplicate of every edit.
+            localStorage.removeItem(recoveryKey);
             return true;
         } catch { return false; }
+    }
+
+    function matchesBridgeNote(note) {
+        try {
+            const meta = JSON.parse(localStorage[keys.META_PREFIX + note.id] || 'null');
+            if (!meta || meta.id !== note.id || !!meta.removed !== (note.state === 'removed')) return false;
+            return note.state === 'removed' || (meta.updated === note.updated &&
+                !!meta.deleted === (note.state === 'trash') && localStorage[CONTENT_PREFIX + note.id] === note.html);
+        } catch { return false; }
+    }
+
+    function finishBridgePrepared(note, before) {
+        refresh();
+        if (!writable || note.state === 'removed' || !before || localStorage[CONTENT_PREFIX + note.id] !== note.html ||
+            localStorage[keys.META_PREFIX + note.id] !== before.metadata) return false;
+        const meta = {id:note.id, updated:note.updated, auto:note.auto, received:!!(note.received || isReceived(note.id))};
+        if (note.state === 'trash') meta.deleted = note.deleted;
+        if (!writeMeta(meta)) return false;
+        saveIndex();return true;
+    }
+
+    function storeBridgeRecovery(note, from) {
+        refresh();
+        if (!writable) return false;
+        const html = util.safeBridgeHtml(note.html), existing = localStorage[CONTENT_PREFIX + note.id];
+        if (existing !== undefined && util.safeBridgeHtml(existing) !== html) return false;
+        if (!write(CONTENT_PREFIX + note.id, html) || !writeMeta({id:note.id, auto:util.firstLine(util.htmlToText(html)),
+            updated:note.updated, received:true, recoveredFrom:from})) return false;
+        saveIndex();return true;
+    }
+
+    function bridgeRecoveryArchive() {
+        const result = {};
+        for (const key of Object.keys(localStorage)) {
+            if (key === keys.BRIDGE_SNAPSHOT || key === keys.BRIDGE_BOOTSTRAP ||
+                [keys.BRIDGE_OP_PREFIX, keys.BRIDGE_INBOUND_PREFIX, keys.BRIDGE_RECOVERY_PREFIX].some(prefix => key.startsWith(prefix)))
+                result[key] = localStorage[key];
+        }
+        return result;
     }
 
     // Returns true when written, false when storage refused (full): the old copy
@@ -344,6 +422,7 @@ export default (function () {
         const before = localStorage[CONTENT_PREFIX + id];
 
         if (!doc || doc.deleted) return false;
+        if (doc.virtual) return false;
         if (before === html && doc.auto === firstLine) return true;
 
         const updated = Date.now();
@@ -477,7 +556,7 @@ export default (function () {
     }
 
     function isOwnKey(key) {
-        return key === INDEX_KEY || key === CURRENT_KEY || (key && (key.startsWith(CONTENT_PREFIX) || key.startsWith(keys.META_PREFIX)));
+        return key === INDEX_KEY || key === CURRENT_KEY || (key && (key.startsWith(CONTENT_PREFIX) || key.startsWith(keys.META_PREFIX) || key.startsWith(keys.BRIDGE_REV_PREFIX)));
     }
 
     return {
@@ -505,6 +584,15 @@ export default (function () {
         isReceived,
         snapshotForBridge,
         applyBridge,
+        matchesBridgeNote,
+        finishBridgePrepared,
+        storeBridgeRecovery,
+        hasBridgeRecovery(id, from) {
+            try {const meta=JSON.parse(localStorage[keys.META_PREFIX + id] || 'null');return meta?.id===id && (meta.removed===true || meta.recoveredFrom===from);}catch{return false;}
+        },
+        bridgeRecoveryArchive,
+        bridgeBefore: id => ({content:localStorage[CONTENT_PREFIX + id], metadata:localStorage[keys.META_PREFIX + id]}),
+        hasBridgePending: (id, html) => !!bridgeRecorder?.pending?.(id, html),
         bridgeRevision(id) {
             try { return JSON.parse(localStorage[keys.BRIDGE_REV_PREFIX + id] || 'null'); } catch { return null; }
         },

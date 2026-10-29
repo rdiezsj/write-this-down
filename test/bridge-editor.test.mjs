@@ -28,7 +28,7 @@ test('el editor real intercambia notas entre web y panel en Opera',{timeout:1200
   const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++serial;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}));});
   const ev=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error(r.exceptionDetails.exception?.description||r.exceptionDetails.text);return r.result.value;};
   await send('Runtime.enable');
-  const wait=async expression=>{for(let i=0;i<80;i++){if(await ev(expression))return;await sleep(200);}throw Error('No se recibió el cambio: '+expression+' '+JSON.stringify({errors,local:await ev("({keys:Object.keys(localStorage),status:document.querySelector('.status-message')?.textContent,body:!!document.querySelector('article.content')})")}));};
+  const wait=async expression=>{for(let i=0;i<160;i++){if(await ev(expression))return;await sleep(200);}throw Error('No se recibió el cambio: '+expression+' '+JSON.stringify({errors,local:await ev("({keys:Object.keys(localStorage),status:document.querySelector('.status-message')?.textContent,body:!!document.querySelector('article.content')})")}));};
   await wait("!!localStorage.getItem('wtd.bridge.cursor')");
   const extensionId=[...createHash('sha256').update(ext).digest().subarray(0,16)].map(x=>String.fromCharCode(97+(x>>4),97+(x&15))).join('');
   const panelURL=`chrome-extension://${extensionId}/index.html`;
@@ -56,7 +56,25 @@ test('el editor real intercambia notas entre web y panel en Opera',{timeout:1200
    assert.equal(await panelEval("document.querySelector('article.content')?.textContent"),'NOTA DESDE WEB');
    await panelEval("document.querySelector('article.content').innerHTML='EDITADA DESDE PANEL';document.querySelector('article.content').dispatchEvent(new InputEvent('input',{bubbles:true}));true");
    await wait("document.querySelector('article.content').textContent==='EDITADA DESDE PANEL'");
-
+   // Freeze the web bridge while both editors produce independent intentions.
+   await ev("window.__originalPost=window.postMessage.bind(window);window.__holdBridge=true;window.postMessage=(data,...args)=>{if(window.__holdBridge&&data?.direction==='request'&&data?.channel==='wtd-bridge-v1')return;window.__originalPost(data,...args)};window.dispatchEvent(new Event('pagehide'));document.querySelector('article.content').innerHTML='DIVERGENCIA WEB';document.querySelector('article.content').dispatchEvent(new InputEvent('input',{bubbles:true}));true");
+   await sleep(600);
+   await panelEval("document.querySelector('article.content').innerHTML='DIVERGENCIA PANEL';document.querySelector('article.content').dispatchEvent(new InputEvent('input',{bubbles:true}));true");
+   await sleep(600);
+   for(let i=0;i<80;i++){await sleep(200);if(await panelEval("!Object.keys(localStorage).some(k=>k.startsWith('wtd.bridge.op.'))"))break;}
+   assert.equal(await panelEval("!Object.keys(localStorage).some(k=>k.startsWith('wtd.bridge.op.'))"),true);
+   await ev("window.__holdBridge=false;window.dispatchEvent(new Event('pageshow'));true");
+   await wait("localStorage.getItem('wtd.current').startsWith('conflict-')&&!Object.keys(localStorage).some(k=>k.startsWith('wtd.bridge.op.'))");
+   assert.equal(await ev("document.querySelector('article.content').textContent"),'DIVERGENCIA WEB');
+   await wait("Object.keys(localStorage).some(k=>k.startsWith('wtd.doc.')&&localStorage[k]==='DIVERGENCIA PANEL')");
+   await ev("document.querySelector('.documents').click();true");
+   assert.equal(await ev("[...document.querySelectorAll('.picker-item .hint')].some(el=>/conflict|conflicto/.test(el.textContent))"),true);
+   await ev("document.querySelector('.documents').click();true");
+   // Reproduce a crash after writing the content but before metadata/applied.
+   await ev(`(()=>{dispatchEvent(new Event('pagehide'));const id=localStorage.getItem('wtd.current'),key='wtd.meta.'+id,before={content:localStorage.getItem('wtd.doc.'+id),metadata:localStorage.getItem(key)},opId='interrupted-browser',note={id,html:'BORRADOR RECUPERADO',auto:'BORRADOR RECUPERADO',updated:Date.now(),state:'active',received:true};localStorage.setItem('wtd.bridge.op.'+opId,JSON.stringify({state:'prepared',order:Number(localStorage.getItem('wtd.bridge.order'))+1,operation:{protocol:1,opId,clientId:'interrupted',docId:id,base:JSON.parse(localStorage.getItem('wtd.bridge.rev.'+id)),note},before}));localStorage.setItem('wtd.doc.'+id,note.html);return true})()`);
+   await send('Page.reload');await sleep(1000);
+   await wait("document.querySelector('article.content')?.textContent==='BORRADOR RECUPERADO'&&!Object.keys(localStorage).some(k=>k.startsWith('wtd.bridge.op.'))");
+   await wait("Object.keys(localStorage).some(k=>k.startsWith('wtd.doc.previous-')&&localStorage[k]==='DIVERGENCIA WEB')");
   }finally{panel.close();}
 
  }finally{ws?.close();if(proc){const done=new Promise(r=>proc.once('exit',r));proc.kill('SIGTERM');await Promise.race([done,new Promise(r=>setTimeout(r,3000))]);if(proc.exitCode===null)proc.kill('SIGKILL');}server.close();await rm(root,{recursive:true,force:true,maxRetries:10,retryDelay:500});}

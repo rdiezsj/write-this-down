@@ -48,6 +48,7 @@ export async function openDatabase(factory=indexedDB) {
                 const revision={epoch,sequence:cursor+1};
                 const receipt={opId:operation.opId,outcome:result.outcome,revision,note:result.note};
                 if(result.conflict) {
+                    receipt.authorDocId=result.authorDocId;
                     receipt.conflictId=result.conflict.id;
                     receipt.conflict=result.conflict;
                     notes.add({id:result.conflict.id,note:result.conflict,revision});

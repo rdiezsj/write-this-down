@@ -131,3 +131,17 @@ test('una edición conserva la revisión con la que se abrió aunque otra pesta�
  revision={epoch:'e',sequence:2};s.article.innerHTML='LOCAL';s.events.input();s.editor.saveState();
  assert.equal(base.sequence,1);
 });
+
+test('una copia de conflicto conserva el artículo y cambia la identidad de la nota abierta',()=>{
+ const s=setup();let renders=0;s.editor.onDocumentChange(()=>renders++);
+ assert.equal(s.editor.receiveBridge(()=>{s.documents.add({id:'conflict-x',updated:2},'SAVED A');return true;},()=>({from:'a',to:'conflict-x'})),true);
+ assert.equal(s.editor.documentId(),'conflict-x');assert.equal(s.article.innerHTML,'SAVED A');assert.equal(renders,1);
+});
+test('storage no sustituye el texto de una operación local todavía pendiente',()=>{
+ const s=setup();s.documents.setBridgeRecorder({pending:()=>true});s.data[keys.DOC_PREFIX+'a']='REMOTE';
+ s.events.storage({key:keys.DOC_PREFIX+'a'});assert.equal(s.article.innerHTML,'SAVED A');
+});
+test('otra pestaña no cambia la selección local al recibir nuevos documentos',()=>{
+ const s=setup();s.data[keys.CURRENT]='b';s.events.storage({key:keys.CURRENT});
+ assert.equal(s.editor.documentId(),'a');assert.equal(s.article.innerHTML,'SAVED A');
+});

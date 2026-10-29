@@ -1,6 +1,8 @@
 import keys from '../js/keys.js';
 import {createJournal} from '../js/components/bridge-journal.js';
 import {createBridgeClient} from './client.js';
+import {bootstrapLibrary} from './bootstrap.js';
+import {recoverBridgeLibrary} from './recovery.js';
 
 // One session joins the existing editor to the local coordinator.
 export function createBridgeSession({storage,documents,editor,transport,onPending=()=>{}}) {
@@ -16,45 +18,46 @@ export function createBridgeSession({storage,documents,editor,transport,onPendin
             const recovered=journal.recover();
             if(recovered.paused || recovered.drafts.length) return false;
             const opId=crypto.randomUUID();
-            return journal.prepare({protocol:1,opId,clientId,docId:note.id,base,note})?opId:false;
+            return journal.prepare({protocol:1,opId,clientId,docId:note.id,base,note},documents.bridgeBefore?.(note.id))?opId:false;
         },
         applied(token) {const saved=journal.applied(token);if(saved)onPending();return saved;},
+        pending:(id,html)=>journal.recover().pending.some(op=>op.docId===id && op.note.html===html),
     };
     function enable() {documents.setBridgeRecorder(recorder);enabled=true;}
     // A previously connected page keeps recording even with the extension absent.
     if(storage.getItem(keys.BRIDGE_CURSOR)!==null) enable();
+    function connectLibrary(epoch,previous=null) {
+        if(!editor.saveState()) return false;
+        if(!bootstrapLibrary({epoch,previous,storage,documents,journal,clientId})) return false;
+        enable();return true;
+    }
     const client=createBridgeClient({storage,journal,transport,
-        async onFirstConnect(epoch) {
-            if(!editor.saveState()) return false;
-            let snapshot=storage.getItem(keys.BRIDGE_SNAPSHOT);
-            if(snapshot===null) {
-                const notes=documents.snapshotForBridge();
-                if(notes===null) return false;
-                snapshot=JSON.stringify({epoch,operations:notes.map(note=>({protocol:1,opId:crypto.randomUUID(),clientId,docId:note.id,base:null,note}))});
-                storage.setItem(keys.BRIDGE_SNAPSHOT,snapshot);
-            }
-            const saved=JSON.parse(snapshot);
-            if(saved.epoch!==epoch || !Array.isArray(saved.operations)) return false;
-            const current=documents.snapshotForBridge();
-            if(current===null || current.length!==saved.operations.length || saved.operations.some(operation=>
-                JSON.stringify(current.find(note=>note.id===operation.docId))!==JSON.stringify(operation.note))) return false;
-            for(const operation of saved.operations) {
-                if(!journal.prepare(operation) || !journal.applied(operation.opId)) return false;
-            }
-            enable();return true;
-        },
+        beforeSync:()=>recoverBridgeLibrary({storage,documents,journal}),
+        onFirstConnect:epoch=>connectLibrary(epoch),
+        onEpochChange:(epoch,previous)=>connectLibrary(epoch,previous),
         applyRemote(receipt) {
-            // Conflict presentation/recovery is the next step: keep the durable
-            // local operation and both coordinator versions until it is ready.
-            if(receipt.outcome==='conflict') return false;
+            let redirect=null;
             return editor.receiveBridge(()=>{
                 const pending=journal.recover();
                 if(pending.paused || pending.drafts.length) return false;
+                const source=pending.pending.find(op=>op.opId===receipt.opId);
                 const waiting=pending.pending.filter(op=>op.docId===receipt.note.id && op.opId!==receipt.opId);
-                if(waiting.length) return pending.pending.some(op=>op.opId===receipt.opId);
-                const own=pending.pending.some(op=>op.opId===receipt.opId);
-                return documents.applyBridge({...receipt,note:{...receipt.note,received:own?receipt.note.received:true}});
-            });
+                if(!source && waiting.length) return false;
+                const own=!!source;
+                const incoming={...receipt,note:{...receipt.note,received:own?receipt.note.received:true}};
+                const preserve=[];
+                if(receipt.conflict) {
+                    const copiedAuthor=source && (receipt.authorDocId?receipt.authorDocId===receipt.conflictId:source.note.state==='active');
+                    const successors=waiting.filter(op=>copiedAuthor && op.clientId===source?.clientId);
+                    const latest=successors.at(-1)?.note || source?.note;
+                    incoming.conflict={...(successors.length?latest:receipt.conflict),id:receipt.conflictId,received:true};
+                    if(waiting.some(op=>!copiedAuthor || op.clientId!==source?.clientId)) preserve.push(receipt.note.id);
+                    const selected=editor.documentId?.() || documents.current?.().id;
+                    if(copiedAuthor && selected===source.docId && (source.clientId===clientId || documents.getContent?.(source.docId)===latest?.html))
+                        redirect={from:source.docId,to:receipt.conflictId};
+                } else if(waiting.length) preserve.push(receipt.note.id);
+                return documents.applyBridge(incoming,{preserve,focus:redirect});
+            },()=>redirect);
         },
     });
     return {

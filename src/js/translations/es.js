@@ -1,5 +1,7 @@
 // El inglés es la clave; este catálogo contiene únicamente textos de interfaz.
 export default {
+    'conflict copy': 'copia de conflicto',
+    'recovered copy': 'copia recuperada',
     'load external image': 'cargar imagen externa',
     'connects to an external website': 'conecta con una web externa',
     'A private place to write.': 'Un lugar privado para escribir.',

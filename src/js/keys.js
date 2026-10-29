@@ -21,6 +21,8 @@ export default {
     // IndexedDB: the folder copy's handle
     BRIDGE_CURSOR: 'wtd.bridge.cursor', // acknowledged canonical feed position
     BRIDGE_SNAPSHOT: 'wtd.bridge.snapshot', // recoverable library before first connection
+    BRIDGE_BOOTSTRAP: 'wtd.bridge.bootstrap', // resumable reconciliation batch
+    BRIDGE_RECOVERY_PREFIX: 'wtd.bridge.recovery.', // preserved interrupted or previous-epoch records
     BRIDGE_INBOUND_PREFIX: 'wtd.bridge.inbound.', // received changes and previous local values
     BRIDGE_OP_PREFIX: 'wtd.bridge.op.', // durable local operations
     BRIDGE_ORDER: 'wtd.bridge.order', // local queue order, independent of Storage enumeration
