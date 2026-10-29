@@ -1,5 +1,6 @@
 // Runs only on the WTD page, never on other sites or subframes.
-if(window.top===window && location.origin==='https://rdiezsj.github.io' && location.pathname.startsWith('/write-this-down/')) {
+if(window.top===window && (location.origin==='https://writethisdown.eu' ||
+    (location.origin==='https://rdiezsj.github.io' && location.pathname.startsWith('/write-this-down/')))) {
     let port;
     function connect() {
         if(port) return port;

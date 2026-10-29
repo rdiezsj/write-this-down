@@ -8,7 +8,7 @@ export default {
     title: 'Write this down!',
     line: 'A private place to write.',
     description: 'Write this down! is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.',
-    url: 'https://rdiezsj.github.io/write-this-down/',
+    url: 'https://writethisdown.eu/',
     language: 'en',
     publisher: {
         name: 'Write this down!',

@@ -88,3 +88,13 @@ test('la identidad pública y el código no conservan enlaces ni marca del produ
     assert.equal(pkg.homepage, facts.url);
     assert.equal(pkg.repository.url, `git+${facts.source}.git`);
 });
+
+
+test('la URL pública y CNAME usan el dominio definitivo',()=>{
+    assert.equal(facts.url,'https://writethisdown.eu/');
+    assert.equal(JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8')).homepage,facts.url);
+    assert.equal(readFileSync(new URL('../public/CNAME',import.meta.url),'utf8').trim(),new URL(facts.url).hostname);
+    const built=new URL('../dist/CNAME',import.meta.url);
+    if(existsSync(new URL('../dist/index.html',import.meta.url)))
+        assert.equal(readFileSync(built,'utf8').trim(),new URL(facts.url).hostname);
+});

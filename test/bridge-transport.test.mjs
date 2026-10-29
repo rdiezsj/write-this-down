@@ -14,6 +14,14 @@ test('solo admite el panel y la página WTD principal del mismo perfil',()=>{
   {id,url:`chrome-extension://${id}/otra.html`},
  ]) assert.equal(senderAllowed(sender,id),false);
 });
+test('admite el dominio definitivo con HTTPS y rechaza otros orígenes y subframes',()=>{
+ for(const url of ['https://writethisdown.eu/','https://writethisdown.eu/#s=nota'])
+  assert.equal(senderAllowed({id,url,tab:{id:1},frameId:0},id),true);
+ for(const url of ['http://writethisdown.eu/','https://writethisdown.eu:8443/','https://www.writethisdown.eu/','https://writethisdown.eu.ejemplo.com/'])
+  assert.equal(senderAllowed({id,url,tab:{id:1},frameId:0},id),false);
+ assert.equal(senderAllowed({id,url:'https://writethisdown.eu/',tab:{id:1},frameId:1},id),false);
+ assert.equal(senderAllowed({id:'otra',url:'https://writethisdown.eu/',tab:{id:1},frameId:0},id),false);
+});
 test('rechaza comandos abiertos, campos extra y cursores inválidos',()=>{
  assert.equal(validateRequest({protocol:1,requestId:'r1',method:'hello'}),true);
  assert.equal(validateRequest({protocol:1,requestId:'r1',method:'pull',cursor:0}),true);

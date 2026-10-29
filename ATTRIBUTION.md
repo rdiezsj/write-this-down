@@ -41,3 +41,5 @@ Las fuentes, sonidos, lista de palabras y bibliotecas conservan sus licencias y 
 Conserva esta atribución, `LICENSE` y los avisos de terceros al redistribuir el proyecto. Este documento registra el origen y las modificaciones; las condiciones de licencia están en los textos correspondientes.
 
 - Indicador compacto de conexión local y borde azul del icono lateral de Opera, con etiquetas accesibles y detalle en el menú.
+
+- Dominio principal writethisdown.eu en metadatos, enlaces del panel y configuración de publicación; puente de Opera compatible con el dominio nuevo y la ruta anterior.

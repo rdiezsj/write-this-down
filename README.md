@@ -1,5 +1,7 @@
 # Write this down! (WTD)
 
+Aplicación: [writethisdown.eu](https://writethisdown.eu/).
+
 Editor de texto privado y minimalista. Write This Down es un proyecto independiente; el origen del código, las modificaciones y los avisos de autoría están en [ATTRIBUTION.md](ATTRIBUTION.md).
 
 La interfaz permite elegir español o inglés desde la barra inferior o el menú. La elección se guarda en el navegador y no traduce el contenido de las notas.
@@ -44,11 +46,17 @@ npm run build:extension
 
 En Opera, abre `opera://extensions`, activa el modo de desarrollador y usa «Cargar extensión descomprimida» para seleccionar la carpeta `dist/opera/`. Si recibes un ZIP, extráelo y selecciona la carpeta que contiene `manifest.json`. Conserva esa carpeta para que Opera pueda seguir cargándola. El icono de WTD abre el panel lateral.
 
-El panel y la web de [Write This Down](https://rdiezsj.github.io/write-this-down/) comparten notas y papelera dentro del mismo perfil de Opera cuando ambas versiones incluyen el puente local. Cada superficie conserva su nota seleccionada: para abrir una nota recibida, búscala en la lista de documentos. Los ajustes, permisos de carpeta y autorizaciones de imágenes permanecen separados.
+El panel y la web de [Write This Down](https://writethisdown.eu/) comparten notas y papelera dentro del mismo perfil de Opera cuando ambas versiones incluyen el puente local. Cada superficie conserva su nota seleccionada: para abrir una nota recibida, búscala en la lista de documentos. Los ajustes, permisos de carpeta y autorizaciones de imágenes permanecen separados.
 
-El estado indica si el puente está conectado, tiene cambios pendientes o está en pausa. Ante un error, el menú permite reintentar. Si dos ediciones entran en conflicto, WTD conserva las versiones y señala la copia de conflicto en la lista de documentos. Las copias de seguridad incluyen también como notas recuperables las ediciones pendientes que difieran de las notas visibles. La extensión solo se comunica con la ruta de WTD en su sitio web.
+El estado indica si el puente está conectado, tiene cambios pendientes o está en pausa. Ante un error, el menú permite reintentar. Si dos ediciones entran en conflicto, WTD conserva las versiones y señala la copia de conflicto en la lista de documentos. Las copias de seguridad incluyen también como notas recuperables las ediciones pendientes que difieran de las notas visibles. La extensión solo se comunica con `https://writethisdown.eu/` y, por compatibilidad, con la ruta anterior `https://rdiezsj.github.io/write-this-down/`.
 
 En Chrome, la aplicación instalada y la pestaña web del mismo origen y perfil comparten el almacenamiento del navegador. Las bibliotecas de Opera y Chrome, o de perfiles distintos, permanecen separadas: usa la exportación y restauración de una copia de seguridad para trasladarlas. Exporta una copia antes de desinstalar la extensión o borrar los datos del navegador.
+
+## Cambio de dominio
+
+La dirección principal es `https://writethisdown.eu/`. Usa HTTPS y actualiza los marcadores. Los enlaces compartidos contienen la nota después de `#`: se puede conservar ese fragmento al sustituir la dirección antigua por la nueva.
+
+Las notas web y los ajustes pertenecen al origen del navegador; el cambio de dominio no los mueve automáticamente. Exporta una copia desde la instalación anterior y restáurala en la nueva. Si la web antigua redirige, conserva las pestañas y PWA que aún tengan tus notas y exporta desde ellas antes de cerrarlas o borrar sus datos. La extensión de Opera conserva su biblioteca al actualizarla en la misma carpeta: recárgala y abre la nueva web en ese perfil; las notas se reciben en la lista de documentos. Para Chrome, importa la copia y vuelve a instalar la PWA desde el dominio nuevo. Conserva la copia hasta comprobar las notas importadas.
 
 ## Desarrollo local
 

@@ -8,8 +8,10 @@ export function senderAllowed(sender, extensionId) {
         const url=new URL(sender.url);
         if(url.protocol==='chrome-extension:')
             return url.hostname===extensionId && url.pathname==='/index.html';
-        return url.protocol==='https:' && url.hostname==='rdiezsj.github.io' && url.port==='' &&
-            url.pathname.startsWith('/write-this-down/') && !!sender.tab && sender.frameId===0;
+        const allowed=url.origin==='https://writethisdown.eu' ||
+            (url.protocol==='https:' && url.hostname==='rdiezsj.github.io' && url.port==='' &&
+             url.pathname.startsWith('/write-this-down/'));
+        return allowed && !!sender.tab && sender.frameId===0;
     } catch {return false;}
 }
 

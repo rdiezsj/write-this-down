@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
+import vm from 'node:vm';
 
 const json=path=>JSON.parse(readFileSync(path,'utf8'));
 
@@ -15,8 +16,10 @@ test('el paquete de Opera contiene panel, iconos y recursos locales',()=>{
     for(const icon of Object.values(manifest.sidebar_action.default_icon))assert.ok(existsSync('dist/opera/'+icon),icon);
     assert.deepEqual(manifest.permissions||[],[]);
     assert.equal(manifest.host_permissions,undefined);
-    assert.deepEqual(manifest.content_scripts.map(s=>s.matches),[['https://rdiezsj.github.io/write-this-down/*']]);
+    assert.deepEqual(manifest.content_scripts.map(s=>s.matches),[['https://writethisdown.eu/*','https://rdiezsj.github.io/write-this-down/*']]);
     assert.equal(manifest.content_scripts[0].run_at,'document_start');
+    assert.equal(manifest.version,pkg.version);
+    assert.equal(existsSync('dist/opera/CNAME'),false);
     assert.equal(manifest.background.type,'module');
     assert.ok(existsSync('dist/opera/background.js'));
     assert.ok(existsSync('dist/opera/content.js'));
@@ -26,4 +29,26 @@ test('el paquete de Opera contiene panel, iconos y recursos locales',()=>{
     assert.ok(scripts.length>0);
     for(const [,attrs,content] of scripts){assert.match(attrs,/\bsrc=/i);assert.equal(content.trim(),'');assert.doesNotMatch(attrs,/https?:\/\//i);}
     assert.doesNotMatch(html,/http-equiv="Content-Security-Policy"/i);
+});
+
+
+test('el script de contenido se limita al dominio nuevo y a la ruta anterior',()=>{
+    const source=readFileSync('extension/opera/content.js','utf8');
+    for(const [url,allowed] of [
+        ['https://writethisdown.eu/',true],
+        ['https://rdiezsj.github.io/write-this-down/',true],
+        ['https://rdiezsj.github.io/otro/',false],
+        ['http://writethisdown.eu/',false],
+        ['https://writethisdown.eu:8443/',false],
+        ['https://writethisdown.eu.ejemplo.com/',false],
+        ['https://www.writethisdown.eu/',false],
+    ]) {
+        for(const subframe of [false,true]) {
+            let listeners=0;
+            const window={addEventListener(){listeners++;}};
+            window.top=subframe?{}:window;
+            vm.runInNewContext(source,{window,location:new URL(url)});
+            assert.equal(listeners,allowed&&!subframe?1:0,`${url} subframe=${subframe}`);
+        }
+    }
 });

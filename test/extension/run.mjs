@@ -37,7 +37,7 @@ try{
  await tab.ev("document.querySelector('.share-modal [data-choice=public]').click();true");
  await delay(800);
  const link=await tab.ev("document.querySelector('.link-output').value");
- assert.match(link,/^https:\/\/rdiezsj\.github\.io\/write-this-down\/#s=/);
+ assert.match(link,/^https:\/\/writethisdown\.eu\/#s=/);
  ws.close();await stop();
  const id2=await launch();assert.equal(id2,id);tab=await openPanel(id2);
  assert.equal(await tab.ev("document.querySelector('article.content')?.textContent"),'nota offline');
