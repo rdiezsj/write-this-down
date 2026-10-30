@@ -123,6 +123,7 @@ ${list(facts.credits)}
 - Short description: ${facts.url}llms.txt
 - Project: ${facts.publisher.url}
 - Source: ${facts.source} (${facts.licence}, copyright ${facts.copyright})
+- Support: ${facts.support}
 `;
 
     return {

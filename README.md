@@ -1,6 +1,6 @@
 # Write this down! (WTD)
 
-Aplicación: [writethisdown.eu](https://writethisdown.eu/).
+Aplicación: [writethisdown.eu](https://writethisdown.eu/). Si te resulta útil, puedes [invitarme a un café](https://buymeacoffee.com/rdiezsj).
 
 Editor de texto privado y minimalista. Write This Down es un proyecto independiente; el origen del código, las modificaciones y los avisos de autoría están en [ATTRIBUTION.md](ATTRIBUTION.md).
 

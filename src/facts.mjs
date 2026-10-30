@@ -16,6 +16,7 @@ export default {
     },
     price: 0,
     source: 'https://github.com/rdiezsj/write-this-down',
+    support: 'https://buymeacoffee.com/rdiezsj',
     licence: 'AGPL-3.0',
     copyright: 'Nazir Dashtiev',
 

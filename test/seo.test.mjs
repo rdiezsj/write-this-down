@@ -56,6 +56,15 @@ test('la descripción generada distingue los temas de los modos disponibles', ()
     assert.ok(html.includes('data-hint="mode: ' + facts.colorModes.join(', ') + '"'));
 });
 
+test('el enlace de apoyo de About, README, FUNDING.yml y llms-full.txt es el de los datos', () => {
+    const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
+    const funding = readFileSync(new URL('../.github/FUNDING.yml', import.meta.url), 'utf8');
+    assert.ok(html.includes(`<a href="${facts.support}" target="_blank">buy me a coffee</a>`));
+    assert.ok(readme.includes(`(${facts.support})`));
+    assert.equal(funding, `buy_me_a_coffee: ${facts.support.split('/').pop()}\n`);
+    assert.ok(files()['llms-full.txt'].includes(`- Support: ${facts.support}\n`));
+});
+
 test('the generated files are current (when a build exists) and well formed', () => {
     const generated = files();
     assert.equal(generated['robots.txt'], `User-agent: *\nAllow: /\n\nSitemap: ${facts.url}sitemap.xml\n`);
