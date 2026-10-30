@@ -6,6 +6,7 @@ test('el idioma elegido traduce la interfaz y permite volver al inglés', () => 
     setLanguage('es');
     assert.equal(t('new document'), 'nuevo documento');
     assert.equal(t('theme dark'), 'tema oscuro');
+    assert.equal(t('Start writing. Your notes are saved in this browser, ready for your next visit.'), 'Empieza a escribir. Tus notas se guardan en este navegador y estarán aquí cuando vuelvas.');
     assert.equal(t('0 words'), '0 palabras');
     assert.equal(t('1 word · 6 chars'), '1 palabra · 6 caracteres');
     setLanguage('en');
