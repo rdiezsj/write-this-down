@@ -46,3 +46,5 @@ Conserva esta atribución, `LICENSE` y los avisos de terceros al redistribuir el
 - Cinco paletas con modos independientes, degradados estáticos durante la escritura y bienvenida renovada.
 
 - Adaptación de la extensión a Firefox con panel lateral, botón de extensiones y puente local del mismo perfil.
+
+- Extensiones de Opera, Firefox y Chrome con código e iconos compartidos, panel lateral como acceso principal y botón de extensiones; popup del mismo editor como alternativa en Opera.

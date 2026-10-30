@@ -8,7 +8,7 @@ export function senderAllowed(sender, extensionId, extensionURL=`chrome-extensio
         const url=new URL(sender.url);
         if(url.protocol==='chrome-extension:' || url.protocol==='moz-extension:') {
             const own=new URL(extensionURL);
-            return url.protocol===own.protocol && url.host===own.host && url.pathname==='/index.html';
+            return url.protocol===own.protocol && url.host===own.host && ['/index.html','/popup.html'].includes(url.pathname);
         }
         return url.origin==='https://writethisdown.eu' && !!sender.tab && sender.frameId===0;
     } catch {return false;}

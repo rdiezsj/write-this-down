@@ -1,3 +1,4 @@
+import './action.js';
 import {openDatabase} from './src/bridge/database.js';
 import {createAssembler,splitMessage} from './src/bridge/protocol.js';
 import {dispatch,senderAllowed} from './src/bridge/transport.js';

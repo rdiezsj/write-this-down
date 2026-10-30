@@ -44,7 +44,7 @@ npm ci
 npm run build:extension
 ```
 
-En Opera, abre `opera://extensions`, activa el modo de desarrollador y usa «Cargar extensión descomprimida» para seleccionar la carpeta `dist/opera/`. Si recibes un ZIP, extráelo y selecciona la carpeta que contiene `manifest.json`. Conserva esa carpeta para que Opera pueda seguir cargándola. El icono de WTD abre el panel lateral.
+En Opera, abre `opera://extensions`, activa el modo de desarrollador y usa «Cargar extensión descomprimida» para seleccionar la carpeta `dist/opera/`. Si recibes un ZIP, extráelo y selecciona la carpeta que contiene `manifest.json`. Conserva esa carpeta para que Opera pueda seguir cargándola. El icono lateral de WTD abre el panel. El botón de la barra de extensiones muestra el mismo editor en un popup, como alternativa cuando la barra lateral está oculta; ambas superficies usan la misma biblioteca local.
 
 El panel y la web de [Write This Down](https://writethisdown.eu/) comparten notas y papelera dentro del mismo perfil de Opera cuando ambas versiones incluyen el puente local. Cada superficie conserva su nota seleccionada: para abrir una nota recibida, búscala en la lista de documentos. Los ajustes, permisos de carpeta y autorizaciones de imágenes permanecen separados.
 
@@ -66,6 +66,25 @@ El paquete queda en `dist/firefox/`. Para probarlo, abre `about:debugging#/runti
 El panel y la web comparten notas y papelera dentro del mismo perfil de Firefox; los ajustes y la nota seleccionada son propios de cada superficie. Las bibliotecas de Firefox y otros navegadores permanecen separadas. El paquete no añade telemetría y limita el puente web a `https://writethisdown.eu/`.
 
 Las pruebas de Firefox requieren Firefox de escritorio y Python 3. Usan un perfil desechable, datos sintéticos y una copia del paquete cuyo origen se sustituye por un servidor local; el paquete distribuido conserva el dominio productivo. Puedes indicar el ejecutable mediante `FIREFOX`.
+
+## Panel lateral de Chrome
+
+```bash
+npm run build:chrome
+npm run test:chrome
+```
+
+Abre `chrome://extensions`, activa el modo de desarrollador y carga la carpeta `dist/chrome/` como extensión descomprimida. WTD registra su icono en el menú del panel lateral; el botón de la barra de extensiones abre ese panel. La fijación y visibilidad de los botones dependen de la configuración del navegador.
+
+El panel comparte notas y papelera con la web de WTD y su PWA en el mismo perfil de Chrome mediante el mismo puente local que Opera y Firefox. Los navegadores y perfiles distintos mantienen bibliotecas separadas.
+
+Para construir las tres variantes con una sola compilación del editor:
+
+```bash
+npm run build:extensions
+```
+
+Los manifiestos específicos usan el mismo editor, proceso de fondo, puente, activación e iconos de `extension/shared/`. Opera añade únicamente la presentación de popup; Firefox y Chrome abren el panel desde el botón. Las pruebas de Chrome admiten el ejecutable de Chrome for Testing mediante `CHROME`. `npm run test:chrome:native` requiere una sesión gráfica y comprueba el botón y la vista lateral en una ventana temporal con perfil desechable.
 
 ## Desarrollo local
 

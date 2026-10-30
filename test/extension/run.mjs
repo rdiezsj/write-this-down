@@ -5,23 +5,27 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createServer} from 'node:net';
 import assert from 'node:assert/strict';
-const dir=process.cwd()+'/dist/opera',profile=await mkdtemp(join(tmpdir(),'wtd-opera-reinicio-'));
+import {resolveChrome} from '../browser/chrome.mjs';
+const target=process.env.WTD_EXTENSION_TARGET || 'opera';
+const executable=target==='chrome' ? resolveChrome() : (process.env.CHROME || 'opera');
+const dir=process.cwd()+'/dist/'+target,profile=await mkdtemp(join(tmpdir(),'wtd-extension-reinicio-'));
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 const port=await new Promise(r=>{const s=createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>r(p));});});
 let proc,ws;
 async function launch(){
- proc=spawn('opera',['--headless=new',`--user-data-dir=${profile}`,`--remote-debugging-port=${port}`,`--disable-extensions-except=${dir}`,`--load-extension=${dir}`,'--no-first-run','about:blank'],{stdio:'ignore'});
+ proc=spawn(executable,['--headless=new',`--user-data-dir=${profile}`,`--remote-debugging-port=${port}`,`--disable-extensions-except=${dir}`,`--load-extension=${dir}`,'--no-first-run','about:blank'],{stdio:'ignore'});
  for(let i=0;i<80;i++){await delay(250);try{const targets=await(await fetch(`http://127.0.0.1:${port}/json/list`)).json();if(targets.length)return [...createHash('sha256').update(dir).digest().subarray(0,16)].map(x=>String.fromCharCode(97+(x>>4),97+(x&15))).join('');}catch{}}
  throw Error('No se detecta el service worker de la extensión');
 }
 async function stop(){if(!proc||proc.exitCode!==null)return;const done=new Promise(r=>proc.once('exit',r));proc.kill('SIGTERM');await Promise.race([done,delay(5000)]);if(proc.exitCode===null){proc.kill('SIGKILL');await done;}}
 async function openPanel(id){
- const target=await(await fetch(`http://127.0.0.1:${port}/json/new?about:blank`,{method:'PUT'})).json();
- ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});let n=0;const pending=new Map();
+ const pageTarget=await(await fetch(`http://127.0.0.1:${port}/json/new?about:blank`,{method:'PUT'})).json();
+ ws=new WebSocket(pageTarget.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});let n=0;const pending=new Map();
  ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(Error(m.error.message)):p.resolve(m.result);}};
  const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++n;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}));});
  await send('Network.enable');await send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
- const nav=await send('Page.navigate',{url:`chrome-extension://${id}/index.html`});assert.equal(nav.errorText,undefined);
+ const page=target==='opera'?'popup.html':'index.html';
+ const nav=await send('Page.navigate',{url:`chrome-extension://${id}/${page}`});assert.equal(nav.errorText,undefined);
  await delay(1000);
  return {send,ev:async expression=>(await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true})).result.value};
 }
@@ -36,12 +40,20 @@ try{
  await delay(300);
  await tab.ev("document.querySelector('.share-modal [data-choice=public]').click();true");
  await delay(800);
+ if(target==='chrome') {
+  assert.equal((await tab.ev('chrome.sidePanel.getPanelBehavior()')).openPanelOnActionClick,true);
+  assert.equal((await tab.ev('chrome.sidePanel.getOptions({})')).path,'index.html');
+  const opened=await tab.send('Runtime.evaluate',{expression:'chrome.sidePanel.open({windowId:chrome.windows.WINDOW_ID_CURRENT}).then(()=>true)',awaitPromise:true,returnByValue:true,userGesture:true});
+  assert.equal(opened.result?.value,true,JSON.stringify(opened));
+ }
  const link=await tab.ev("document.querySelector('.link-output').value");
  assert.match(link,/^https:\/\/writethisdown\.eu\/#s=/);
- ws.close();await stop();
+ await tab.send('Browser.close');ws.close();
+ for(let i=0;i<100&&proc.exitCode===null;i++)await delay(50);
+ await stop();
  const id2=await launch();assert.equal(id2,id);tab=await openPanel(id2);
  assert.equal(await tab.ev("document.querySelector('article.content')?.textContent"),'nota offline');
  const second=await tab.ev(handshake);assert.equal(second?.ok,true);assert.equal(second.result.epoch,first.result.epoch);
- const result={offline_first_open:true,offline_write:true,restart_persisted:true,public_link:true,bridge_worker:true,profile:'aislado y eliminado'};
+ const result={...(target==='chrome'?{sidepanel_configured:true,sidepanel_open:true}:{popup_editor:true}),offline_first_open:true,offline_write:true,restart_persisted:true,public_link:true,bridge_worker:true,profile:'aislado y eliminado'};
  console.log(JSON.stringify(result));
 }finally{ws?.close();await stop();await rm(profile,{recursive:true,force:true,maxRetries:10,retryDelay:500});}

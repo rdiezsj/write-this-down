@@ -6,20 +6,23 @@ import {createServer} from 'node:http';
 import {mkdtemp,cp,readFile,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {resolveChrome} from './browser/chrome.mjs';
+const extensionTarget=process.env.WTD_EXTENSION_TARGET || 'opera';
+const executable=extensionTarget==='chrome' ? resolveChrome() : (process.env.CHROME || 'opera');
 
 // A test-only copy substitutes the local origin; the production package keeps its strict HTTPS origin.
-test('el editor real intercambia notas entre web y panel en Opera',{timeout:120000},async()=>{
+test('el editor real intercambia notas entre web y panel en el navegador Chromium',{timeout:120000},async()=>{
  const root=await mkdtemp(join(tmpdir(),'wtd-bridge-content-')),ext=join(root,'extension'),profile=join(root,'profile');
  const server=createServer(async(req,res)=>{try{const name=decodeURIComponent(new URL(req.url,'http://local').pathname).replace(/^\/write-this-down\//,'')||'index.html';if(name.includes('..'))throw Error();const body=await readFile(join('dist',name));const type=name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':name.endsWith('.html')?'text/html':'application/octet-stream';res.writeHead(200,{'Content-Type':type}).end(body);}catch{res.writeHead(404).end();}});
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin=`http://127.0.0.1:${server.address().port}`;
  let proc,ws;
  try{
-  await cp('dist/opera',ext,{recursive:true});
+  await cp('dist/'+extensionTarget,ext,{recursive:true});
   const manifest=JSON.parse(await readFile(join(ext,'manifest.json'),'utf8'));manifest.content_scripts[0].matches=['http://127.0.0.1/*'];
   await writeFile(join(ext,'manifest.json'),JSON.stringify(manifest));
   const content=join(ext,'content.js');await writeFile(content,(await readFile(content,'utf8')).replace("location.origin==='https://writethisdown.eu'",`location.origin===${JSON.stringify(origin)}`));
   const transport=join(ext,'src/bridge/transport.js');await writeFile(transport,(await readFile(transport,'utf8')).replace("url.origin==='https://writethisdown.eu'",`url.origin===${JSON.stringify(origin)}`));
-  proc=spawn('opera',['--headless=new',`--user-data-dir=${profile}`,'--remote-debugging-port=0',`--disable-extensions-except=${ext}`,`--load-extension=${ext}`,'--no-first-run',origin+'/write-this-down/'],{stdio:['ignore','ignore','pipe']});let stderr='';proc.stderr.on('data',chunk=>stderr+=chunk);
+  proc=spawn(executable,['--headless=new','--disable-background-timer-throttling','--disable-renderer-backgrounding',`--user-data-dir=${profile}`,'--remote-debugging-port=0',`--disable-extensions-except=${ext}`,`--load-extension=${ext}`,'--no-first-run',origin+'/write-this-down/'],{stdio:['ignore','ignore','pipe']});let stderr='';proc.stderr.on('data',chunk=>stderr+=chunk);
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));for(let i=0;i<80&&!stderr.includes('DevTools listening on');i++)await sleep(200);
   const port=stderr.match(/DevTools listening on ws:\/\/127\.0\.0\.1:(\d+)\//)?.[1];assert.ok(port);
   let page;for(let i=0;i<40&&!page;i++){const targets=await(await fetch(`http://127.0.0.1:${port}/json/list`)).json();page=targets.find(t=>t.type==='page'&&t.url.startsWith(origin));if(!page)await sleep(100);}assert.ok(page);
@@ -65,8 +68,7 @@ test('el editor real intercambia notas entre web y panel en Opera',{timeout:1200
    assert.ok(layout.boxes.every((box,i)=>box.left>=0&&box.right<=400&&(!i||layout.boxes[i-1].right<=box.left)),JSON.stringify(layout));
    // Freeze the web bridge while both editors produce independent intentions.
    await ev("window.__originalPost=window.postMessage.bind(window);window.__holdBridge=true;window.postMessage=(data,...args)=>{if(window.__holdBridge&&data?.direction==='request'&&data?.channel==='wtd-bridge-v1')return;window.__originalPost(data,...args)};window.dispatchEvent(new Event('pagehide'));document.querySelector('article.content').innerHTML='DIVERGENCIA WEB';document.querySelector('article.content').dispatchEvent(new InputEvent('input',{bubbles:true}));true");
-   await sleep(600);
-   assert.equal(await ev("document.querySelector('.bridge-indicator').title"),'changes pending');
+   await wait("document.querySelector('.bridge-indicator').title==='changes pending'");
    assert.equal(await ev("getComputedStyle(document.querySelector('.bridge-indicator')).backgroundColor"),'rgb(0, 0, 0)');
    await panelEval("document.querySelector('article.content').innerHTML='DIVERGENCIA PANEL';document.querySelector('article.content').dispatchEvent(new InputEvent('input',{bubbles:true}));true");
    await sleep(600);
@@ -79,8 +81,7 @@ test('el editor real intercambia notas entre web y panel en Opera',{timeout:1200
    assert.equal(await ev("document.querySelector('.status-said').textContent"),'conflict preserved');
    // A subsequent storage refusal must outrank the still-visible conflict notice.
    await ev("window.__setItem=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k.startsWith('wtd.bridge.op.'))throw new DOMException('full','QuotaExceededError');return window.__setItem.call(this,k,v)};document.querySelector('article.content').innerHTML='DIVERGENCIA WEB SIN GUARDAR';document.querySelector('article.content').dispatchEvent(new InputEvent('input',{bubbles:true}));true");
-   await sleep(600);
-   assert.equal(await ev("document.querySelector('.status-message').textContent.includes('could not save this text')"),true);
+   await wait("document.querySelector('.status-message').textContent.includes('could not save this text')");
    await ev("Storage.prototype.setItem=window.__setItem;document.querySelector('article.content').innerHTML='DIVERGENCIA WEB';document.querySelector('article.content').dispatchEvent(new InputEvent('input',{bubbles:true}));true");
    await sleep(600);
 

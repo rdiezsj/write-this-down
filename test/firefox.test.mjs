@@ -12,7 +12,7 @@ test('Firefox registra panel y botón sin popup ni permisos generales',()=>{
  assert.equal(manifest.sidebar_action.open_at_install,false);
  assert.equal(manifest.action.default_popup,undefined);
  assert.ok(manifest.action.default_icon['32']);
- assert.deepEqual(manifest.background.scripts,['background.js','action.js']);
+ assert.deepEqual(manifest.background.scripts,['background.js']);
  assert.equal(manifest.background.type,'module');
  assert.equal(manifest.background.service_worker,undefined);
  assert.deepEqual(manifest.permissions||[],[]);
@@ -23,7 +23,7 @@ test('Firefox registra panel y botón sin popup ni permisos generales',()=>{
 });
 test('el botón de Firefox abre el panel directamente desde el gesto del usuario',()=>{
  let click,opened=0;
- vm.runInNewContext(readFileSync('extension/firefox/action.js','utf8'),{browser:{action:{onClicked:{addListener(fn){click=fn;}}},sidebarAction:{open(){opened++;return Promise.resolve();}}}});
+ vm.runInNewContext(readFileSync('extension/shared/action.js','utf8'),{console,browser:{runtime:{getManifest:()=>({action:{}})},action:{onClicked:{addListener(fn){click=fn;}}},sidebarAction:{open(){opened++;return Promise.resolve();}}}});
  assert.equal(typeof click,'function');assert.equal(opened,0);click();assert.equal(opened,1);
 });
 test('Firefox acepta solo su UUID interno y su ID, nunca otra extensión o página',()=>{

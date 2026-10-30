@@ -5,6 +5,9 @@ import {createServer} from 'node:http';
 import {mkdtemp,cp,readFile,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {resolveChrome} from './browser/chrome.mjs';
+const extensionTarget=process.env.WTD_EXTENSION_TARGET || 'opera';
+const executable=extensionTarget==='chrome' ? resolveChrome() : (process.env.CHROME || 'opera');
 
 // A test-only copy substitutes the local origin; the production package keeps its strict HTTPS origin.
 test('content script y worker intercambian operaciones solo en el origen autorizado',{timeout:60000},async()=>{
@@ -13,12 +16,12 @@ test('content script y worker intercambian operaciones solo en el origen autoriz
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin=`http://127.0.0.1:${server.address().port}`;
  let proc,ws;
  try{
-  await cp('dist/opera',ext,{recursive:true});
+  await cp('dist/'+extensionTarget,ext,{recursive:true});
   const manifest=JSON.parse(await readFile(join(ext,'manifest.json'),'utf8'));manifest.content_scripts[0].matches=['http://127.0.0.1/*'];
   await writeFile(join(ext,'manifest.json'),JSON.stringify(manifest));
   const content=join(ext,'content.js');await writeFile(content,(await readFile(content,'utf8')).replace("location.origin==='https://writethisdown.eu'",`location.origin===${JSON.stringify(origin)}`));
   const transport=join(ext,'src/bridge/transport.js');await writeFile(transport,(await readFile(transport,'utf8')).replace("url.origin==='https://writethisdown.eu'",`url.origin===${JSON.stringify(origin)}`));
-  proc=spawn('opera',['--headless=new',`--user-data-dir=${profile}`,'--remote-debugging-port=0',`--disable-extensions-except=${ext}`,`--load-extension=${ext}`,'--no-first-run',origin+'/write-this-down/'],{stdio:['ignore','ignore','pipe']});let stderr='';proc.stderr.on('data',chunk=>stderr+=chunk);
+  proc=spawn(executable,['--headless=new','--disable-background-timer-throttling','--disable-renderer-backgrounding',`--user-data-dir=${profile}`,'--remote-debugging-port=0',`--disable-extensions-except=${ext}`,`--load-extension=${ext}`,'--no-first-run',origin+'/write-this-down/'],{stdio:['ignore','ignore','pipe']});let stderr='';proc.stderr.on('data',chunk=>stderr+=chunk);
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));for(let i=0;i<80&&!stderr.includes('DevTools listening on');i++)await sleep(200);
   const port=stderr.match(/DevTools listening on ws:\/\/127\.0\.0\.1:(\d+)\//)?.[1];assert.ok(port);
   let page;for(let i=0;i<40&&!page;i++){const targets=await(await fetch(`http://127.0.0.1:${port}/json/list`)).json();page=targets.find(t=>t.type==='page'&&t.url.startsWith(origin));if(!page)await sleep(100);}assert.ok(page);

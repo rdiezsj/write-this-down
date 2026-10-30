@@ -42,7 +42,7 @@ test('el paquete de Opera conserva el código propio legible y omite recursos we
 
 
 test('el script de contenido se limita al dominio productivo',()=>{
-    const source=readFileSync('extension/opera/content.js','utf8');
+    const source=readFileSync('extension/shared/content.js','utf8');
     for(const [url,allowed] of [
         ['https://writethisdown.eu/',true],
         ['https://other.example/',false],
