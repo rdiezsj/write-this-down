@@ -21,7 +21,7 @@ export default {
     copyright: 'Nazir Dashtiev',
 
     // what leaves the browser, for the generated files; About says it in its own words
-    privacy: 'The text stays in the browser unless you export it or share it. No analytics, cookies or tracking. A picture named by its address is fetched from there when the preview shows it.',
+    privacy: 'The text stays in the browser unless you export it, share it, or keep a copy in a folder. No analytics, cookies or tracking. A picture named by its address is fetched from there when the preview shows it.',
 
     // the product, as lists the generated files can name
     formats: { reads: ['.txt', '.md'], writes: ['.md', '.txt', 'PDF (print)', '.json backup', '.zip of .md files'] },

@@ -74,7 +74,7 @@ Address: ${facts.url}. ${facts.name} is an independent project. Free, no account
 
 ## Privacy
 
-${facts.privacy} There is no server holding text, no account and no sync; the browser's own storage holds the only copy, so a backup (export everything) or the folder copy is how a copy outlives the browser. A share link carries the text after the # of the address, which browsers never send to a server; a private link is locked with a seed word that never leaves the browser.
+${facts.privacy} There is no server holding text and no account. The Opera extension and website can share notes locally in the same browser profile. Export a backup or keep a folder copy to retain notes outside browser storage. A share link carries the text after the # of the address, which browsers never send to a server; a private link is locked with a seed word that never leaves the browser.
 
 ## Writing
 
