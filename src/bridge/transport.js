@@ -2,12 +2,14 @@ import {validateOperation} from './protocol.js';
 
 const ownKeys=(value,keys)=>Object.keys(value).every(key=>keys.includes(key));
 
-export function senderAllowed(sender, extensionId) {
+export function senderAllowed(sender, extensionId, extensionURL=`chrome-extension://${extensionId}/`) {
     if(!sender || sender.id!==extensionId || typeof sender.url!=='string') return false;
     try {
         const url=new URL(sender.url);
-        if(url.protocol==='chrome-extension:')
-            return url.hostname===extensionId && url.pathname==='/index.html';
+        if(url.protocol==='chrome-extension:' || url.protocol==='moz-extension:') {
+            const own=new URL(extensionURL);
+            return url.protocol===own.protocol && url.host===own.host && url.pathname==='/index.html';
+        }
         return url.origin==='https://writethisdown.eu' && !!sender.tab && sender.frameId===0;
     } catch {return false;}
 }

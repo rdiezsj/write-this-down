@@ -4,7 +4,7 @@ import {t} from './i18n';
 
 // Only interface state crosses this boundary; note text stays in the stores.
 let current={state:'disconnected',pending:0,retry:false,active:false,conflicts:0};
-function visible() {return current.active || current.pending>0 || current.state==='pending' || location.protocol==='chrome-extension:';}
+function visible() {return current.active || current.pending>0 || current.state==='pending' || ['chrome-extension:','moz-extension:'].includes(location.protocol);}
 function message() {
     if(!visible()) return '';
     if(current.state==='disconnected') return 'local bridge unavailable · notes remain in this browser';

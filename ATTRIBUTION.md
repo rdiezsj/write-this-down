@@ -14,7 +14,7 @@ Se conserva el copyright de Nazir Dashtiev sobre el código original. Su incorpo
 
 ## Modificaciones de Write This Down
 
-Modificaciones realizadas el **27 a 29 de octubre de 2026** por el proyecto Write This Down:
+Modificaciones realizadas el **27 a 30 de octubre de 2026** por el proyecto Write This Down:
 
 - Identidad independiente de WTD en interfaz, metadatos, enlaces, almacenamiento y copias; retirada del traslado entre dominios del proyecto original.
 - Empaquetado local de la aplicación como extensión para el panel lateral de Opera y conexión del editor con la web mediante un puente dentro del mismo perfil, con cola duradera y copias locales recuperables.
@@ -44,3 +44,5 @@ Conserva esta atribución, `LICENSE` y los avisos de terceros al redistribuir el
 
 - Dominio principal writethisdown.eu en metadatos, enlaces del panel y configuración de publicación; puente de Opera limitado a ese único origen productivo.
 - Cinco paletas con modos independientes, degradados estáticos durante la escritura y bienvenida renovada.
+
+- Adaptación de la extensión a Firefox con panel lateral, botón de extensiones y puente local del mismo perfil.

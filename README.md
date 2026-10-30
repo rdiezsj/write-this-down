@@ -52,6 +52,21 @@ El estado indica si el puente está conectado, tiene cambios pendientes o está 
 
 En Chrome, la aplicación instalada y la pestaña web del mismo origen y perfil comparten el almacenamiento del navegador. Las bibliotecas de Opera y Chrome, o de perfiles distintos, permanecen separadas: usa la exportación y restauración de una copia de seguridad para trasladarlas. Exporta una copia antes de desinstalar la extensión o borrar los datos del navegador.
 
+## Panel lateral de Firefox
+
+La extensión de Firefox reutiliza el editor y el puente local de Opera. Su entrada lateral y el botón de la barra de extensiones abren el mismo panel, que permanece disponible mientras navegas. Puedes fijar el botón desde el menú de extensiones del navegador.
+
+```bash
+npm run build:firefox
+npm run test:firefox
+```
+
+El paquete queda en `dist/firefox/`. Para probarlo, abre `about:debugging#/runtime/this-firefox`, pulsa «Cargar complemento temporal» y selecciona su `manifest.json`. La instalación temporal termina al cerrar Firefox; exporta tus notas antes de retirarla. La instalación permanente requiere un paquete firmado por Mozilla.
+
+El panel y la web comparten notas y papelera dentro del mismo perfil de Firefox; los ajustes y la nota seleccionada son propios de cada superficie. Las bibliotecas de Firefox y otros navegadores permanecen separadas. El paquete no añade telemetría y limita el puente web a `https://writethisdown.eu/`.
+
+Las pruebas de Firefox requieren Firefox de escritorio y Python 3. Usan un perfil desechable, datos sintéticos y una copia del paquete cuyo origen se sustituye por un servidor local; el paquete distribuido conserva el dominio productivo. Puedes indicar el ejecutable mediante `FIREFOX`.
+
 ## Desarrollo local
 
 `npm run test:browser:build` sirve el build de producción en un puerto temporal y ejecuta las pruebas sin BrowserSync. Añade `-- --subpath` para comprobar `/write-this-down/`. Chrome se detecta automáticamente; puedes indicar otro ejecutable mediante `CHROME`.

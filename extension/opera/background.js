@@ -9,7 +9,7 @@ function coordinator() {
 }
 
 chrome.runtime.onConnect.addListener(port=>{
-    if(port.name!=='wtd-bridge-v1' || !senderAllowed(port.sender,chrome.runtime.id)) {
+    if(port.name!=='wtd-bridge-v1' || !senderAllowed(port.sender,chrome.runtime.id,chrome.runtime.getURL('/'))) {
         port.disconnect();
         return;
     }

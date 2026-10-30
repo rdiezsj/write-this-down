@@ -92,7 +92,7 @@ export default (function () {
     }
 
     function linkFor(fragment) {
-        return `${location.protocol === 'chrome-extension:' ? facts.url : location.origin + location.pathname}#${fragment}`;
+        return `${['chrome-extension:', 'moz-extension:'].includes(location.protocol) ? facts.url : location.origin + location.pathname}#${fragment}`;
     }
 
     function sizeOf(length) {

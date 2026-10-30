@@ -6,7 +6,7 @@ import {createBridgeSession} from '../../bridge/session';
 
 // The extension port and window channel carry local messages, never HTTP requests.
 function channel() {
-    if(location.protocol==='chrome-extension:' && chrome.runtime?.id) {
+    if(['chrome-extension:','moz-extension:'].includes(location.protocol) && chrome.runtime?.id) {
         let port=null,listener=null;
         return {
             listen(fn){listener=fn;return ()=>{listener=null;port?.disconnect();port=null;};},
