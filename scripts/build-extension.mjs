@@ -22,7 +22,9 @@ await cp('extension/opera/manifest.json',join(target,'manifest.json'));
 
 await cp('extension/opera/background.js',join(target,'background.js'));
 await cp('extension/opera/content.js',join(target,'content.js'));
-await cp('src/bridge',join(target,'src/bridge'),{recursive:true});
+await mkdir(join(target,'src/bridge'),{recursive:true});
+for(const name of ['database.js','protocol.js','reconcile.js','transport.js'])
+    await cp(join('src/bridge',name),join(target,'src/bridge',name));
 await mkdir(join(target,'src/js'),{recursive:true});
 await cp('src/js/keys.js',join(target,'src/js/keys.js'));
 

@@ -36,7 +36,7 @@ test('el paquete de Opera conserva el código propio legible y omite recursos we
     const bundle=readFileSync('dist/opera/js/bundle.js','utf8');
     assert.match(bundle,/function normaliseSeed\(seed\)/);
     assert.ok(bundle.split('\n').length>1000,'el código debe ser revisable');
-    for(const path of ['404.html','favicon.ico','android-chrome-256x256.png','android-chrome-512x512.png'])
+    for(const path of ['404.html','favicon.ico','android-chrome-256x256.png','android-chrome-512x512.png','src/bridge/session.js','src/bridge/client.js','src/bridge/bootstrap.js','src/bridge/page-transport.js','src/bridge/recovery.js'])
         assert.equal(existsSync('dist/opera/'+path),false,path);
 });
 
