@@ -32,6 +32,15 @@ test('el paquete de Opera contiene panel, iconos y recursos locales',()=>{
 });
 
 
+test('el paquete de Opera conserva el código propio legible y omite recursos web ajenos al panel',()=>{
+    const bundle=readFileSync('dist/opera/js/bundle.js','utf8');
+    assert.match(bundle,/function normaliseSeed\(seed\)/);
+    assert.ok(bundle.split('\n').length>1000,'el código debe ser revisable');
+    for(const path of ['404.html','favicon.ico','android-chrome-256x256.png','android-chrome-512x512.png'])
+        assert.equal(existsSync('dist/opera/'+path),false,path);
+});
+
+
 test('el script de contenido se limita al dominio productivo',()=>{
     const source=readFileSync('extension/opera/content.js','utf8');
     for(const [url,allowed] of [

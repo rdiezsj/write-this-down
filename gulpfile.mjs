@@ -17,6 +17,7 @@ const server = browserSync.create();
 // Webpack Stream config
 const webpackStreamConfig = {
   mode: process.env.NODE_ENV,
+  ...(process.env.WTD_EXTENSION === '1' && { optimization: { minimize: false, concatenateModules: false } }),
   plugins: [new ThirdPartyLicensesPlugin()],
   output: {
     filename: 'bundle.js',

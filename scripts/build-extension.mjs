@@ -4,7 +4,7 @@ import {join} from 'node:path';
 const dist='dist', target=join(dist,'opera');
 await rm(target,{recursive:true,force:true});
 await mkdir(target,{recursive:true});
-const excluded=new Set(['opera','CNAME','sw.js','site.webmanifest','robots.txt','sitemap.xml','llms.txt','llms-full.txt']);
+const excluded=new Set(['opera','CNAME','sw.js','site.webmanifest','robots.txt','sitemap.xml','llms.txt','llms-full.txt','404.html','favicon.ico','android-chrome-256x256.png','android-chrome-512x512.png']);
 for(const name of await readdir(dist)) {
     if(!excluded.has(name)) await cp(join(dist,name),join(target,name),{recursive:true});
 }
