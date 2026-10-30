@@ -18,7 +18,7 @@ Las imágenes de documentos recibidos por enlace requieren pulsar «cargar image
 - Enlaces compartidos con el texto dentro del enlace, abiertos o bloqueados con una palabra semilla mediante AES-GCM en el navegador.
 - Markdown con vista previa, tablas, tareas, notas al pie, frontmatter y código resaltado; índice de títulos y búsqueda de documentos.
 - Menú de comandos, comandos con `/`, atajos de edición, modo de concentración, números de línea y pantalla completa.
-- Temas, tres familias tipográficas, tamaños de texto, cursor fino o de bloque y sonidos de teclado opcionales.
+- Cinco temas con modos claro, oscuro o según el sistema; fondo de degradado opcional, estático al escribir. Tres familias tipográficas, tamaños de texto, cursor fino o de bloque y sonidos de teclado opcionales.
 - Recuento de palabras y caracteres, y tiempo estimado de lectura, también sobre una selección.
 - Funcionamiento sin conexión tras la primera visita compatible e instalación como aplicación.
 - Copias de seguridad en JSON o ZIP con archivos Markdown; copia a una carpeta en navegadores de escritorio compatibles con File System Access.

@@ -55,9 +55,25 @@ article {
 	pointer-events: none;
 	user-select: none;
 
+	.welcome-logo {
+		display: flex;
+		align-items: center;
+		margin-bottom: 2em;
+	}
+
 	.wordmark {
 		color: var(--fg);
 	}
+
+	.welcome-cursor {
+		width: .6em;
+		height: 1.4em;
+		background: var(--accent);
+		margin-left: .3em;
+	}
+
+	.welcome-intro { margin-bottom: 1em; }
+	.for-keys, .for-touch { margin-top: 2em; }
 
 	p {
 		margin: 0;

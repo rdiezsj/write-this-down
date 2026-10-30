@@ -2,7 +2,7 @@
 // store stays fast (numbers returned as bounds, not timings)
 export const expect = {
     menuEggs: 'Shopping [in the text]', menuZebra: 'zebra facts | Journal [in the text]', menuSea: 'Journal [in the text]', menuEntity: 'Shopping [in the text]',
-    menuTheme: 6, opened: 'Shoppingmilk, eggs &', docsStripes: 'zebra facts [in the text]', bigStore: true, openFast: true, filterFast: true, needle: 'perf 59 [in the text]',
+    menuTheme: 5, opened: 'Shoppingmilk, eggs &', docsStripes: 'zebra facts [in the text]', bigStore: true, openFast: true, filterFast: true, needle: 'perf 59 [in the text]',
 };
 
 export default async (t) => {

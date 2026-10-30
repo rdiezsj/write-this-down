@@ -35,9 +35,12 @@ body {
 	scroll-padding: 48px 0 160px;
 	min-width: 200px;
 	width: 100%;
-	background: var(--bg);
+	background: radial-gradient(ellipse at 85% 5%, var(--glow1), transparent 55%), radial-gradient(ellipse at 10% 95%, var(--glow2), transparent 55%), var(--bg);
+	background-attachment: fixed;
 	color: var(--fg);
 }
+
+body.background-off { background: var(--bg); }
 
 ::selection {
 	background: var(--select);

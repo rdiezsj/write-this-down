@@ -8,8 +8,8 @@ export default async t=>{
  await t.sleep(200);
  out.inlineBlocked=await t.ev(`window.__untrusted!==1`);
  out.directives=await t.ev(`__violations.includes('script-src-elem')&&__violations.includes('connect-src')`);
- await t.ev(`__violations.length=0;localStorage.scheme='scheme-night'`);await t.reload();
- out.theme=await t.ev(`document.documentElement.classList.contains('scheme-night')`);
+ await t.ev(`__violations.length=0;localStorage.scheme='nord'`);await t.reload();
+ out.theme=await t.ev(`document.documentElement.classList.contains('theme-nord')`);
  await t.ev(`window.__violations=[];document.addEventListener('securitypolicyviolation',e=>__violations.push(e.effectiveDirective))`);
  out.fonts=await t.ev(`document.fonts.ready.then(()=>document.fonts.check('15px "IBM Plex Mono"'))`);
  await t.focus();await t.insert('# CSP note\n\n**works**');out.edited=(await t.text()).includes('CSP note');

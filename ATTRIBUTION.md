@@ -43,3 +43,4 @@ Conserva esta atribución, `LICENSE` y los avisos de terceros al redistribuir el
 - Indicador compacto de conexión local y borde azul del icono lateral de Opera, con etiquetas accesibles y detalle en el menú.
 
 - Dominio principal writethisdown.eu en metadatos, enlaces del panel y configuración de publicación; puente de Opera limitado a ese único origen productivo.
+- Cinco paletas con modos independientes, degradados estáticos durante la escritura y bienvenida renovada.

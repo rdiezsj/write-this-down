@@ -3,6 +3,19 @@ import assert from 'node:assert/strict';
 import {component} from './helpers/component.mjs';
 import keys from '../src/js/keys.js';
 
+test('la copia conserva tema y modo independientes',()=>{
+ const storage={scheme:'nord','color-mode':'dark'};
+ const documents={current:()=>null,list:()=>[],isBlank:()=>true};
+ const backup=component('backup',{documents,util:{},keys,localStorage:storage});
+ const data=backup.collect();
+ assert.equal(data.settings.scheme,'nord');
+ assert.equal(data.settings['color-mode'],'dark');
+ storage.scheme='github'; storage['color-mode']='light';
+ backup.apply(data);
+ assert.equal(storage.scheme,'nord');
+ assert.equal(storage['color-mode'],'dark');
+});
+
 test('el traslado conserva una edición pendiente que otra pestaña ha sustituido en la copia visible',()=>{
  const notes=new Map([['a',{id:'a',updated:2,text:'VERSIÓN VISIBLE'}]]);
  const operation={protocol:1,opId:'pending-author',clientId:'writer',docId:'a',base:null,

@@ -16,7 +16,7 @@ export default async (t) => {
     const mod = await t.ev('/Mac/.test(navigator.platform) ? 4 : 2');
     await t.key('k', 'KeyK', mod); await t.sleep(150);
     const menuUsed = (await t.pickerOpen()) === 'true:commands';
-    await t.filter('theme light'); await t.key('Enter');
+    await t.filter('theme github'); await t.key('Enter');
     await t.focus(); await t.type('/date'); await t.key('Enter');
     const slashUsed = /\d{4}/.test(await t.text());
     await t.type(' private writing'); await t.sleep(500);

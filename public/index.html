@@ -21,7 +21,7 @@
 		<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Write this down!","alternateName":"WTD","url":"https://writethisdown.eu/","description":"Write this down! is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","inLanguage":"en","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Project","name":"Write this down!","url":"https://github.com/rdiezsj/write-this-down"}}</script>
 
 		<!-- Apply the saved or system theme before painting the page. -->
-		<script>try{var s=localStorage.getItem('scheme')||'scheme-system';if(s==='scheme-system')s=matchMedia('(prefers-color-scheme: dark)').matches?'scheme-dark-and-white':'scheme-light';document.documentElement.className=s}catch(e){}</script>
+		<script>try{var t=localStorage.getItem('scheme'),m=localStorage.getItem('color-mode');if(!['github','nord','dracula','paper','everforest'].includes(t))t='github';if(!['light','dark'].includes(m))m=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.className='theme-'+t+' mode-'+m}catch(e){}</script>
 
 		<!-- CSS -->
 		<link href="css/style.css" rel="stylesheet" media="all">
@@ -38,7 +38,7 @@
 
 	</head>
 
-	<body class="scheme-light size-s" style="display: none">
+	<body class="theme-github mode-light size-s" style="display: none">
 		<!-- The WTD wordmark, reused in the empty state and in About -->
 		<svg xmlns="http://www.w3.org/2000/svg" style="display: none">
 			<symbol id="wordmark" viewBox="0 0 350 36"><text x="0" y="29" font-family="IBM Plex Mono, monospace" font-size="34" font-weight="700" fill="currentColor">Write this down!</text></symbol>
@@ -96,7 +96,8 @@
 					<tr><th colspan="2">Appearance</th></tr>
 					<tr><td>Interface language: english / español</td><td>in the menu or the bottom bar</td></tr>
 					<tr><td>Size: s, m, l</td><td><kbd data-keys="Mod +"></kbd> larger, <kbd data-keys="Mod -"></kbd> smaller; past l the browser zooms</td></tr>
-					<tr><td>Theme: system, light, dark, green, sand, night</td><td><kbd data-keys="Mod Shift E"></kbd></td></tr>
+					<tr><td>Theme: github, nord, dracula, paper, everforest</td><td><kbd data-keys="Mod Shift E"></kbd></td></tr>
+					<tr><td>Mode: system, light, dark</td><td>in the menu</td></tr>
 					<tr><td>Font: mono, sans, serif</td><td><kbd data-keys="Mod Shift A"></kbd></td></tr>
 					<tr><td>Cursor: block, thin</td><td><kbd data-keys="Mod Shift K"></kbd></td></tr>
 					<tr><td>Key sounds: off, soft, click, blip, typewriter</td><td><kbd data-keys="Mod Shift Y"></kbd></td></tr>
@@ -216,7 +217,8 @@
 				</div>
 				<div class="group">
 					<button class="font-size" data-hint="size of the text, and the page with it" data-keys="Mod +">size <b>s</b></button>
-					<button class="color-flip" data-hint="theme: system, light, dark, green, sand, night" data-keys="Mod Shift E">theme <b>light</b></button>
+					<button class="color-flip" data-hint="theme: github, nord, dracula, paper, everforest" data-keys="Mod Shift E">theme <b>github</b></button>
+					<button class="mode-flip" data-hint="mode: system, light, dark">mode <b>system</b></button>
 					<button class="font-flip" data-hint="font of the text" data-keys="Mod Shift A">font <b>mono</b></button>
 					<button class="caret" data-hint="cursor" data-keys="Mod Shift K">cursor <b>block</b></button>
 					<button class="sfx-mute" data-hint="key sounds: off, soft, click, blip, typewriter" data-keys="Mod Shift Y">sound <b>off</b></button>
@@ -264,8 +266,8 @@
 
 			<!-- Shown while the document is empty -->
 			<div class="welcome" aria-hidden="true">
-				<svg class="wordmark"><use href="#wordmark"></use></svg>
-				<pre class="divider">▄▁▁▁▁▁▁▁▁▁▁▁</pre>
+				<div class="welcome-logo"><svg class="wordmark"><use href="#wordmark"></use></svg><span class="welcome-cursor"></span></div>
+				<p class="welcome-intro">A quiet place for your ideas.</p>
 				<p>Type your text. When you return it will still be here.</p>
 				<p>It never leaves this browser.</p>
 				<p class="for-keys"><kbd data-keys="Mod K"></kbd> lists every command.</p>

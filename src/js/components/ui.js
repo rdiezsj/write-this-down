@@ -43,17 +43,8 @@ export default (function () {
     // and the on-screen keyboard takes part of the screen.
     const isTouch = window.matchMedia && window.matchMedia('(hover: none)').matches;
 
-    // Colour schemes, in the order the theme command cycles through them. "system"
-    // is light or dark by the operating system's setting, and follows it.
-    let colorSchemes = [
-        "scheme-system",
-        "scheme-light",
-        "scheme-dark-and-white",
-        "scheme-dark-and-green",
-        "scheme-solarized",
-        "scheme-night",
-    ];
-    const SYSTEM_SCHEME = "scheme-system";
+    const colorSchemes = ['github', 'nord', 'dracula', 'paper', 'everforest'];
+    const colorModes = ['system', 'light', 'dark'];
     const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
 
     // Font schemes for the text, in the order the font command cycles through them.
@@ -69,15 +60,6 @@ export default (function () {
         "font-scheme-monospace": "mono",
         "font-scheme-sans-serif": "sans",
         "font-scheme-serif": "serif",
-    };
-
-    let schemeNames = {
-        "scheme-system": "system",
-        "scheme-light": "light",
-        "scheme-dark-and-white": "dark",
-        "scheme-dark-and-green": "green",
-        "scheme-solarized": "sand",
-        "scheme-night": "night",
     };
 
     // Status line: a hint for what is under the pointer, or a short message
@@ -97,6 +79,8 @@ export default (function () {
 
     // Default color scheme
     let colorScheme = colorSchemes[0];
+    let colorMode = 'system';
+    let colorModeElement;
 
     // Default font scheme
     let fontScheme = fontSchemes[0];
@@ -212,6 +196,7 @@ export default (function () {
     function loadState() {
         i18n.setLanguage(localStorage['language'] || i18n.preferredLanguage());
         const colorSchemeFromStorage = localStorage['scheme'];
+        const colorModeFromStorage = localStorage['color-mode'];
         const fontSchemeFromStorage = localStorage['font-scheme'];
         const soundFromStorage = localStorage['sound'] || (localStorage[keys.LEGACY_MUTED] === 'false' ? 'typewriter' : localStorage[keys.LEGACY_MUTED] === 'true' ? 'off' : '');
         const focusFromStorage = localStorage['focus-mode'];
@@ -243,6 +228,7 @@ export default (function () {
             keySounds.set(soundFromStorage);
         }
 
+        colorMode = colorModes.includes(colorModeFromStorage) ? colorModeFromStorage : 'system';
         setColorScheme(colorSchemes.includes(colorSchemeFromStorage) ? colorSchemeFromStorage : colorSchemes[0]);
 
         setFontScheme(fontSchemes.includes(fontSchemeFromStorage) ? fontSchemeFromStorage : fontSchemes[0]);
@@ -268,8 +254,8 @@ export default (function () {
             setSpelling(false);
         }
 
-        if (ripplesFromStorage === 'false' && isRipplesOn) {
-            setRipples(false);
+        if ((ripplesFromStorage !== 'false') !== isRipplesOn) {
+            setRipples(ripplesFromStorage !== 'false');
         }
 
         if (counterFromStorage && counterFromStorage !== counter.mode()) {
@@ -295,6 +281,7 @@ export default (function () {
             localStorage['sound'] = keySounds.current();
             localStorage.removeItem(keys.LEGACY_MUTED);
             localStorage['scheme'] = colorScheme;
+            localStorage['color-mode'] = colorMode;
             localStorage['font-scheme'] = fontScheme;
             localStorage['focus-mode'] = caret.focusOn();
             localStorage['preview'] = isMarkdownModeOn;
@@ -328,6 +315,8 @@ export default (function () {
         // Command: theme
         colorLayoutElement = document.querySelector('.color-flip');
         colorLayoutElement.onclick = onColorLayoutClick;
+        colorModeElement = document.querySelector('.mode-flip');
+        colorModeElement.onclick = onColorModeClick;
         systemDark.addEventListener('change', onSystemSchemeChange);
 
         // Command: font
@@ -430,7 +419,8 @@ export default (function () {
         setValue(changeFontElement, fontNames[fontScheme]);
         setValue(fontSizeElement, fontSizeName(fontSize));
         setValue(caret.elements().cursor, caret.isBlock() ? 'block' : 'thin');
-        setValue(colorLayoutElement, schemeNames[colorScheme]);
+        setValue(colorLayoutElement, colorScheme);
+        setValue(colorModeElement, colorMode);
         setValue(sfxMuteElement, keySounds.current());
         setValue(caret.elements().lines, caret.linesOn() ? 'on' : 'off');
         setValue(caret.elements().focus, caret.focusOn() ? 'on' : 'off');
@@ -664,29 +654,39 @@ export default (function () {
         (isFullscreen() ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {});
     }
 
-    // The page carries the class of a real scheme; "system" resolves to light or dark
+    // The saved mode may follow the operating system without changing the theme.
     function setColorScheme(scheme) {
-        const shown = scheme === SYSTEM_SCHEME ? (systemDark.matches ? 'scheme-dark-and-white' : 'scheme-light') : scheme;
-
-        colorSchemes.forEach((name) => body.classList.remove(name));
+        const shownMode = colorMode === 'system' ? (systemDark.matches ? 'dark' : 'light') : colorMode;
+        colorSchemes.forEach(name => body.classList.remove(`theme-${name}`));
+        body.classList.remove('mode-light', 'mode-dark');
         colorScheme = scheme;
-        body.classList.add(shown);
-        document.documentElement.className = shown;   // the first paint reads it from here (index.html)
-        setValue(colorLayoutElement, schemeNames[colorScheme]);
+        const classes = [`theme-${scheme}`, `mode-${shownMode}`];
+        body.classList.add(...classes);
+        document.documentElement.className = classes.join(' ');
+        setValue(colorLayoutElement, colorScheme);
+        setValue(colorModeElement, colorMode);
         ripples.set(body.classList.contains('is-empty') && isRipplesOn);
     }
 
-    // The operating system switched between light and dark
     function onSystemSchemeChange() {
-        if (colorScheme === SYSTEM_SCHEME) {
-            setColorScheme(colorScheme);
-        }
+        if (colorMode === 'system') setColorScheme(colorScheme);
     }
 
     function changeColorScheme(scheme) {
         setColorScheme(scheme);
         saveState();
-        setStatus(`theme ${schemeNames[colorScheme]}`);
+        setStatus(`theme ${colorScheme}`);
+    }
+
+    function changeColorMode(mode) {
+        colorMode = mode;
+        setColorScheme(colorScheme);
+        saveState();
+        setStatus(`mode ${colorMode}`);
+    }
+
+    function onColorModeClick() {
+        changeColorMode(colorModes[(colorModes.indexOf(colorMode) + 1) % colorModes.length]);
     }
 
     function onColorLayoutClick() {
@@ -891,6 +891,7 @@ export default (function () {
 
     function setRipples(on) {
         isRipplesOn = on;
+        body.classList.toggle('background-off', !on);
         updateEmptyState();
     }
 
@@ -928,7 +929,8 @@ export default (function () {
             setFontSize(size);
         }
 
-        setColorScheme(SYSTEM_SCHEME);
+        colorMode = 'system';
+        setColorScheme(colorScheme);
 
         if (doc && !isMarkdownModeOn) {
             setMarkdownMode(true);
@@ -1036,7 +1038,10 @@ export default (function () {
             add('appearance', `size ${fontSizeName(size)}`, () => changeFontSize(size), { current: size === fontSize, key: size === fontSize ? `${key('Mod +')} ${key('Mod -')}`.trim() : '' });
         });
         colorSchemes.forEach((scheme) => {
-            add('appearance', `theme ${schemeNames[scheme]}`, () => changeColorScheme(scheme), { current: scheme === colorScheme, key: scheme === colorScheme ? key('Mod Shift E') : '' });
+            add('appearance', `theme ${scheme}`, () => changeColorScheme(scheme), { current: scheme === colorScheme, key: scheme === colorScheme ? key('Mod Shift E') : '' });
+        });
+        colorModes.forEach((mode) => {
+            add('appearance', `mode ${mode}`, () => changeColorMode(mode), { current: mode === colorMode });
         });
         fontSchemes.forEach((scheme) => {
             add('appearance', `font ${fontNames[scheme]}`, () => changeFontScheme(scheme), { current: scheme === fontScheme, key: scheme === fontScheme ? key('Mod Shift A') : '' });
@@ -1050,7 +1055,7 @@ export default (function () {
             keySounds.SETS.forEach((name) => {
                 add('appearance', `sound ${name}`, () => keySounds.change(name), { current: name === keySounds.current(), key: name === keySounds.current() ? key('Mod Shift Y') : '' });
             });
-            add('appearance', `background ${isRipplesOn ? 'off' : 'on'}`, onRipplesClick, { label: t(isRipplesOn ? 'disable background' : 'enable background'), hint: 'the animation on an empty page' });
+            add('appearance', `background ${isRipplesOn ? 'off' : 'on'}`, onRipplesClick, { label: t(isRipplesOn ? 'disable background' : 'enable background'), hint: 'gradients behind the page' });
         }
 
         if (!isTouch) {

@@ -13,7 +13,7 @@ export default {
     RECEIVED_PREFIX: 'wtd.received.', // + document id imported from a share link in this tab
 
     // localStorage: the settings, in the order the backup carries them
-    SETTINGS: ['language', 'scheme', 'font-scheme', 'font-size', 'sound', 'focus-mode', 'preview', 'line-numbers', 'contents', 'spellcheck', 'caret-prefs', 'counter', 'ripples'],
+    SETTINGS: ['language', 'scheme', 'color-mode', 'font-scheme', 'font-size', 'sound', 'focus-mode', 'preview', 'line-numbers', 'contents', 'spellcheck', 'caret-prefs', 'counter', 'ripples'],
     SCHEME: 'scheme',                 // read by the inline script in index.html too (a literal there)
     LEGACY_MUTED: 'muted',            // the on/off sound setting before the sets
     LEGACY_CARET: 'caret',            // the one cursor setting before the per-font one

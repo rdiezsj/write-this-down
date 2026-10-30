@@ -2,7 +2,7 @@
 // each one prevented; then the markdown marks on a selection and ⌘K as a link
 export const expect = {
     notPrevented: [],
-    after: { focus: false, md: false, lines: false, font: 'mono', theme: 'light', sound: 'off', cursor: 'block', size: 's', docs: 3 },
+    after: { focus: false, md: false, lines: false, font: 'mono', theme: 'nord', sound: 'off', cursor: 'block', size: 's', docs: 3 },
     menuOpened: true, docsOpened: true,
     bold: 'hello **world**', italic: 'hello *world*', code: 'hello `world`', link: 'hello [world](https://)', menuOnLink: false,
 };
@@ -18,7 +18,7 @@ export default async (t) => {
         ['KeyM', 12, 'markdown on'], ['KeyM', 12, 'markdown off'],
         ['KeyU', 12, 'lines on'], ['KeyU', 12, 'lines off'],
         ['KeyA', 12, 'font sans'], ['KeyA', 12, 'font serif'], ['KeyA', 12, 'font mono'],
-        ['KeyE', 12, 'theme light'], ['KeyE', 12, 'theme dark'], ['KeyE', 12, 'theme green'], ['KeyE', 12, 'theme sand'], ['KeyE', 12, 'theme night'], ['KeyE', 12, 'theme system'], ['KeyE', 12, 'theme light'],
+        ['KeyE', 12, 'theme nord'], ['KeyE', 12, 'theme dracula'], ['KeyE', 12, 'theme paper'], ['KeyE', 12, 'theme everforest'], ['KeyE', 12, 'theme github'], ['KeyE', 12, 'theme nord'],
         ['KeyY', 12, 'sound soft'], ['KeyY', 12, 'sound click'], ['KeyY', 12, 'sound blip'], ['KeyY', 12, 'sound typewriter'], ['KeyY', 12, 'sound off'],
         ['KeyK', 12, 'cursor thin'], ['KeyK', 12, 'cursor block'],
         ['Equal', 4, 'size m'], ['Equal', 4, 'size l'], ['Minus', 4, 'size m'], ['Digit0', 4, 'size s'],

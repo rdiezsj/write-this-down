@@ -6,7 +6,7 @@
 		<base href="/write-this-down/">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta name="robots" content="noindex">
-		<script>try{var s=localStorage.getItem('scheme')||'scheme-system';if(s==='scheme-system')s=matchMedia('(prefers-color-scheme: dark)').matches?'scheme-dark-and-white':'scheme-light';document.documentElement.className=s}catch(e){}</script>
+		<script>try{var t=localStorage.getItem('scheme'),m=localStorage.getItem('color-mode');if(!['github','nord','dracula','paper','everforest'].includes(t))t='github';if(!['light','dark'].includes(m))m=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.className='theme-'+t+' mode-'+m}catch(e){}</script>
 		<link href="./css/style.css" rel="stylesheet" media="all">
 		<link rel="icon" type="image/svg+xml" href="./favicon.svg">
 		<style>

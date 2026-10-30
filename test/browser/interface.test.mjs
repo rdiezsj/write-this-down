@@ -34,10 +34,10 @@ export default async t => {
     out.newLabel = await t.ev(`document.querySelector('.new-doc').textContent`);
     out.menuLabel = await t.ev(`document.querySelector('.palette').textContent`);
     out.savedLanguage = await t.ev(`localStorage['language']`);
-    await t.click('.palette'); await t.filter('tema oscuro');
-    out.spanishMenu = await t.ev(`document.querySelector('.picker-list').textContent.includes('tema oscuro')`);
+    await t.click('.palette'); await t.filter('modo oscuro');
+    out.spanishMenu = await t.ev(`document.querySelector('.picker-list').textContent.includes('modo oscuro')`);
     await t.click('.picker-item');
-    out.darkChosen = await t.ev(`document.body.classList.contains('scheme-dark-and-white')`);
+    out.darkChosen = await t.ev(`document.body.classList.contains('mode-dark')`);
     await t.click('.palette'); await t.filter('compartir');
     out.shareMenu = await t.ev(`document.querySelector('.picker-list').textContent.includes('compartir mediante enlace…')`);
     await t.key('Escape');
@@ -59,7 +59,7 @@ export default async t => {
     await t.click('.new-doc'); await t.click('.palette'); await t.filter('disable background'); await t.click('.picker-item');
     out.backgroundOff = await t.ev(`localStorage['ripples']==='false'`) && (await t.ev(pixels)) === 0;
     await t.click('.palette'); await t.filter('enable background'); await t.click('.picker-item');
-    await t.click('.palette'); await t.filter('theme light'); await t.click('.picker-item');
+    await t.click('.palette'); await t.filter('mode light'); await t.click('.picker-item');
     await t.ev(`document.querySelector('.language').click()`);
     await t.sleep(200); await t.shot('wtd-es-background');
     await t.click('.about'); await t.shot('wtd-es-about');

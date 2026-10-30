@@ -6,6 +6,13 @@ export default (function () {
     let canvas, context, on = false, request = 0, last = 0;
     let width = 0, height = 0;
     const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
+    const palettes = {
+        github: ['85,165,215', '160,130,205', '225,170,125'],
+        nord: ['94,129,172', '136,192,208', '129,161,193'],
+        dracula: ['189,147,249', '255,121,198', '139,233,253'],
+        paper: ['190,125,80', '210,170,110', '160,120,90'],
+        everforest: ['131,165,98', '167,192,128', '219,188,127'],
+    };
 
     function init() {
         canvas = document.createElement('canvas');
@@ -40,10 +47,9 @@ export default (function () {
 
     function draw(time) {
         context.clearRect(0, 0, width, height);
-        const dark = ['scheme-dark-and-white', 'scheme-dark-and-green', 'scheme-night'].some(name => app.body.classList.contains(name));
-        const colours = app.body.classList.contains('scheme-dark-and-green')
-            ? ['65,160,100', '40,120,120', '90,140,80']
-            : ['85,165,215', '160,130,205', '225,170,125'];
+        const dark = app.body.classList.contains('mode-dark');
+        const theme = Object.keys(palettes).find(name => app.body.classList.contains(`theme-${name}`));
+        const colours = palettes[theme] || palettes.github;
         colours.forEach((colour, i) => {
             const phase = time / 18000 + i * 2.1;
             const x = width * (0.5 + Math.sin(phase) * 0.32 + (still.matches ? 0 : pointer.x * 0.45));

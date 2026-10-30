@@ -4,6 +4,10 @@ El código original conserva su copyright y su licencia AGPL-3.0-only. [ATTRIBUT
 
 Los recursos de terceros mantienen las siguientes licencias y atribuciones.
 
+## Referencias de color
+
+Las paletas de la interfaz se inspiran en [GitHub Primer](https://primer.style/), [Nord](https://www.nordtheme.com/), [Dracula](https://draculatheme.com/spec) y [Everforest](https://github.com/sainnhe/everforest). Las variantes se adaptan a la interfaz de WTD; la variante clara de Dracula y la paleta papel son diseños propios.
+
 ## Fuentes (`public/fonts`, SIL Open Font License 1.1)
 
 - **IBM Plex Mono**: [IBM Plex](https://github.com/IBM/plex), de IBM Corp.; archivos WOFF2 completos sin modificar del paquete oficial `@ibm/plex-mono` 2.5.0. Copyright © 2017 IBM Corp., con nombre reservado «Plex». Aviso original en `public/fonts/IBM-Plex-OFL.txt`.

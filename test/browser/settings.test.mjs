@@ -1,8 +1,8 @@
 // Theme system follows the OS; duplicate; the zip export; the frontmatter block and
 // the copy word in the preview; the hint word for a refusal
 export const expect = {
-    freshDarkOs: 'scheme-dark-and-white/system', osToLight: 'scheme-light/system', chosenLightUnderDark: 'scheme-light/light', storedLightDarkOs: 'scheme-light/light',
-    cycle: 'light,dark,green,sand,night,system', duplicate: 'Recipe|Recipe', opened: 'Recipeflour',
+    freshDarkOs: 'theme-github mode-dark/system', osToLight: 'theme-github mode-light/system', chosenLightUnderDark: 'theme-github mode-light/light', storedLightDarkOs: 'theme-github mode-light/light',
+    cycle: 'nord,dracula,paper,everforest,github', duplicate: 'Recipe|Recipe', opened: 'Recipeflour',
     zipName: true, zipFiles: 'documents/Notes (2).md,documents/Notes.md,documents/Recipe (2).md,documents/Recipe.md,documents/abcd quoted.md,wtd-backup.json',
     emptyPreview: 'Here your text is rendered as you write it.|', frontmatter: '<dl class="frontmatter"><div><dt>title</dt><dd>Notes</dd></div></dl>', copyWord: 'copy', copied: 'let a = 1;\n', copyAfter: 'copied',
     nothingToShare: 'nothing to share', fileDrop: 'dropped note|imported note.md', dragHint: 'drop to import as a new document (.txt, .md; .json restores a backup)|true', dragLeft: '|false',
@@ -11,15 +11,15 @@ export const expect = {
 export default async (t) => {
     const os = (v) => t.media([{ name: 'prefers-color-scheme', value: v }]);
     await os('dark'); await t.open('/');
-    const state = () => t.ev(`document.documentElement.className + '/' + document.querySelector('.color-flip b').textContent`);
+    const state = () => t.ev(`document.documentElement.className + '/' + document.querySelector('.mode-flip b').textContent`);
     const out = { freshDarkOs: await state() };
     await os('light'); await t.sleep(200); out.osToLight = await state();
     await os('dark'); await t.sleep(200);
     const cycle = [];
-    for (let i = 0; i < 6; i++) { await t.click('.color-flip', 60); cycle.push(await t.ev(`document.querySelector('.color-flip b').textContent`)); }
+    for (let i = 0; i < 5; i++) { await t.click('.color-flip', 60); cycle.push(await t.ev(`document.querySelector('.color-flip b').textContent`)); }
     out.cycle = cycle.join(',');
-    await t.click('.color-flip', 60); out.chosenLightUnderDark = await state();
-    await t.ev(`localStorage.scheme = 'scheme-light'`); await t.reload(); out.storedLightDarkOs = await state();
+    await t.click('.mode-flip', 60); out.chosenLightUnderDark = await state();
+    await t.ev(`localStorage['color-mode'] = 'light'`); await t.reload(); out.storedLightDarkOs = await state();
     await os('light');
 
     await t.focus(); await t.insert('Recipe\n\nflour, water'); await t.ev(`document.querySelector('article').blur()`); await t.sleep(400);

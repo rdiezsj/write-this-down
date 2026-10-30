@@ -53,7 +53,7 @@ export function t(value) {
         const match = pattern.exec(value);
         if (match) return render(...match);
     }
-    const command = /^(size|theme|font|cursor|sound|lines|focus|contents|fullscreen|markdown|spellcheck|ripples|background|language|backup) (.+)$/.exec(key);
+    const command = /^(size|theme|mode|font|cursor|sound|lines|focus|contents|fullscreen|markdown|spellcheck|ripples|background|language|backup) (.+)$/.exec(key);
     if (command) return `${t(command[1])} ${t(command[2])}`;
     const count = /^([\d.,]+) (word|words|chars|chars selected|min read)$/.exec(key);
     if (count) return `${count[1]} ${{ word: 'palabra', words: 'palabras', chars: 'caracteres', 'chars selected': 'caracteres seleccionados', 'min read': 'min de lectura' }[count[2]]}`;
