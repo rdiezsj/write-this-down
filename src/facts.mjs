@@ -24,7 +24,8 @@ export default {
 
     // the product, as lists the generated files can name
     formats: { reads: ['.txt', '.md'], writes: ['.md', '.txt', 'PDF (print)', '.json backup', '.zip of .md files'] },
-    themes: ['system', 'light', 'dark', 'green', 'sand', 'night'],
+    themes: ['github', 'nord', 'dracula', 'paper', 'everforest'],
+    colorModes: ['system', 'light', 'dark'],
     fonts: ['mono (IBM Plex Mono)', 'sans (Inter)', 'serif (Literata)'],
     sizes: ['s', 'm', 'l'],
     cursors: ['block', 'thin'],

@@ -88,6 +88,7 @@ ${facts.privacy} There is no server holding text, no account and no sync; the br
 ## Look
 
 - Themes: ${facts.themes.join(', ')}.
+- Modes: ${facts.colorModes.join(', ')}.
 - Fonts: ${facts.fonts.join('; ')}.
 - Sizes: ${facts.sizes.join(', ')} (the page scales with the text).
 - Cursor: ${facts.cursors.join(' or ')}. Key sounds: ${facts.sounds.join(', ')}.

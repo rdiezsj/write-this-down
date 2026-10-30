@@ -46,6 +46,16 @@ test('the manifest agrees', () => {
     assert.equal(manifest.short_name, facts.shortName);
 });
 
+test('la descripción generada distingue los temas de los modos disponibles', () => {
+    const description = files()['llms-full.txt'];
+    assert.deepEqual(facts.themes, ['github', 'nord', 'dracula', 'paper', 'everforest']);
+    assert.deepEqual(facts.colorModes, ['system', 'light', 'dark']);
+    assert.ok(description.includes('Themes: github, nord, dracula, paper, everforest.'));
+    assert.ok(description.includes('Modes: system, light, dark.'));
+    assert.ok(html.includes('data-hint="theme: ' + facts.themes.join(', ') + '"'));
+    assert.ok(html.includes('data-hint="mode: ' + facts.colorModes.join(', ') + '"'));
+});
+
 test('the generated files are current (when a build exists) and well formed', () => {
     const generated = files();
     assert.equal(generated['robots.txt'], `User-agent: *\nAllow: /\n\nSitemap: ${facts.url}sitemap.xml\n`);
