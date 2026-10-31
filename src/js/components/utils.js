@@ -72,9 +72,9 @@ export default (function() {
     }
 
     // Stored HTML with anything but lines in it (a <u> from the browser's own ⌘U,
-    // tags from an older version) is rebuilt from its text: lines only
+    // tags or attributes from an older version) is rebuilt from its text: lines only
     function plainHtml(html) {
-        return /<(?!\/?(div|br|p)\b)/i.test(html) ? textToHtml(htmlToText(html)) : html;
+        return /<(?!\/?(div|br|p)\s*\/?>)/i.test(html) ? textToHtml(htmlToText(html)) : html;
     }
 
     // Article DOM -> plain text, one line per block. innerText would give
@@ -122,9 +122,9 @@ export default (function() {
         return lines.join('\n').replace(/\xa0/g, ' ');
     }
 
-    // Article HTML -> plain text, without needing the element to be rendered
+    // Article HTML -> plain text in an inert template, without loading resources
     function htmlToText(html) {
-        const element = document.createElement('div');
+        const element = document.createElement('template');
 
         // a block starts a new line; a <br> alone in a block is that line's only content
         element.innerHTML = html
@@ -133,7 +133,7 @@ export default (function() {
             .replace(/<(div|p)[^>]*>/gi, '\n')
             .replace(/<\/(div|p)>/gi, '');
 
-        return element.textContent.replace(/\xa0/g, ' ');
+        return element.content.textContent.replace(/\xa0/g, ' ');
     }
 
     // Template contents are inert: normalize bridge input without loading URLs.
