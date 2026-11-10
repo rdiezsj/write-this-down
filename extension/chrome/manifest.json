@@ -6,6 +6,7 @@
   "icons": {
     "16": "sidebar-16.png",
     "32": "sidebar-32.png",
+    "128": "icon-128.png",
     "192": "android-chrome-192x192.png"
   },
   "background": {

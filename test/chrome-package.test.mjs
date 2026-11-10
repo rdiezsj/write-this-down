@@ -4,6 +4,7 @@ import {readFileSync,existsSync} from 'node:fs';
 test('Chrome distribuye un panel local con código compartido y sin popup',()=>{
  const root='dist/chrome/',m=JSON.parse(readFileSync(root+'manifest.json','utf8'));
  assert.equal(m.side_panel.default_path,'index.html');assert.deepEqual(m.permissions,['sidePanel']);
+ assert.ok(m.icons['128'],'Chrome Web Store requiere icono de 128 px');
  assert.equal(m.action.default_popup,undefined);assert.equal(m.sidebar_action,undefined);
  for(const file of ['index.html','background.js','action.js','content.js','theme.js','js/bundle.js','css/style.css','fonts/IBMPlexMono-Regular.woff2','src/bridge/database.js','LICENSE','ATTRIBUTION.md','CREDITS.md',...Object.values(m.icons)])assert.ok(existsSync(root+file),file);
  for(const file of ['opera','firefox','chrome','popup.html','sw.js','CNAME'])assert.equal(existsSync(root+file),false,file);

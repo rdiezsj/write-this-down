@@ -36,3 +36,5 @@ await mkdir(join(target,'src/js'),{recursive:true});
 await cp('src/js/keys.js',join(target,'src/js/keys.js'));
 
 for(const size of [16,32]) await cp(`extension/shared/sidebar-${size}.png`,join(target,`sidebar-${size}.png`));
+
+if(browser==='chrome') await cp('extension/shared/icon-128.png',join(target,'icon-128.png'));
