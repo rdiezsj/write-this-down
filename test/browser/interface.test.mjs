@@ -1,7 +1,7 @@
 import { deflateSync, strToU8 } from 'fflate';
 // El idioma cambia en vivo sin traducir notas; el fondo usa color y respeta movimiento reducido.
 export const expect = {
-    autoSpanish: 'es', title: 'Write this down!', heading: 'Write this down!', idle: '0.24',
+    autoSpanish: 'es', title: 'Write this down! – private online text and Markdown editor', heading: 'Write this down!', idle: '0.24',
     gradient: true, reducedStill: true, spanish: 'es', newLabel: 'nueva', menuLabel: 'menú',
     savedLanguage: 'es', spanishMenu: true, shareMenu: true, darkChosen: true, noteIntact: true,
     hiddenWithText: true, documentTitleIntact: true, english: 'en', englishLabel: 'new',

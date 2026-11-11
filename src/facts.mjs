@@ -5,7 +5,8 @@
 export default {
     name: 'Write this down!',
     shortName: 'WTD',
-    title: 'Write this down!',
+    title: 'Write this down! – private online text and Markdown editor',
+    image: { url: 'https://writethisdown.eu/og-image.png', width: 1200, height: 630, alt: 'Write this down! A private place to write.' },
     line: 'A private place to write.',
     description: 'Write this down! is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.',
     url: 'https://writethisdown.eu/',

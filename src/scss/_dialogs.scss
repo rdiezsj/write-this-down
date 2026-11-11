@@ -45,6 +45,20 @@
 		margin-bottom: 1.5em;
 	}
 
+	// About's heading is the wordmark; its text is for search engines and screen readers
+	.wordmark-heading {
+		margin: 0;
+	}
+
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+
 	// a row of links, like the status line: the dots between them are muted
 	.links {
 		margin-top: 0.5em;

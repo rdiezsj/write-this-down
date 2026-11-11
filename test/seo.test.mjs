@@ -21,6 +21,21 @@ test('title, description, canonical, Open Graph and Twitter say the facts', () =
     assert.equal(meta('property', 'og:site_name'), facts.name);
     assert.equal(meta('name', 'twitter:title'), facts.title);
     assert.equal(meta('name', 'twitter:description'), facts.description);
+    assert.equal(meta('property', 'og:image'), facts.image.url);
+    assert.equal(meta('property', 'og:image:width'), String(facts.image.width));
+    assert.equal(meta('property', 'og:image:height'), String(facts.image.height));
+    assert.equal(meta('property', 'og:image:alt'), facts.image.alt);
+    assert.equal(meta('name', 'twitter:image'), facts.image.url);
+    assert.ok(facts.image.url.startsWith(facts.url));
+    const png = readFileSync(new URL(`../public/${facts.image.url.slice(facts.url.length)}`, import.meta.url));
+    assert.deepEqual([png.readUInt32BE(16), png.readUInt32BE(20)], [facts.image.width, facts.image.height]);
+});
+
+test('About is the one dialog search results may quote, under a real heading', () => {
+    assert.ok(!/<div class="overlay"[^>]*data-nosnippet/.test(html));
+    assert.match(html, /<div class="description modal"(?![^>]*data-nosnippet)[^>]*>\s*<h1[^>]*>[\s\S]*?>Write this down!<\/span><\/h1>/);
+    ['help-modal', 'share-modal', 'backup-modal', 'unlock-modal', 'commands']
+        .forEach(name => assert.match(html, new RegExp(`<div class="${name}[^"]*"[^>]*data-nosnippet`), name));
 });
 
 test('the JSON-LD on the page is the one built from the facts', () => {
@@ -42,7 +57,7 @@ test('About says the same about privacy, the independent project', () => {
 
 test('the manifest agrees', () => {
     const manifest = JSON.parse(readFileSync(new URL('../public/site.webmanifest', import.meta.url), 'utf8'));
-    assert.equal(manifest.name, facts.title);
+    assert.equal(manifest.name, facts.name);
     assert.equal(manifest.short_name, facts.shortName);
 });
 

@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<!-- MISC/META -->
-		<title>Write this down!</title>
+		<title>Write this down! – private online text and Markdown editor</title>
 		<meta charset="utf-8">
 		<meta name="description" content="Write this down! is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -12,11 +12,16 @@
 		<link rel="canonical" href="https://writethisdown.eu/">
 		<meta property="og:type" content="website">
 		<meta property="og:site_name" content="Write this down!">
-		<meta property="og:title" content="Write this down!">
+		<meta property="og:title" content="Write this down! – private online text and Markdown editor">
 		<meta property="og:description" content="Write this down! is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.">
 		<meta property="og:url" content="https://writethisdown.eu/">
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:title" content="Write this down!">
+		<meta property="og:image" content="https://writethisdown.eu/og-image.png">
+		<meta property="og:image:width" content="1200">
+		<meta property="og:image:height" content="630">
+		<meta property="og:image:alt" content="Write this down! A private place to write.">
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:title" content="Write this down! – private online text and Markdown editor">
+		<meta name="twitter:image" content="https://writethisdown.eu/og-image.png">
 		<meta name="twitter:description" content="Write this down! is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.">
 		<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Write this down!","alternateName":"WTD","url":"https://writethisdown.eu/","description":"Write this down! is a free online text editor: minimal, private, plain text and Markdown. Your text stays in your browser, it works offline, and a share link carries the text inside itself.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","inLanguage":"en","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Project","name":"Write this down!","url":"https://github.com/rdiezsj/write-this-down"}}</script>
 
@@ -44,9 +49,9 @@
 			<symbol id="wordmark" viewBox="0 0 350 36"><text x="0" y="29" font-family="IBM Plex Mono, monospace" font-size="34" font-weight="700" fill="currentColor">Write this down!</text></symbol>
 		</svg>
 
-		<div class="overlay" data-nosnippet>
+		<div class="overlay">
 			<div class="description modal" role="dialog" aria-label="About Write this down!" tabindex="-1">
-				<svg class="wordmark" role="img" aria-label="Write this down!"><use href="#wordmark"></use></svg>
+				<h1 class="wordmark-heading"><svg class="wordmark" aria-hidden="true"><use href="#wordmark"></use></svg><span class="visually-hidden">Write this down!</span></h1>
 				<p>A private place to write.</p>
 				<ul>
 					<li>You open the page and type.</li>
@@ -71,7 +76,7 @@
 				</p>
 			</div>
 
-			<div class="help-modal modal" role="dialog" aria-label="Keys" tabindex="-1">
+			<div class="help-modal modal" role="dialog" aria-label="Keys" tabindex="-1" data-nosnippet>
 				<h1>Keys</h1>
 				<table class="keys">
 					<tr><th colspan="2">Documents</th></tr>
@@ -125,7 +130,7 @@
 
 			<!-- Share: explain first, ask second. The link and the seed word are shown
 			     side by side at the end, each with its own copy, so neither is lost. -->
-			<div class="share-modal modal" role="dialog" aria-label="Share this document" tabindex="-1">
+			<div class="share-modal modal" role="dialog" aria-label="Share this document" tabindex="-1" data-nosnippet>
 				<div class="share-step" data-step="choose">
 					<h1>Share this document</h1>
 					<p>Write this down! puts the text inside the link itself. Nothing is stored anywhere: not on a server, not by Write this down!. The link is the only copy, and it works for as long as someone keeps it. It cannot be taken back: whoever has the link has the text, as with a file you have sent.</p>
@@ -166,7 +171,7 @@
 			</div>
 
 			<!-- Backup: where the text lives, and how to keep a copy that outlives the browser -->
-			<div class="backup-modal modal" role="dialog" aria-label="A copy that outlives this browser" tabindex="-1">
+			<div class="backup-modal modal" role="dialog" aria-label="A copy that outlives this browser" tabindex="-1" data-nosnippet>
 				<h1>A copy that outlives this browser</h1>
 				<p>Your text lives in this browser's own storage. That is private, and it is also fragile: it goes when the browser's data is cleared, and it does not follow you to another device.</p>
 				<p class="for-folder">On this browser Write this down! can keep a folder up to date as you write: every document as a <b>.md</b> file, and everything in one <b>.json</b>. Pick the folder once; if it is in iCloud or Dropbox, the copy follows you.</p>
@@ -188,7 +193,7 @@
 			<!-- A locked link: the text is inside the link, encrypted; the seed word
 			     decrypts it here. Said plainly, so neither a person nor a browser's
 			     phishing model reads it as a sign-in. -->
-			<div class="unlock-modal modal" role="dialog" aria-label="This link is locked" tabindex="-1">
+			<div class="unlock-modal modal" role="dialog" aria-label="This link is locked" tabindex="-1" data-nosnippet>
 				<h1>This link is locked</h1>
 				<p>The text travels inside the link, scrambled. The seed word that came with the link unscrambles it here, in your browser. Nothing is sent anywhere, and there is no account.</p>
 				<label class="field"><span class="field-name">seed word</span><input class="unlock-input" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off"></label>
@@ -202,7 +207,7 @@
 		<!-- Commands: plain words, nearly invisible until the pointer comes close.
 		     Only what is used often or shows a state; everything else is in the menu. -->
 		<nav class="ui" aria-label="Commands" data-nosnippet>
-			<div class="commands">
+			<div class="commands" data-nosnippet>
 				<div class="group">
 					<button class="documents" data-hint="documents" data-keys="Mod Shift O"><span class="count"></span>docs</button>
 					<button class="new-doc" data-hint="new document" data-keys="Mod Shift D">new</button>
